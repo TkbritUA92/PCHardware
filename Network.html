@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Architecture & Throughput Sandbox</title>
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --panel-bg: #131c2e;
+            --node-bg: #1e293b;
+            --accent-blue: #0ea5e9;
+            --accent-purple: #a855f7;
+            --accent-green: #22c55e;
+            --accent-orange: #f97316;
+            --accent-red: #ef4444;
+            --text-light: #f8fafc;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .lab-wrapper {
+            width: 100%;
+            max-width: 1450px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            background-color: var(--panel-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #1e293b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-info h1 {
+            margin: 0 0 8px 0;
+            font-size: 1.8rem;
+            color: var(--accent-blue);
+        }
+
+        .header-info p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .task-bar {
+            display: flex;
+            gap: 10px;
+            background-color: var(--panel-bg);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #1e293b;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .task-btn {
+            background-color: #1e293b;
+            color: var(--accent-blue);
+            border: 1px solid #334155;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .task-btn:hover {
+            background-color: #334155;
+            color: white;
+            border-color: var(--accent-blue);
+        }
+
+        .evidence-btn {
+            background-color: rgba(249, 115, 22, 0.1);
+            color: var(--accent-orange);
+            border: 1px solid rgba(249, 115, 22, 0.4);
+        }
+
+        .evidence-btn:hover {
+            background-color: var(--accent-orange);
+            color: var(--bg-dark);
+            border-color: var(--accent-orange);
+        }
+
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 430px 1fr 350px;
+            gap: 20px;
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .panel-title {
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #94a3b8;
+            border-bottom: 2px solid #1e293b;
+            padding-bottom: 8px;
+            margin-bottom: 5px;
+        }
+
+        .setting-control {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: rgba(15, 23, 42, 0.3);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #1e293b;
+        }
+
+        .setting-control label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .control-purpose {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            line-height: 1.3;
+        }
+
+        select {
+            width: 100%;
+            background-color: var(--bg-dark);
+            border: 1px solid #334155;
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            outline: none;
+            box-sizing: border-box;
+            font-size: 0.85rem;
+        }
+
+        .spec-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .spec-box {
+            background: var(--node-bg);
+            border: 1px solid #334155;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .spec-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .spec-val {
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: white;
+            margin-top: 4px;
+        }
+
+        .terminal-log {
+            background-color: var(--bg-dark);
+            border: 1px solid #1e293b;
+            border-radius: 6px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            height: 200px;
+            overflow-y: auto;
+            color: #34d399;
+        }
+
+        .action-btn {
+            background-color: var(--accent-blue);
+            color: var(--bg-dark);
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        .action-btn:hover { opacity: 0.9; }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(7, 10, 19, 0.9);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-card {
+            background-color: var(--panel-bg);
+            border: 2px solid #334155;
+            border-radius: 12px;
+            max-width: 650px;
+            width: 90%;
+            padding: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+
+        .modal-header {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .modal-body {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background-color: var(--accent-blue);
+            color: var(--bg-dark);
+            border: none; padding: 10px 20px;
+            border-radius: 6px; font-weight: bold; cursor: pointer;
+        }
+
+        .ticket-box {
+            background: rgba(14, 165, 233, 0.05);
+            border-left: 4px solid var(--accent-blue);
+            padding: 12px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="lab-wrapper">
+        
+        <header>
+            <div class="header-info">
+                <h1>Network Interface Subsystem & Bandwidth Sandbox</h1>
+                <p>Enterprise Topology Lab: Balancing Media Types, Signal Degradation, and Packet Integrity Traces</p>
+            </div>
+            <div>
+                <span class="badge" style="background-color: #064e3b; color: #34d399; padding: 6px 12px; font-size: 0.85rem;">Network Module 1</span>
+            </div>
+        </header>
+
+        <div class="task-bar">
+            <span style="font-weight:bold; font-size:0.9rem; color:var(--text-muted); margin-right:10px;">📋 NETWORK DISPATCHES:</span>
+            <button class="task-btn" onclick="showTaskGuide(1)">Task 1: Remote Warehouse Terminal</button>
+            <button class="task-btn" onclick="showTaskGuide(2)">Task 2: Heavy Office LAN</button>
+            <button class="task-btn" onclick="showTaskGuide(3)">Task 3: Latency-Critical Trading Floor</button>
+            <button class="task-btn evidence-btn" onclick="showTaskGuide(4)">📸 Evidence Required</button>
+        </div>
+
+        <div class="workspace-grid">
+            
+            <div class="panel">
+                <div class="panel-title">1. Connection Medium Matcher</div>
+
+                <div class="setting-control">
+                    <label for="scenario-select">Active Topology Context</label>
+                    <select id="scenario-select" onchange="applyScenarioPreset()">
+                        <option value="warehouse">Ticket #401: Remote Branch Warehouse Terminal (Obstacles & Distance)</option>
+                        <option value="office">Ticket #402: Corporate Headquarters HQ (High Core Congestion)</option>
+                        <option value="trading">Ticket #403: Algorithmic Financial Trading Floor (Zero Tolerance Lag)</option>
+                    </select>
+                </div>
+
+                <div class="setting-control">
+                    <label for="nic-select">Network Interface Card (NIC)</label>
+                    <select id="nic-select" onchange="evaluateNetworkGrid()">
+                        <option value="none">-- Select Network Card Type --</option>
+                        <option value="legacy_100">Legacy Base-T Ethernet Adapter (100 Mbps RJ45)</option>
+                        <option value="wifi7_card">Wi-Fi 7 Enterprise Wireless NIC (802.11be | 2.4/5/6 GHz MLO)</option>
+                        <option value="pcie_10g">10 Gbps PCIe Enterprise Copper Adapter (RJ45 Base-T)</option>
+                    </select>
+                </div>
+
+                <div class="setting-control">
+                    <label for="medium-select">Transmission Medium (Cable or Wireless Link)</label>
+                    <select id="medium-select" onchange="evaluateNetworkGrid()">
+                        <option value="none">-- Select Transmission Medium --</option>
+                        <option value="cat5">Category 5 UTP Cable (Unshielded | 100 MHz Base)</option>
+                        <option value="cat6a">Category 6A F/UTP Cable (Foil Shielded | 500 MHz Base)</option>
+                        <option value="cat7">Category 7 S/FTP Cable (Individual Pair Shielding | 600 MHz Screened)</option>
+                        <option value="wifi5_link">Wireless Link: Wi-Fi 5 (802.11ac Legacy Broadcaster)</option>
+                        <option value="wifi7_link">Wireless Link: Wi-Fi 7 Air Interface (320 MHz Channels | Multi-RU)</option>
+                    </select>
+                </div>
+
+                <div class="setting-control">
+                    <label for="distance-select">Deployment Physical Distance</label>
+                    <select id="distance-select" onchange="evaluateNetworkGrid()">
+                        <option value="short">Short Patch Loop (Under 5 Metres | Server Rack Boundary)</option>
+                        <option value="medium">Standard Run (25-50 Metres | Office Floor Trace)</option>
+                        <option value="long">Extended Facility Run (90-120 Metres | Structural Boundary Limits)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">2. Signal Propagation & Bandwidth Monitors</div>
+                
+                <div class="ticket-box" id="ticket-display">
+                    Select a network dispatch ticket from the dashboard bar above to link telemetry targets...
+                </div>
+
+                <div class="silicon-inspector">
+                    <div class="spec-grid" style="margin-bottom: 15px;">
+                        <div class="spec-box"><div class="spec-label">Theoretical Max Speed</div><div class="spec-val" id="val-net-speed">0 Mbps</div></div>
+                        <div class="spec-box"><div class="spec-label">Link Packet Latency</div><div class="spec-val" id="val-net-latency" style="color:var(--accent-purple);">0 ms</div></div>
+                    </div>
+                    <div class="spec-grid" style="margin-bottom: 15px;">
+                        <div class="spec-box"><div class="spec-label">Signal Attenuation Level</div><div class="spec-val" id="val-net-attenuation" style="color:var(--accent-orange);">Baseline</div></div>
+                        <div class="spec-box"><div class="spec-label">EMI Shielding Coefficient</div><div class="spec-val" id="val-net-shielding">None</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">3. Bus Master & Verification</div>
+                
+                <div class="setting-control">
+                    <label>MAC Layer Frame Interrupt Log</label>
+                    <div class="terminal-log" id="log-stream">> Network interface transceiver standing by. Assign media configurations to map active links...</div>
+                </div>
+
+                <button class="action-btn" id="btn-verify">Audit Network Topology</button>
+                <button class="action-btn" id="btn-reset" style="background-color:#334155; color:white;">Strip Interface Rig</button>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="drill-modal">
+        <div class="modal-card">
+            <div class="modal-header" id="m-header">Executing Network Traffic Burst...</div>
+            <div class="modal-body" id="m-body">Analyzing physical layer frame parameters...</div>
+            <div style="text-align: right;">
+                <button class="modal-close" onclick="closeDrillModal()">Acknowledge Topology Status</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const logStream = document.getElementById('log-stream');
+        const scenarioSelect = document.getElementById('scenario-select');
+        const nicSelect = document.getElementById('nic-select');
+        const mediumSelect = document.getElementById('medium-select');
+        const distanceSelect = document.getElementById('distance-select');
+        const btnVerify = document.getElementById('btn-verify');
+        const btnReset = document.getElementById('btn-reset');
+        
+        const modal = document.getElementById('drill-modal');
+        const mHeader = document.getElementById('m-header');
+        const mBody = document.getElementById('m-body');
+        const ticketDisplay = document.getElementById('ticket-display');
+
+        const scenariosDatabase = {
+            warehouse: {
+                title: "Dispatched Ticket #401: Remote Branch Warehouse Terminal",
+                desc: "<strong>Site Survey Parameters:</strong> 'An old desktop in our secondary sorting bay needs connection back to the main server room. The route crosses a distance of approximately 95 metres over a concrete sub-floor with thick block walls. Speed is not critical, but link reliability over structural distances is non-negotiable.'"
+            },
+            office: {
+                title: "Dispatched Ticket #402: Corporate Headquarters HQ",
+                desc: "<strong>Site Survey Parameters:</strong> 'A busy open-plan floor requires wireless layout expansion for client notebooks. The space is heavily congested with over a hundred mobile devices and high wireless signal interference from adjacent offices. Requires cutting-edge wireless technology to maintain high connection stability.'"
+            },
+            trading: {
+                title: "Dispatched Ticket #403: Algorithmic Financial Trading Floor",
+                desc: "<strong>Site Survey Parameters:</strong> 'High-frequency transaction systems require connection to top-of-rack switches. The area is packed with high-voltage server power paths leaking massive Electromagnetic Interference (EMI). The link demands exactly 10 Gbps and absolutely zero microsecond latency spikes.'"
+            }
+        };
+
+        function showTaskGuide(id) {
+            mHeader.innerText = taskBriefings[id].title;
+            mHeader.style.color = (id === 4) ? "var(--accent-orange)" : "var(--accent-blue)";
+            mBody.innerHTML = taskBriefings[id].body;
+            modal.style.display = 'flex';
+        }
+
+        const taskBriefings = {
+            1: {
+                title: "Task 1 Instructions: Provisioning the Extended Warehouse Run",
+                body: `<strong>Objective:</strong> Overcome physical distance limits and structural attenuation parameters using a wired, long-distance infrastructure plan.<br><br>
+                       <strong>Instructions:</strong><br>
+                       1. Ensure Active Topology is set to <strong>Ticket #401 (Remote Branch Warehouse)</strong>.<br>
+                       2. Select the **10 Gbps Enterprise Copper Adapter** to handle the heavy hardware interface lanes.<br>
+                       3. Map the transmission medium to a high-grade **Category 6A or Cat 7 cable**, and change the distance option to **Extended Facility Run (90-120 Metres)** to bypass wireless wall obstacles entirely.`
+            },
+            2: {
+                title: "Task 2 Instructions: Deploying High-Density Wi-Fi 7 Air Fabrics",
+                body: `<strong>Objective:</strong> Mitigate airwave channel congestion and multi-user signal degradation loops using cutting-edge enterprise wireless protocols.<br><br>
+                       <strong>Instructions:</strong><br>
+                       1. Set the Active Topology selection to **Ticket #402 (Corporate Headquarters HQ)**.<br>
+                       2. Populate the workstation with the **Wi-Fi 7 Enterprise Wireless NIC**.<br>
+                       3. Match it with the **Wi-Fi 7 Air Interface** transmission medium to unlock advanced multi-link operations (MLO) across 6 GHz bands, clearing airwave interference bottlenecks.`
+            },
+            3: {
+                title: "Task 3 Instructions: Engineering the Low-Latency, EMI-Shielded Trading Floor",
+                body: `<strong>Objective:</strong> Secure maximum packet integrity and precise 10 Gbps speeds under heavy electromagnetic interference environments.<br><br>
+                       <strong>Instructions:</strong><br>
+                       1. Shift your testing environment over to **Ticket #403 (Algorithmic Financial Trading Floor)**.<br>
+                       2. Select the **10 Gbps PCIe Enterprise Copper Adapter** to match the strict transaction backbone guidelines.<br>
+                       3. Protect data packets from high-voltage EMI leaks by selecting the heavily screened **Category 7 S/FTP Cable**, keeping the trace short.`
+            },
+            4: {
+                title: "📸 EVALUATION SIGN-OFF: Networking Evidence Matrix",
+                body: `<strong>Submission Deliverables:</strong><br>
+                       Apprentices must submit a screen snippet of a successful enterprise deployment verification popup to clear this module.<br><br>
+                       <strong>Requirements:</strong><br>
+                       Successfully complete **Task 3 (Trading Floor)** by coordinating the 10 Gbps NIC with a screened Cat 7 cable on a short patch loop. Capture a snippet showing:<br>
+                       • The left selectors configured with your high-speed shielded hardware pairing.<br>
+                       • The green **'Network Topology Audit Successful'** confirmation popup displaying clean packet delivery parameters.<br><br>
+                       Label your output file as <em>'NetworkTopology_Pass_[Name].png'</em> and upload it for grading tracking.`
+            }
+        };
+
+        function applyScenarioPreset() {
+            const key = scenarioSelect.value;
+            ticketDisplay.innerHTML = `${scenariosDatabase[key].desc}`;
+            writeLog(`System: Staging networking telemetry benchmarks for [${scenariosDatabase[key].title}].`);
+            evaluateNetworkGrid();
+        }
+
+        function evaluateNetworkGrid() {
+            const nic = nicSelect.value;
+            const medium = mediumSelect.value;
+            const distance = distanceSelect.value;
+
+            let speedText = "0 Mbps";
+            let latencyText = "0 ms";
+            let attenText = "Minimal";
+            let shieldText = "None";
+
+            // Determine values based on component interactions
+            if (nic === 'legacy_100') {
+                speedText = "100 Mbps"; latencyText = "14 ms";
+            } else if (nic === 'pcie_10g') {
+                speedText = (medium === 'cat5') ? "1,000 Mbps (Throttled)" : "10,000 Mbps (10 Gbps)";
+                latencyText = "1.2 ms";
+            } else if (nic === 'wifi7_card') {
+                if (medium === 'wifi7_link') { speedText = "46,000 Mbps (46 Gbps Max)"; latencyText = "4.5 ms"; }
+                else if (medium === 'wifi5_link') { speedText = "1,300 Mbps"; latencyText = "18 ms"; }
+                else { speedText = "0 Mbps (Media Mismatch)"; latencyText = "Infinite"; }
+            }
+
+            if (medium === 'cat5') shieldText = "None (UTP Unshielded)";
+            else if (medium === 'cat6a') shieldText = "Foil Shielded Layer (F/UTP)";
+            else if (medium === 'cat7') shieldText = "S/FTP (Individual Foil + Outer Braiding)";
+            else shieldText = "Radio Frequency Airwave Enclosure";
+
+            if (distance === 'long') {
+                attenText = (medium.includes('wifi')) ? "CRITICAL DROPOUT (Signal Blocked)" : "Moderate Copper Loss (-3.5dB)";
+                if (nic === 'wifi7_card' && medium === 'wifi7_link') latencyText = "32 ms (Packet Retry Overheads)";
+            } else if (distance === 'medium') {
+                attenText = "Low Line Impedance";
+            } else {
+                attenText = "Negligible Tracing Attenuation";
+            }
+
+            document.getElementById('val-net-speed').innerText = speedText;
+            document.getElementById('val-net-latency').innerText = latencyText;
+            document.getElementById('val-net-attenuation').innerText = attenText;
+            document.getElementById('val-net-shielding').innerText = shieldText;
+        }
+
+        function writeLog(message) {
+            const timestamp = new Date().toISOString().slice(11, 19);
+            logStream.innerHTML += `<br>[${timestamp}] ${message}`;
+            logStream.scrollTop = logStream.scrollHeight;
+        }
+
+        btnReset.addEventListener('click', () => {
+            scenarioSelect.value = "warehouse";
+            nicSelect.value = "none";
+            mediumSelect.value = "none";
+            distanceSelect.value = "short";
+            applyScenarioPreset();
+            writeLog("System Alert: Flushed active interface registers. Reseating hardware ports back to baseline.");
+        });
+
+        // Physical Layer Transmission Audit Logic Engine
+        btnVerify.addEventListener('click', () => {
+            const scenario = scenarioSelect.value;
+            const nic = nicSelect.value;
+            const medium = mediumSelect.value;
+            const distance = distanceSelect.value;
+
+            mHeader.style.color = "var(--accent-red)";
+            writeLog(`⚡ Traffic Signal Burst: Broadcasting test packet frames across physical transceiver lines...`);
+
+            if (nic === 'none' || medium === 'none') {
+                mHeader.innerText = "⚙️ Topology Fault: Open Connection Defect";
+                mBody.innerHTML = "Hardware Layer Error: Network adapters cannot initiate link training sequences if they lack an explicit **Network Interface Card** or matching **Transmission Medium** connection.";
+                modal.style.display = 'flex';
+                return;
+            }
+
+            // Cross-Media Interface Safeguard Logic Checks
+            const isNicWired = (nic === 'legacy_100' || nic === 'pcie_10g');
+            const isMediumWired = (medium === 'cat5' || medium === 'cat6a' || medium === 'cat7');
+            if ((isNicWired && !isMediumWired) || (!isNicWired && isMediumWired)) {
+                mHeader.innerText = "💥 Link Fault: Media Interface Type Mismatch";
+                mBody.innerHTML = "Fatal Framing Error: You attempted to plug a physical copper cable into a wireless radio card, or bind an over-the-air link to an RJ45 jack port. Complete packet breakdown logged on the physical layer transceiver.";
+                modal.style.display = 'flex';
+                return;
+            }
+
+            if (scenario === 'warehouse') {
+                // TICKET 401 VALIDATION ROUTINES (EXTENDED STRUCTURAL WAREHOUSE DISPATCH)
+                if (isNicWired && (medium === 'cat6a' || medium === 'cat7') && distance === 'long') {
+                    mHeader.innerText = "      Network Topology Audit Successful: Link Established";
+                    mHeader.style.color = "var(--accent-green)";
+                    mBody.innerHTML = `🏆 <strong>Task Complete: Remote Warehouse Connected Safely!</strong><br><br>
+                                       Excellent infrastructure choice. By choosing a solid wired connection over shielding cables, you bypassed structural concrete wall obstacles completely. Copper traces easily support continuous runs up to 100 metres before line attenuation requires an inline signal repeater or switch hop.`;
+                } else if (medium.includes('wifi')) {
+                    mHeader.innerText = "❌ Connection Failed: Radio Attenuation Blind Spot";
+                    mBody.innerHTML = "Link Failure: Airwave signals are blocked. Attempting to broadcast high-frequency radio waves across 95 metres of solid concrete walls causes extreme attenuation. The remote warehouse terminal cannot connect due to packet loss.";
+                } else if (medium === 'cat5') {
+                    mHeader.innerText = "🚨 Link Dropped: Distance Impedance Propagation Fault";
+                    mBody.innerHTML = "Transmission Failure: Standard unshielded Cat 5 copper cannot maintain signal integrity or clear voltage transitions near its 100-metre physical limit. High frame checking sequence errors (FCS) caused the network switch to drop the port connection.";
+                }
+            } 
+            else if (scenario === 'office') {
+                // TICKET 402 VALIDATION ROUTINES (HIGH-DENSITY CORPORATE HEADQUARTERS HINTS)
+                if (nic === 'wifi7_card' && medium === 'wifi7_link') {
+                    mHeader.innerText = "      Network Topology Audit Successful: Air Fabric Stable";
+                    mHeader.style.color = "var(--accent-green)";
+                    mBody.innerHTML = `🏆 <strong>Task Complete: Airwaves Cleared of Congestion!</strong><br><br>
+                                       Perfect protocol selection. Deploying **Wi-Fi 7 (802.11be)** introduces Multi-Link Operation (MLO), enabling client notebooks to combine multiple frequency bands (2.4/5/6 GHz) simultaneously. This technology routes around crowded local corporate channels and keeps connections stable despite heavy surrounding signal noise.`;
+                } else if (medium === 'wifi5_link') {
+                    mHeader.innerText = "❌ Connection Failed: Wi-Fi Channel Saturation Crash";
+                    mBody.innerHTML = "Airwave Failure: Legacy Wi-Fi 5 protocols rely on narrow, rigid channel slots. Under heavy corporate density, over a hundred mobile devices competing for the same radio frequencies created a packet collision storm, causing connections to cycle in drop loops.";
+                } else {
+                    mHeader.innerText = "🔴 Engineering Rejection: Wired Layout Constraints";
+                    mBody.innerHTML = "Deployment Failure: While wired copper loops are fast, forcing hundreds of moving mobile laptop users to hook up to physical cables violates client workspace flexibility guidelines. Choose an advanced enterprise wireless option.";
+                }
+            } 
+            else if (scenario === 'trading') {
+                // TICKET 403 VALIDATION ROUTINES (LOW-LATENCY SHIELDED FIN-TECH INFRASTRUCTURE)
+                if (nic === 'pcie_10g' && medium === 'cat7' && distance === 'short') {
+                    mHeader.innerText = "      Network Topology Audit Successful: Line Cleared";
+                    mHeader.style.color = "var(--accent-green)";
+                    mBody.innerHTML = `🏆 <strong>Task Complete: 10 Gbps Pipeline Active!</strong><br><br>
+                                       Flawless engineering layout. Squeezing heavy high-frequency trades down to sub-millisecond rates requires a solid wired pipeline. Choosing the **Category 7 S/FTP cable** provides individual foil wraps for each twisted pair along with outer braided screening, blocking high-voltage EMI leaks completely to secure absolute frame integrity.`;
+                } else if (medium === 'cat5' || medium === 'cat6a') {
+                    mHeader.innerText = "💥 Link Blown: Electromagnetic Interference Infiltration";
+                    mBody.innerHTML = `Transmission Failure: Critical packet corruption logged. Because standard Cat 5 or unshielded Cat 6 copper layers lack heavy individual pair shielding, high-voltage server power loops leaked cross-talk interference right onto your data lines. This corrupted frame data and triggered severe packet resend delays, violating strict low-latency guidelines.`;
+                } else {
+                    mHeader.innerText = "❌ Latency Check Failed: Wireless Jitter Constraints";
+                    mBody.innerHTML = "Deployment Failure: Even high-speed Wi-Fi 7 protocols introduce airwave jitter and packet variations due to radio reflections. Financial trading systems reject wireless infrastructures completely, demanding physical shielded copper pipes for rock-solid stability.";
+                }
+            }
+
+            modal.style.display = 'flex';
+        });
+
+        function closeDrillModal() {
+            modal.style.display = 'none';
+        }
+
+        window.onload = applyScenarioPreset;
+    </script>
+</body>
+</html>
