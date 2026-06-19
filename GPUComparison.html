@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graphics Architecture & VRAM Matching Sandbox</title>
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --panel-bg: #131c2e;
+            --node-bg: #1e293b;
+            --accent-blue: #0ea5e9;
+            --accent-purple: #a855f7;
+            --accent-green: #22c55e;
+            --accent-orange: #f97316;
+            --accent-red: #ef4444;
+            --text-light: #f8fafc;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .lab-wrapper {
+            width: 100%;
+            max-width: 1450px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            background-color: var(--panel-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #1e293b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-info h1 {
+            margin: 0 0 8px 0;
+            font-size: 1.8rem;
+            color: var(--accent-blue);
+        }
+
+        .header-info p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .task-bar {
+            display: flex;
+            gap: 10px;
+            background-color: var(--panel-bg);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #1e293b;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .task-btn {
+            background-color: #1e293b;
+            color: var(--accent-blue);
+            border: 1px solid #334155;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .task-btn:hover {
+            background-color: #334155;
+            color: white;
+            border-color: var(--accent-blue);
+        }
+
+        .evidence-btn {
+            background-color: rgba(249, 115, 22, 0.1);
+            color: var(--accent-orange);
+            border: 1px solid rgba(249, 115, 22, 0.4);
+        }
+
+        .evidence-btn:hover {
+            background-color: var(--accent-orange);
+            color: var(--bg-dark);
+            border-color: var(--accent-orange);
+        }
+
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 420px 1fr 350px;
+            gap: 20px;
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .panel-title {
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #94a3b8;
+            border-bottom: 2px solid #1e293b;
+            padding-bottom: 8px;
+            margin-bottom: 5px;
+        }
+
+        .setting-control {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: rgba(15, 23, 42, 0.3);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #1e293b;
+        }
+
+        .setting-control label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .control-purpose {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            line-height: 1.3;
+        }
+
+        select {
+            width: 100%;
+            background-color: var(--bg-dark);
+            border: 1px solid #334155;
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            outline: none;
+            box-sizing: border-box;
+            font-size: 0.85rem;
+        }
+
+        .spec-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .spec-box {
+            background: var(--node-bg);
+            border: 1px solid #334155;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .spec-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .spec-val {
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: white;
+            margin-top: 4px;
+        }
+
+        .terminal-log {
+            background-color: var(--bg-dark);
+            border: 1px solid #1e293b;
+            border-radius: 6px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            height: 200px;
+            overflow-y: auto;
+            color: #34d399;
+        }
+
+        .action-btn {
+            background-color: var(--accent-blue);
+            color: var(--bg-dark);
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        .action-btn:hover { opacity: 0.9; }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(7, 10, 19, 0.9);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-card {
+            background-color: var(--panel-bg);
+            border: 2px solid #334155;
+            border-radius: 12px;
+            max-width: 650px;
+            width: 90%;
+            padding: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+
+        .modal-header {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .modal-body {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background-color: var(--accent-blue);
+            color: var(--bg-dark);
+            border: none; padding: 10px 20px;
+            border-radius: 6px; font-weight: bold; cursor: pointer;
+        }
+
+        .ticket-box {
+            background: rgba(14, 165, 233, 0.05);
+            border-left: 4px solid var(--accent-blue);
+            padding: 12px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="lab-wrapper">
+        
+        <header>
+            <div class="header-info">
+                <h1>Graphics Subsystem & VRAM Allocation Sandbox</h1>
+                <p>Enterprise Infrastructure Lab: Balancing GPU Pipelines, Frame Buffers, and Refresh Rates</p>
+            </div>
+            <div>
+                <span class="badge" style="background-color: #1e1b4b; color: #a78bfa; padding: 6px 12px; font-size: 0.85rem;">GPU Module 1</span>
+            </div>
+        </header>
+
+        <div class="task-bar">
+            <span style="font-weight:bold; font-size:0.9rem; color:var(--text-muted); margin-right:10px;">📋 HARDWARE DISPATCHES:</span>
+            <button class="task-btn" onclick="showTaskGuide(1)">Task 1: Legacy Legacy Recovery</button>
+            <button class="task-btn" onclick="showTaskGuide(2)">Task 2: Office Productivity</button>
+            <button class="task-btn" onclick="showTaskGuide(3)">Task 3: Simulation Studio</button>
+            <button class="task-btn evidence-btn" onclick="showTaskGuide(4)">📸 Evidence Required</button>
+        </div>
+
+        <div class="workspace-grid">
+            
+            <div class="panel">
+                <div class="panel-title">1. System Hardware Matcher</div>
+
+                <div class="setting-control">
+                    <label for="scenario-select">Active Dispatch Ticket Context</label>
+                    <select id="scenario-select" onchange="applyScenarioPreset()">
+                        <option value="legacy">Ticket #901: Legacy POS Terminal Restore (Max 60Hz)</option>
+                        <option value="office">Ticket #902: Financial Analyst Multi-Display Workstation (60Hz-120Hz)</option>
+                        <option value="simulation">Ticket #903: Real-Time AI Simulation Studio Engine (144Hz-240Hz+)</option>
+                    </select>
+                </div>
+
+                <div class="setting-control">
+                    <label for="gpu-select">Graphics Processor Unit (GPU)</label>
+                    <select id="gpu-select" onchange="evaluateHardwareGrid()">
+                        <option value="none">-- Select GPU Model --</option>
+                        <option value="ati_128">ATI Rage 128 (128MB SDRAM | 64-bit Bus | Legacy PCI)</option>
+                        <option value="intel_uhd">Intel UHD Graphics 770 (Shared System VRAM | Unified Bus | Integrated Motherboard)</option>
+                        <option value="rtx_4060">NVIDIA GeForce RTX 4060 (8GB GDDR6 | 128-bit Bus | PCIe 4.0 x8)</option>
+                        <option value="rtx_4090">NVIDIA GeForce RTX 4090 (24GB GDDR6X | 384-bit Bus | PCIe 4.0 x16)</option>
+                    </select>
+                </div>
+
+                <div class="setting-control">
+                    <label for="cpu-select">Central Processing Unit (CPU) Baseline</label>
+                    <select id="cpu-select" onchange="evaluateHardwareGrid()">
+                        <option value="none">-- Select CPU Base --</option>
+                        <option value="pentium">Intel Pentium III Legacy (Single-Core @ 500MHz)</option>
+                        <option value="i5">Intel Core i5-14400 (14 Cores / 20 Threads @ 4.7GHz)</option>
+                        <option value="i9">Intel Core i9-14900K (24 Cores / 32 Threads @ 6.0GHz)</option>
+                    </select>
+                </div>
+
+                <div class="setting-control">
+                    <label for="ram-select">System Volatile Pool (RAM)</label>
+                    <select id="ram-select" onchange="evaluateHardwareGrid()">
+                        <option value="none">-- Select RAM Base --</option>
+                        <option value="256mb">256 MB PC100 SDRAM</option>
+                        <option value="16gb">16 GB DDR5 Synchronous Dual-Channel</option>
+                        <option value="64gb">64 GB DDR5 High-Speed Dual-Channel</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">2. Video Bus & Display Telemetry</div>
+                
+                <div class="ticket-box" id="ticket-display">
+                    Staging dispatch criteria metadata...
+                </div>
+
+                <div class="silicon-inspector">
+                    <div class="spec-grid" style="margin-bottom: 15px;">
+                        <div class="spec-box"><div class="spec-label">Frame Buffer VRAM</div><div class="spec-val" id="val-gpu-vram">0 MB</div></div>
+                        <div class="spec-box"><div class="spec-label">Memory Bus Width</div><div class="spec-val" id="val-gpu-bus" style="color:var(--accent-purple);">0-bit</div></div>
+                    </div>
+                    <div class="spec-grid" style="margin-bottom: 15px;">
+                        <div class="spec-box"><div class="spec-label">Achievable Refresh Rate</div><div class="spec-val" id="val-gpu-refresh" style="color:var(--accent-orange);">0 Hz</div></div>
+                        <div class="spec-box"><div class="spec-label">System Bus Interface</div><div class="spec-val" id="val-gpu-interface">N/A</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">3. Display Rail Controls</div>
+                
+                <div class="setting-control">
+                    <label>Frame Buffer Cycle Stream Logs</label>
+                    <div class="terminal-log" id="log-stream">> Video trace lines grounded. Select dispatch ticket parameters above to mount the bus...</div>
+                </div>
+
+                <button class="action-btn" id="btn-stress">Verify Hardware Pipeline Match</button>
+                <button class="action-btn" id="btn-reset" style="background-color:#334155; color:white;">Strip Hardware Rig</button>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="drill-modal">
+        <div class="modal-card">
+            <div class="modal-header" id="m-header">Processing Graphics Frame Pipeline...</div>
+            <div class="modal-body" id="m-body">Analyzing frame buffer trace vectors...</div>
+            <div style="text-align: right;">
+                <button class="modal-close" onclick="closeDrillModal()">Acknowledge Status</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const logStream = document.getElementById('log-stream');
+        const scenarioSelect = document.getElementById('scenario-select');
+        const gpuSelect = document.getElementById('gpu-select');
+        const cpuSelect = document.getElementById('cpu-select');
+        const ramSelect = document.getElementById('ram-select');
+        const btnStress = document.getElementById('btn-stress');
+        const btnReset = document.getElementById('btn-reset');
+        
+        const modal = document.getElementById('drill-modal');
+        const mHeader = document.getElementById('m-header');
+        const mBody = document.getElementById('m-body');
+        const ticketDisplay = document.getElementById('ticket-display');
+
+        const scenariosDatabase = {
+            legacy: {
+                title: "🎫 DISPATCH TICKET #901: Legacy System Crash",
+                desc: "<strong>User Ticket Context:</strong> 'A warehouse inventory terminal running legacy 1999 stock software crashed during a database query. Motherboard has ancient standard PCI slots. Needs an original standalone frame buffer replacement.'",
+                targetRefresh: "60 Hz Max"
+            },
+            office: {
+                title: "🎫 DISPATCH TICKET #902: Analyst Workstation Expansion",
+                desc: "<strong>User Ticket Context:</strong> 'A financial analyst needs their desktop configured to support dual 4K monitors running spreadsheets at a clean 60Hz-120Hz. No rendering or AI loads needed, but system memory cannot be bottlenecked.'",
+                targetRefresh: "120 Hz Dual Display"
+            },
+            simulation: {
+                title: "🎫 DISPATCH TICKET #903: Real-Time AI Simulation Studio Engine",
+                desc: "<strong>User Ticket Context:</strong> 'Our content division is spinning up an advanced 2026 AI rendering node. The system must process heavy vector paths and stream real-time physics output to a 4K display array at 240Hz+.'",
+                targetRefresh: "240 Hz+ Ultra-Low Latency"
+            }
+        };
+
+        const taskBriefings = {
+            1: {
+                title: "Task 1 Instructions: Recover the Legacy POS System Workspace",
+                body: `<strong>Objective:</strong> Rebuild an obsolete workstation using retro hardware without over-provisioning modern computing power.<br><br>
+                       <strong>Instructions:</strong><br>
+                       1. Set the Active Dispatch dropdown to <strong>Ticket #901 (Legacy POS Terminal)</strong>.<br>
+                       2. Look back into computing history: choose the original standalone <strong>ATI Rage 128</strong> card (carrying a tiny 128MB frame buffer).<br>
+                       3. Pair it with matching legacy components (Pentium III CPU and 256MB RAM) to satisfy ancient BIOS software architectures, then execute validation.`
+            },
+            2: {
+                title: "Task 2 Instructions: Scale the Financial Analyst Multi-Display Workstation",
+                body: `<strong>Objective:</strong> Deploy integrated motherboard architectures to drive high-definition displays without adding discrete hardware costs.<br><br>
+                       <strong>Instructions:</strong><br>
+                       1. Change the Active Dispatch dropdown selection to <strong>Ticket #902 (Office Productivity)</strong>.<br>
+                       2. Select the motherboard's <strong>Intel UHD Graphics 770</strong> option. Note that it lacks dedicated video chips and instead steals a portion of regular system RAM to act as VRAM.<br>
+                       3. Pair it with a modern Core i5 processor and 16GB of synchronous RAM to ensure the shared frame memory does not bottleneck the operating system.`
+            },
+            3: {
+                title: "Task 3 Instructions: Provision the AI Simulation Node",
+                body: `<strong>Objective:</strong> Align maximum data bus widths and VRAM storage matrices to conquer extreme 240Hz+ real-time processing constraints.<br><br>
+                       <strong>Instructions:</strong><br>
+                       1. Shift your staging environment to <strong>Ticket #903 (Real-Time AI Simulation Studio Engine)</strong>.<br>
+                       2. Audit premium card specifications. Notice how the flagship <strong>RTX 4090</strong> scales to a massive 24GB frame buffer running on a wide 384-bit parallel bus interface lane tracking network.<br>
+                       3. Coordinate this elite card with our top-tier Core i9 and 64GB DDR5 memory configuration to clear all hardware bottlenecks.`
+            },
+            4: {
+                title: "📸 EVALUATION SIGN-OFF: Video Subsystem Deliverables",
+                body: `<strong>Submission Deliverables:</strong><br>
+                       Apprentices must submit visual validation records proving correct pipeline pairing to complete this hardware module.<br><br>
+                       <strong>Instructions:</strong><br>
+                       Successfully solve <strong>Task 3 (AI Simulation Workstation)</strong> by aligning our most powerful, wide-bus components. Take a snippet (<strong>Win+Shift+S</strong> or <strong>Cmd+Shift+4</strong>) showing:<br>
+                       • The selection panel reading an active Task 3 ticket backed by the flagship 24GB/384-bit card array.<br>
+                       • The green <strong>'Pipeline Verification Clear'</strong> popup window displaying an optimized 240Hz+ output matrix.<br><br>
+                       Submit your snapshot to your coordinator for evaluation grade tracking.`
+            }
+        };
+
+        function showTaskGuide(id) {
+            mHeader.innerText = taskBriefings[id].title;
+            mHeader.style.color = (id === 4) ? "var(--accent-orange)" : "var(--accent-blue)";
+            mBody.innerHTML = taskBriefings[id].body;
+            modal.style.display = 'flex';
+        }
+
+        function applyScenarioPreset() {
+            const key = scenarioSelect.value;
+            ticketDisplay.innerHTML = `<strong>${scenariosDatabase[key].title}</strong><br><br>${scenariosDatabase[key].desc}`;
+            writeLog(`System: Staging video telemetry matrix targets for [${scenariosDatabase[key].title}].`);
+            evaluateHardwareGrid();
+        }
+
+        function evaluateHardwareGrid() {
+            const gpu = gpuSelect.value;
+            
+            let vramText = "0 MB";
+            let busText = "0-bit";
+            let refreshText = "0 Hz";
+            let interfaceText = "N/A";
+
+            if (gpu === 'ati_128') {
+                vramText = "128 MB SDRAM"; busText = "64-bit"; refreshText = "60 Hz Max"; interfaceText = "Legacy PCI Backplane";
+            } else if (gpu === 'intel_uhd') {
+                vramText = "Shared Dynamic (System RAM)"; busText = "Unified System Bus"; refreshText = "60Hz - 120Hz Dual"; interfaceText = "Integrated Motherboard Fabric";
+            } else if (gpu === 'rtx_4060') {
+                vramText = "8 GB GDDR6"; busText = "128-bit"; refreshText = "144 Hz Active"; interfaceText = "PCIe 4.0 x8 Slot";
+            } else if (gpu === 'rtx_4090') {
+                vramText = "24 GB GDDR6X"; busText = "384-bit"; refreshText = "240 Hz - 360 Hz Ultra"; interfaceText = "PCIe 4.0 x16 Master Slot";
+            }
+
+            document.getElementById('val-gpu-vram').innerText = vramText;
+            document.getElementById('val-gpu-bus').innerText = busText;
+            document.getElementById('val-gpu-refresh').innerText = refreshText;
+            document.getElementById('val-gpu-interface').innerText = interfaceText;
+        }
+
+        function writeLog(message) {
+            const timestamp = new Date().toISOString().slice(11, 19);
+            logStream.innerHTML += `<br>[${timestamp}] ${message}`;
+            logStream.scrollTop = logStream.scrollHeight;
+        }
+
+        btnReset.addEventListener('click', () => {
+            scenarioSelect.value = "legacy";
+            gpuSelect.value = "none";
+            cpuSelect.value = "none";
+            ramSelect.value = "none";
+            applyScenarioPreset();
+            writeLog("System Event: Testing station variables reset to factory parameters.");
+        });
+
+        // Pipeline Verification Validation Logic Engine
+        btnStressTest.onclick = function() { btnVerifyPipeline(); };
+
+        btnStress.addEventListener('click', () => {
+            const scenario = scenarioSelect.value;
+            const gpu = gpuSelect.value;
+            const cpu = cpuSelect.value;
+            const ram = ramSelect.value;
+
+            mHeader.style.color = "var(--accent-red)";
+            writeLog(`⚡ Verification Signal: Testing frame buffer rendering bandwidth across interface lanes...`);
+
+            if (gpu === 'none' || cpu === 'none' || ram === 'none') {
+                mHeader.innerText = "⚙️ Pipeline Error: Broken Component Chain";
+                mBody.innerHTML = "Hardware Failure: You cannot execute rendering operations if your layout is missing any core components. Ensure a GPU, CPU, and RAM module are all mapped to the system.";
+                modal.style.display = 'flex';
+                return;
+            }
+
+            if (scenario === 'legacy') {
+                // TASK 1 VALIDATION MATRIX (RETRO POS RESTORE)
+                if (gpu === 'ati_128' && cpu === 'pentium' && ram === '256mb') {
+                    mHeader.innerText = "🟢 Pipeline Verification Clear: POS Terminal Online";
+                    mHeader.style.color = "var(--accent-green)";
+                    mBody.innerHTML = `🏆 <strong>Task Complete: Legacy Infrastructure Restored!</strong><br><br>
+                                       Excellent diagnostics. Pairing the original 128MB ATI legacy PCI graphics card with a matching Pentium III processor and 256MB of retro SDRAM satisfies the ancient system dependencies perfectly. The software compiles safely within historical parameters.`;
+                } else if (gpu !== 'ati_128') {
+                    mHeader.innerText = "💥 POST Failure: Legacy Architecture Incompatibility";
+                    mBody.innerHTML = "Fatal Error: You attempted to install a modern motherboard or discrete graphics card into an ancient 1999 environment. The legacy backplane cannot supply the voltage or data channels needed, stalling the machine.";
+                } else {
+                    mHeader.innerText = "🟡 Inefficient Allocation: Bottlenecked Configuration";
+                    mBody.innerHTML = "Configuration Fault: You mounted the legacy ATI graphics card, but paired it with a modern Core i5 or i9 processor. The 1999 graphic bus cannot interface with modern DDR5 lanes, trapping your powerful computing loops in an infinite waiting state.";
+                }
+            } 
+            else if (scenario === 'office') {
+                // TASK 2 VALIDATION MATRIX (PRODUCTIVITY WORKSTATION)
+                if (gpu === 'intel_uhd' && cpu === 'i5' && ram === '16gb') {
+                    mHeader.innerText = "🟢 Pipeline Verification Clear: Workload Optimized";
+                    mHeader.style.color = "var(--accent-green)";
+                    mBody.innerHTML = `🏆 <strong>Task Complete: Office Workstation Provisioned!</strong><br><br>
+                                       Perfect balancing. Utilizing the motherboard's **Intel UHD Graphics 770** drives the dual business displays easily without adding discrete hardware costs. Backing it with a Core i5 and 16GB of synchronous RAM ensures the system memory remains performant, leaving plenty of room for heavy calculations.`;
+                } else if (gpu === 'rtx_4090') {
+                    mHeader.innerText = "🔴 Financial Audit Failure: Extreme Over-Provisioning";
+                    mBody.innerHTML = "Budget Violation: The machine booted successfully, but your infrastructure design was rejected by accounting. Deploying a flagship 24GB card for standard office spreadsheets and dual 4K monitoring waste critical capital budgets without adding any functional efficiency.";
+                } else if (gpu === 'intel_uhd' && ram === '256mb') {
+                    mHeader.innerText = "🚨 System Crash: Shared VRAM Exhaustion";
+                    mBody.innerHTML = "Fatal Error: Because integrated motherboard graphics rely on **stealing regular system RAM** to serve as video frame buffers, dropping the system pool down to 256MB left zero allocation space for the operating system, crashing the computer during dual display calibration tracks.";
+                } else {
+                    mHeader.innerText = "❌ Pipeline Mismatch: Component Bottleneck Detected";
+                    mBody.innerHTML = "Configuration Fault: The selected component layout creates a severe bottleneck. Ensure you choose matching mainstream components to maximize budget efficiency.";
+                }
+            } 
+            else if (scenario === 'simulation') {
+                // TASK 3 VALIDATION MATRIX (AI & SIMULATION STUDIO ENGINE)
+                if (gpu === 'rtx_4090' && cpu === 'i9' && ram === '64gb') {
+                    mHeader.innerText = "🟢 Pipeline Verification Clear: Elite Simulation Node Active";
+                    mHeader.style.color = "var(--accent-green)";
+                    mBody.innerHTML = `🏆 <strong>Task Complete: Real-Time Engine Unlocked!</strong><br><br>
+                                       Flawless engineering layout. Squeezing heavy AI processing vector models and real-time physics trees requires maximum pipeline capacity: a **24GB GDDR6X frame buffer** running on a wide **384-bit parallel data bus**. Coordinating this elite card with our top-tier Core i9 and 64GB DDR5 memory configuration eliminates all hardware bottlenecks, delivering an un-throttled 240Hz+ output matrix.`;
+                } else if (gpu === 'intel_uhd' || gpu === 'ati_128') {
+                    mHeader.innerText = "🔥 Pipeline Stall: Frame Buffer Saturation Crash";
+                    mBody.innerHTML = "Fatal Error: The simulation engine crashed instantly due to a lack of memory. Attempting to parse modern AI vector logic math through integrated motherboard graphics or an obsolete card causes an immediate data overflow error, trapping core operations in a performance freeze.";
+                } else if (gpu === 'rtx_4060') {
+                    mHeader.innerText = "🟡 Performance Warn: Narrow Bus Bottleneck Stalling";
+                    mBody.innerHTML = "Warning: The server booted, but your output dropped to single-digit frame rates. The RTX 4060's narrow 128-bit memory bus width cannot process large simulation datasets quickly enough, creating a massive hardware bottleneck that throttles your Core i9 processor.";
+                } else {
+                    mHeader.innerText = "❌ Pipeline Bottleneck: Inadequate Memory / Compute Cores";
+                    mBody.innerHTML = "Configuration Fault: Your graphics card is powerful, but your CPU or RAM selection is throttling its performance. Upgrade your system variables to unlock full 240Hz+ processing bandwidth.";
+                }
+            }
+
+            modal.style.display = 'flex';
+        });
+
+        function closeDrillModal() {
+            modal.style.display = 'none';
+        }
+
+        // Initialize default view state on baseline load
+        window.onload = applyScenarioPreset;
+    </script>
+</body>
+</html>
