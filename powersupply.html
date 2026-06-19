@@ -103,7 +103,7 @@
 
         .workspace-grid {
             display: grid;
-            grid-template-columns: 380px 1fr 350px;
+            grid-template-columns: 420px 1fr 350px;
             gap: 20px;
         }
 
@@ -302,7 +302,7 @@
         
         <header>
             <div class="header-info">
-                <h1>Power Supply Load Balancing & Efficiency sandbox</h1>
+                <h1>Power Supply Load Balancing & Efficiency Sandbox</h1>
                 <p>Enterprise Infrastructure Lab: Balancing Wattage Curve Profiles and 80 PLUS Thermal Efficiency Rails</p>
             </div>
             <div>
@@ -321,23 +321,43 @@
         <div class="workspace-grid">
             
             <div class="panel">
-                <div class="panel-title">1. Machine Workload Profile</div>
+                <div class="panel-title">1. Custom Rig Configurator</div>
 
                 <div class="setting-control">
-                    <label for="machine-select">Target Machine Architecture Type</label>
-                    <div class="control-purpose">Each profile alters the hardware power signature, modifying total component draw parameters.</div>
-                    <select id="machine-select" onchange="updateMachineProfile()">
-                        <option value="desktop">Everyday Office Desktop (Integrated Graphics, Low-Draw CPU)</option>
-                        <option value="publisher">Desktop Publisher Workstation (Mid-Tier CPU, Render GPU)</option>
-                        <option value="gamer">Hardcore Gaming PC (Overclocked CPU, High-Tier Enthusiast GPU)</option>
-                        <option value="ai_server">Enterprise AI Server (Dual Core-Heavy CPUs, Quad Tensor AI Accelerator Cluster)</option>
+                    <label for="machine-select">Preset Chassis Architecture Base</label>
+                    <div class="control-purpose">Loading a preset applies typical baseline hardware choices to the fields below.</div>
+                    <select id="machine-select" onchange="applyMachinePreset()">
+                        <option value="desktop">Everyday Office Desktop Baseline</option>
+                        <option value="publisher">Desktop Publisher Workstation Baseline</option>
+                        <option value="gamer">Hardcore Gaming PC Baseline</option>
+                        <option value="ai_server">Enterprise AI Server Baseline</option>
+                    </select>
+                </div>
+
+                <div class="setting-control">
+                    <label for="cpu-select">Central Processing Unit (CPU) Tier</label>
+                    <select id="cpu-select" onchange="calculatePowerMetrics(true)">
+                        <option value="65">Eco Quad-Core CPU (65W TDP)</option>
+                        <option value="125">Mid-Tier 8-Core CPU (150W Real Peak Load)</option>
+                        <option value="253">Enthusiast Multi-Core CPU (253W Peak Load)</option>
+                        <option value="500">Dual Enterprise Server Processors (500W Combined Load)</option>
+                    </select>
+                </div>
+
+                <div class="setting-control">
+                    <label for="gpu-select">Graphics Processing Unit (GPU) Array</label>
+                    <select id="gpu-select" onchange="calculatePowerMetrics(true)">
+                        <option value="30">Integrated Motherboard Graphics (30W Rail Load)</option>
+                        <option value="200">Mainstream Rendering GPU (200W Draw)</option>
+                        <option value="450">Flagship Enthusiast GPU (450W Draw)</option>
+                        <option value="750">Tensor Core Deep-Learning Accelerator Cluster (750W Draw)</option>
                     </select>
                 </div>
 
                 <div class="setting-control">
                     <label for="psu-wattage">PSU Capacity Wattage Setting</label>
                     <div class="control-purpose">Slide to adjust the absolute peak wattage threshold rating of the power supply.</div>
-                    <input type="range" id="psu-wattage" min="300" max="1600" step="50" value="500" oninput="calculatePowerMetrics()">
+                    <input type="range" id="psu-wattage" min="300" max="1600" step="50" value="500" oninput="calculatePowerMetrics(false)">
                     <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted); margin-top:2px;">
                         <span>300W</span>
                         <span id="psu-wattage-val" style="color:var(--accent-blue); font-weight:bold;">500W</span>
@@ -346,8 +366,8 @@
                 </div>
 
                 <div class="setting-control">
-                    <label for="efficiency-select">80 PLUS Efficiency Cert Certification</label>
-                    <select id="efficiency-select" onchange="calculatePowerMetrics()">
+                    <label for="efficiency-select">80 PLUS Efficiency Certification</label>
+                    <select id="efficiency-select" onchange="calculatePowerMetrics(false)">
                         <option value="0.75">Standard / Uncertified (75% Efficient under load)</option>
                         <option value="0.85">80 PLUS Bronze (85% Efficient under load)</option>
                         <option value="0.90">80 PLUS Gold (90% Efficient under load)</option>
@@ -383,7 +403,7 @@
                 
                 <div class="setting-control">
                     <label>Voltage Transistor Stream Logs</label>
-                    <div class="terminal-log" id="log-stream">> Power rails grounded. Choose a deployment target above to evaluate current draw maps...</div>
+                    <div class="terminal-log" id="log-stream">> Power rails grounded. Choose a deployment target or edit components above...</div>
                 </div>
 
                 <button class="action-btn" id="btn-stress-test">Execute Full-Load System Stress Test</button>
@@ -406,6 +426,8 @@
     <script>
         const logStream = document.getElementById('log-stream');
         const machineSelect = document.getElementById('machine-select');
+        const cpuSelect = document.getElementById('cpu-select');
+        const gpuSelect = document.getElementById('gpu-select');
         const psuSlider = document.getElementById('psu-wattage');
         const psuSliderVal = document.getElementById('psu-wattage-val');
         const efficiencySelect = document.getElementById('efficiency-select');
@@ -416,46 +438,47 @@
         const mHeader = document.getElementById('m-header');
         const mBody = document.getElementById('m-body');
 
-        // Combined data database tracking exact system component demands
-        const targetComponentDatabase = {
-            desktop: { name: "Office Desktop", draw: 180, desc: "Low-overhead profile. Uses integrated processing traces, drawing basic current rails safely handled by introductory components." },
-            publisher: { name: "Desktop Publisher Workstation", draw: 420, desc: "Balanced render profile. Incorporates dedicated image layout processors and mid-tier calculation matrix channels." },
-            gamer: { name: "Hardcore Gaming PC", draw: 750, desc: "High-overhead enthusiast configuration. Uses factory overclocked logic chips and premium rendering architecture demanding significant current stability." },
-            ai_server: { name: "Enterprise AI Infrastructure Server", draw: 1350, desc: "Maximum current draw profile. Houses multiple high-core server processors and an enterprise tensor cluster for deep-learning calculation trees." }
+        // Presets preset configurations matrix values mapping matching components
+        const systemPresets = {
+            desktop:    { name: "Office Desktop", cpu: "65",  gpu: "30" },
+            publisher:  { name: "Desktop Publisher Workstation", cpu: "125", gpu: "200" },
+            gamer:      { name: "Hardcore Gaming PC", cpu: "253", gpu: "450" },
+            ai_server:  { name: "Enterprise AI Server", cpu: "500", gpu: "750" }
         };
 
         const taskBriefings = {
             1: {
-                title: "Task 1 Instructions: Scaling the Everyday Office Desktop Baseline",
+                title: "Task 1 Instructions: Sizing the Everyday Office Desktop Baseline",
                 body: `<strong>Objective:</strong> Right-size the power supply for a basic office computer to match load safety curves.<br><br>
                        <strong>Instructions:</strong><br>
-                       1. Set the Target Machine Type to <strong>Everyday Office Desktop</strong>.<br>
-                       2. Set your PSU Wattage Slider to **350W** and clear with Bronze or Gold efficiency cert choices.<br>
-                       3. Fire the System Stress Test to check rail stability. Note that low-draw configurations run efficiently without requiring high-wattage hardware.`
+                       1. Set the Preset Chassis selection to <strong>Everyday Office Desktop Baseline</strong>.<br>
+                       2. Ensure the hardware shows an Eco CPU (65W) and Motherboard Graphics (30W).<br>
+                       3. Adjust the PSU Wattage Slider to **350W** and select Bronze or Gold efficiency rating choices.<br>
+                       4. Fire the System Stress Test to check rail stability.`
             },
             2: {
                 title: "Task 2 Instructions: Balance Workstation vs. Hardcore Gaming Demands",
-                body: `<strong>Objective:</strong> Support independent rendering graphics accelerators without tripping overcurrent voltage limits.<br><br>
+                body: `<strong>Objective:</strong> Support independent rendering hardware metrics without tripping overcurrent voltage limits.<br><br>
                        <strong>Instructions:</strong><br>
-                       1. Swap the Target Machine dropdown parameter choice to the **Hardcore Gaming PC** (750W component demand).<br>
-                       2. Leave your power supply configured down at **500W** and click Execute Full-Load System Stress Test.<br>
-                       3. Analyze the crash report logs. Then, adjust the wattage slider up to an optimized **950W** limit to activate the PSU's sweet spot efficiency window.`
+                       1. Toggle the Preset Chassis to the <strong>Hardcore Gaming PC Baseline</strong> (Enthusiast CPU + Flagship GPU).<br>
+                       2. Leave your power supply slider down at **500W** and click Execute Full-Load System Stress Test to analyze the OCP crash code.<br>
+                       3. **Component Customization Challenge:** Drop the GPU back to a 'Mainstream Rendering GPU (200W)' while leaving the CPU at 253W. Observe how the overall power draw dynamically alters, and right-size the wattage slider until you land back inside the safe green efficiency window.`
             },
             3: {
                 title: "Task 3 Instructions: Provisioning the Enterprise AI Compute Server Array",
-                body: `<strong>Objective:</strong> Coordinate maximum current draw demands using 80 PLUS Titanium regulation frameworks.<br><br>
+                body: `<strong>Objective:</strong> Coordinate massive modern computing demands using 80 PLUS Titanium regulation frameworks.<br><br>
                        <strong>Instructions:</strong><br>
-                       1. Shift your system selection type to the massive **Enterprise AI Server** layout (1350W component demand).<br>
+                       1. Shift your system selection preset type to the massive <strong>Enterprise AI Server Baseline</strong> (Dual CPUs + Tensor AI Accelerator Cluster).<br>
                        2. Notice how wall outlet power consumption changes based on your efficiency certification dropdown.<br>
-                       3. Target a **1600W Titanium** framework configuration to verify optimal system clear metrics.`
+                       3. Target a **1600W Titanium** configuration setup to verify optimal system clear metrics.`
             },
             4: {
                 title: "📸 EVALUATION SIGN-OFF: Power Infrastructure Evidence Metrics",
                 body: `<strong>Submission Deliverables:</strong><br>
-                       Apprentices must capture screen snippets of their configurations demonstrating successful balancing parameters to pass this module evaluation check.<br><br>
+                       Apprentices must capture screen snippets of their custom configurations demonstrating successful balancing parameters to pass this module evaluation check.<br><br>
                        <strong>Requirements:</strong><br>
-                       Configure the **Enterprise AI Server** running cleanly on an optimized, safe power curve with zero voltage sags. Take a snippet demonstrating:<br>
-                       • The left selectors reading an active AI Server workload backed by a matching high-wattage, Titanium rating setup.<br>
+                       Configure a high-end customized layout running cleanly on an optimized, safe power curve with zero voltage sags. Take a snippet demonstrating:<br>
+                       • The left panel showing your customized component selections backed by an efficient 80 PLUS rating setup.<br>
                        • The central load telemetry meter indicating a safe load curve range accompanied by a green **'Stress Test Successful'** verification popup card.<br><br>
                        Label the file as <em>'PSU_Balancing_Success_[Name].png'</em> and send it to your training instructor.`
             }
@@ -468,24 +491,37 @@
             modal.style.display = 'flex';
         }
 
-        function updateMachineProfile() {
+        function applyMachinePreset() {
             const key = machineSelect.value;
-            writeLog(`Workload Shift: Testing board calibrated to track [${targetComponentDatabase[key].name}] specifications.`);
-            calculatePowerMetrics();
+            const preset = systemPresets[key];
+            
+            cpuSelect.value = preset.cpu;
+            gpuSelect.value = preset.gpu;
+            
+            writeLog(`Preset Applied: Configured chassis parameters for typical [${systemPresets[key].name}] specifications.`);
+            calculatePowerMetrics(false);
         }
 
-        function calculatePowerMetrics() {
-            const key = machineSelect.value;
+        function calculatePowerMetrics(isManualOverride) {
+            if (isManualOverride) {
+                machineSelect.value = ""; // Break preset alignment tag if user starts mixing custom metrics
+                writeLog("System Event: Custom component allocation detected. Recalculating trace requirements...");
+            }
+
+            const cpuWatts = parseInt(cpuSelect.value);
+            const gpuWatts = parseInt(gpuSelect.value);
+            const baseSystemOverhead = 80; // Hardcoded motherboard, fans, RAM, storage rail overhead
+            
             const targetPsuWatts = parseInt(psuSlider.value);
             const efficiencyModifier = parseFloat(efficiencySelect.value);
             
             psuSliderVal.innerText = `${targetPsuWatts}W`;
 
-            const componentDraw = targetComponentDatabase[key].draw;
+            const componentDraw = cpuWatts + gpuWatts + baseSystemOverhead;
             const wallOutletDraw = Math.round(componentDraw / efficiencyModifier);
             const loadPercentage = Math.round((componentDraw / targetPsuWatts) * 100);
 
-            // Hydrate text cards
+            // Hydrate metrics readouts
             document.getElementById('val-component-draw').innerText = `${componentDraw} W`;
             document.getElementById('val-wall-draw').innerText = `${wallOutletDraw} W`;
             
@@ -514,23 +550,26 @@
 
         function writeLog(message) {
             const timestamp = new Date().toISOString().slice(11, 19);
-            logStream.innerHTML += `<br>[${timestamp}] ${message}`;
-            logStream.scrollTop = logStream.scrollHeight;
+            storageLog.innerHTML += `<br>[${timestamp}] ${message}`;
+            storageLog.scrollTop = storageLog.scrollHeight;
         }
 
         btnReset.addEventListener('click', () => {
             machineSelect.value = "desktop";
             psuSlider.value = "500";
             efficiencySelect.value = "0.75";
-            updateMachineProfile();
-            writeLog("System Event: Testing array registers cleared back to safe office configuration metrics.");
+            applyMachinePreset();
+            writeLog("System Update: Staging boards reset to zero baseline metrics.");
         });
 
-        // Stress Testing Evaluation Simulation Logic Engine
+        // Diagnostics Stress Test Verification Logic Engine
         btnStressTest.addEventListener('click', () => {
-            const key = machineSelect.value;
+            const cpuWatts = parseInt(cpuSelect.value);
+            const gpuWatts = parseInt(gpuSelect.value);
+            const baseSystemOverhead = 80;
+            const componentDraw = cpuWatts + gpuWatts + baseSystemOverhead;
+            
             const targetPsuWatts = parseInt(psuSlider.value);
-            const componentDraw = targetComponentDatabase[key].draw;
             const efficiencyModifier = parseFloat(efficiencySelect.value);
             const loadPercentage = Math.round((componentDraw / targetPsuWatts) * 100);
             const wasteWatts = Math.round((componentDraw / efficiencyModifier) - componentDraw);
@@ -542,7 +581,7 @@
                 mHeader.innerText = "💥 System Crash: Over-Current Protection (OCP) Tripped";
                 mBody.innerHTML = `<strong>Hardware Diagnostic Failure Code: 0xPOWER_SHUTDOWN</strong><br><br>
                                    The stress test failed instantly. Your configured hardware components demanded a combined <strong>${componentDraw}W</strong>, but your power supply is physically capped at a low <strong>${targetPsuWatts}W</strong>.<br><br>
-                                   • <strong>What happened:</strong> As soon as components initialized full rendering threads, current draw spiked across the +12V electrical rail. To prevent a catastrophic electrical fire or melted transistor lines, the PSU's internal <strong>Over-Current Protection (OCP)</strong> safety relay tripped the main power breaker, shutting down the entire machine. Increase your PSU capacity to clear the error.`;
+                                   • <strong>What happened:</strong> As soon as components initialized full execution threads, current draw spiked across the electrical rails. To prevent a catastrophic electrical fire or melted transistor lines, the PSU's internal <strong>Over-Current Protection (OCP)</strong> safety relay tripped the main power breaker, shutting down the entire machine. Increase your PSU capacity to clear the error.`;
                 modal.style.display = 'flex';
                 return;
             }
@@ -550,8 +589,8 @@
             if (loadPercentage > 85 && efficiencyModifier === 0.75) {
                 mHeader.innerText = "🔥 Thermal Crash: System Power Sag Instability";
                 mBody.innerHTML = `<strong>Hardware Diagnostic Failure Code: 0xVOLTAGE_DROP</strong><br><br>
-                                   The test ran for 45 seconds before collapsing into a Blue Screen loop.<br><br>
-                                   • <strong>What happened:</strong> You are running a high-load system near maximum capacity using an uncertified power supply. Because of its low 75% efficiency rating, the unit converted a massive <strong>${wasteWatts}W of raw electricity directly into heat</strong> inside the supply casing. The extreme heat caused voltage ripples across the motherboard lines, resulting in a system crash. Deploy an 80 PLUS certified model to stabilize voltage regulations.`;
+                                   The test ran for 45 seconds before collapsing into a system loop crash.<br><br>
+                                   • <strong>What happened:</strong> You are running a high-load system near maximum capacity using an uncertified power supply. Because of its low 75% efficiency rating, the unit converted a massive <strong>${wasteWatts}W of raw electricity directly into heat</strong> inside the supply casing. The extreme heat caused voltage sags across the motherboard lines, crashing the system. Deploy an 80 PLUS certified model to stabilize voltage regulations.`;
                 modal.style.display = 'flex';
                 return;
             }
@@ -562,8 +601,9 @@
             
             let reportHtml = `<strong>Power Infrastructure Evaluation Passed Cleanly!</strong><br><br>
                               Your configuration maintained absolute voltage regulation stability across all active channels under full synthetic load conditions.<br><br>
+                              • <strong>Combined Component Allocation:</strong> CPU (${cpuWatts}W) + GPU (${gpuWatts}W) + Base Overhead (${baseSystemOverhead}W) = <strong>${componentDraw}W</strong>.<br>
                               • <strong>Load Balance Target:</strong> Operating at <strong>${loadPercentage}%</strong> capacity.<br>
-                              • <strong>Thermal Footprint:</strong> Conversion efficiency filters successfully isolated electrical waste to ${wasteWatts}W.<br>`;
+                              • <strong>Thermal Footprint:</strong> Conversion efficiency filters successfully restricted electrical waste to ${wasteWatts}W.<br>`;
 
             if (loadPercentage >= 40 && loadPercentage <= 60) {
                 reportHtml += `<br>🌟 <strong>BONUS AUDIT ARCHITECTURE CREDIT:</strong> You positioned the system perfectly inside the <strong>PSU Efficiency Sweet Spot Window</strong>. This guarantees optimal power conversion, lower electricity bills, and minimal component degradation over long deployment lifecycles.`;
@@ -578,8 +618,8 @@
             modal.style.display = 'none';
         }
 
-        // Hydrate default baseline values on script initialization
-        window.onload = updateMachineProfile;
+        // Trigger baseline generation instantly upon loading sandbox script
+        window.onload = applyMachinePreset;
     </script>
 </body>
 </html>
