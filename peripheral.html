@@ -279,7 +279,7 @@
                 <p>Enterprise Workstation Provisioning: Optimizing HIDs, Spatial Resolvers, and Display Rails</p>
             </div>
             <div>
-                <span class="badge" style="background-color: #1e1b4b; color: #a78bfa; padding: 6px 12px; font-size: 0.85rem;">HID Module 1</span>
+                <span class="badge" style="background-color: #1e1b4b; color: #a78bfa; padding: 6px 12px; font-size: 0.85rem;">HID Module 1 PRO</span>
             </div>
         </header>
 
@@ -338,9 +338,10 @@
 
                 <div class="setting-control">
                     <label for="monitor-select">Display Array Rail</label>
-                    <select id="monitor-select" onchange="evaluateHardwareGrid()">
+                    <select id="monitor-select" onchange="handleMonitorChange()">
                         <option value="none">-- Select Display Array --</option>
                         <option value="single_60">Single 24" 1080p Monitor (60Hz Refresh | Standard Color Depth)</option>
+                        <option value="touch_enterprise">24" 1080p Multi-Touch Monitor (10-Point Capacitive Touch | 60Hz)</option>
                         <option value="dual_4k">Dual 27" 4K Enterprise Displays (60Hz | IPS Color Accuracy)</option>
                         <option value="triple_cad">Ultra-Wide 49" Curved Display Array (120Hz | High Vector Panoramic Scope)</option>
                         <option value="oled_360">27" QHD Gaming OLED Monitor (360Hz Refresh | 0.03ms Response)</option>
@@ -421,11 +422,11 @@
         const scenariosDatabase = {
             clerk: {
                 title: "🎫 USER PROFILE: Everyday Data Entry Clerk",
-                desc: "<strong>Ergonomic & Operational Requirements:</strong> This profile continuously keys intensive alphanumeric index rows into database sheets. Requires an integrated tenkey numeric pad for optimal speed metrics, standard display rails, and no high-frequency requirements.",
+                desc: "<strong>Ergonomic & Operational Requirements:</strong> This profile continuously keys intensive alphanumeric index rows into database sheets. Requires an integrated tenkey numeric pad for optimal speed metrics. Can benefit from a touchscreen interface for direct UI element navigation, bypassing typical mouse drag boundaries.",
             },
             athlete: {
                 title: "🎫 USER PROFILE: Competitive Esports Athlete",
-                desc: "<strong>Latency & HID Precision Requirements:</strong> Millisecond delays dictate winning parameters. Demands an elite, sub-millisecond mechanical input pipeline, a high-velocity display frame window (360Hz+), and fine-tuned spatial pointer control to avoid hardware translation bottlenecks.",
+                desc: "<strong>Latency & HID Precision Requirements:</strong> Millisecond delays dictate winning parameters. Demands an elite, sub-millisecond mechanical input pipeline and a high-velocity display frame window (360Hz+). Avoid touch screens due to high processing layer delay and physical finger friction constraints.",
             },
             artist: {
                 title: "🎫 USER PROFILE: 3D Digital Matte Artist",
@@ -440,11 +441,11 @@
         const taskBriefings = {
             1: {
                 title: "Task 1 Instructions: Optimize the Data Entry Workspace",
-                body: `<strong>Objective:</strong> Right-size peripherals to facilitate high-volume alphanumeric entry without deploying expensive, unnecessary high-frequency hardware.<br><br>
+                body: `<strong>Objective:</strong> Right-size peripherals to facilitate high-volume alphanumeric entry without deploying expensive high-frequency hardware.<br><br>
                        <strong>Instructions:</strong><br>
                        1. Set Active Workspace Profile to <strong>Everyday Data Entry Clerk</strong>.<br>
-                       2. Select the <strong>Full-Size Mechanical Keyboard</strong>. Note that its integrated physical numpad speeds up text entry metrics compared to compact tenkeyless variants.<br>
-                       3. Complete the setup with standard corporate items (Single 60Hz display, modest mouse DPI) and test configuration compliance.`
+                       2. Select the <strong>Full-Size Mechanical Keyboard</strong> to leverage its numeric grid pad.<br>
+                       3. **Touchscreen Exploration:** Swap the display choice to the **24" Multi-Touch Monitor**. Note how the telemetry system dynamically updates to 'Direct Capacitive Input', bypassing traditional mouse tracking requirements entirely.`
             },
             2: {
                 title: "Task 2 Instructions: Eliminate Latency Bottlenecks for the Esports Athlete",
@@ -452,7 +453,7 @@
                        <strong>Instructions:</strong><br>
                        1. Change Active Workspace to <strong>Competitive Esports Athlete</strong>.<br>
                        2. Select a <strong>Mechanical Linear Keyboard</strong> for near-instant 1ms signal polling.<br>
-                       3. Slide the Mouse Sensor sensitivity down into the pro-athlete range (<strong>400 DPI - 1200 DPI</strong>) for steady tracking precision, and match it with a **360Hz OLED Display Array** to eliminate frame tears.`
+                       3. Keep your cursor settings precise (400 - 1200 DPI) and match it with a **360Hz OLED Display Array** to eliminate frame tears.`
             },
             3: {
                 title: "Task 3 Instructions: Deploy Spatial Digitizers for the Digital Illustrator",
@@ -475,7 +476,7 @@
                 body: `<strong>Submission Deliverables:</strong><br>
                        Apprentices must capture screen confirmations of verified workspace optimizations to fulfill grading audit targets.<br><br>
                        <strong>Instructions:</strong><br>
-                       Successfully complete <strong>Task 3 (Digital Artist Optimization)</strong> or <strong>Task 4 (CAD Architect Engine)</strong>. Take a clear snippet showing:<br>
+                       Successfully solve <strong>Task 1 (Data Entry Touchscreen Workflow)</strong> or <strong>Task 3/4</strong>. Take a clear snippet showing:<br>
                        • Your specialized input/output selections mapped on the left control dock panels.<br>
                        • The green <strong>'Workspace Audit Successful'</strong> evaluation card showing optimal telemetry specs.<br><br>
                        Label the capture file as <em>'IO_Subsystem_Success_[Name].png'</em> and send it to your instructor.`
@@ -487,6 +488,17 @@
             mHeader.style.color = (id === 5) ? "var(--accent-orange)" : "var(--accent-blue)";
             mBody.innerHTML = taskBriefings[id].body;
             modal.style.display = 'flex';
+        }
+
+        function handleMonitorChange() {
+            const monitor = monitorSelect.value;
+            if (monitor === 'touch_enterprise') {
+                writeLog("Touch Integration: Active monitor reporting capacitive digitizer layer. Adjusting HID bus properties...");
+                // Automatically set helpful values when touch is selected to help user visualize interaction
+                tabletSelect.value = "none"; 
+                writeLog("HID Sync: Standalone freehand digitizers bypassed. Touch layer assuming primary screen coordinate mapping roles.");
+            }
+            evaluateHardwareGrid();
         }
 
         function applyScenarioPreset() {
@@ -514,18 +526,26 @@
             if (kb === 'membrane') pollingVal = "16 ms (Slow Membrane)";
             else if (kb === 'mechanical_linear' || kb === 'mechanical_num') pollingVal = "1 ms (High-Speed Polling)";
 
-            if (tablet === 'capacitive_stylus') precisionVal = "Basic Absolute Pos (0 Pressure)";
-            else if (tablet === 'em_tablet') precisionVal = "EMR Stylus (8192 Pressure Levels + Tilt)";
-            else if (dpi > 4000) precisionVal = "High-Res Hyper-Cursor Speed";
-            else if (dpi <= 1200 && dpi >= 400) precisionVal = "Pixel-Precise Low DPI Lock";
+            if (monitor === 'touch_enterprise') {
+                precisionVal = "Direct Capacitive Input (10-Point Touch)";
+            } else if (tablet === 'capacitive_stylus') {
+                precisionVal = "Basic Absolute Pos (0 Pressure)";
+            } else if (tablet === 'em_tablet') {
+                precisionVal = "EMR Stylus (8192 Pressure Levels + Tilt)";
+            } else if (dpi > 4000) {
+                precisionVal = "High-Res Hyper-Cursor Speed";
+            } else if (dpi <= 1200 && dpi >= 400) {
+                precisionVal = "Pixel-Precise Low DPI Lock";
+            }
 
-            if (monitor === 'single_60') refreshVal = "60 Hz";
+            if (monitor === 'single_60' || monitor === 'touch_enterprise') refreshVal = "60 Hz";
             else if (monitor === 'dual_4k') refreshVal = "60 Hz Dual Redundant";
             else if (monitor === 'triple_cad') refreshVal = "120 Hz Curved Sweep";
             else if (monitor === 'oled_360') refreshVal = "360 Hz Ultra-Low Latency";
 
             let aggregateMbps = Math.round((dpi / 1000) + (printer !== 'none' ? 45 : 5));
             if (monitor === 'dual_4k') aggregateMbps += 850;
+            if (monitor === 'touch_enterprise') aggregateMbps += 45; // Touch digitization USB overhead bandwidth
             if (tablet === 'em_tablet') aggregateMbps += 85;
 
             document.getElementById('val-polling').innerText = pollingVal;
@@ -572,14 +592,15 @@
 
             if (scenario === 'clerk') {
                 // TASK 1 COMPLIANCE CHECKS (DATA ENTRY WORKSPACE)
-                if (kb === 'mechanical_num' && monitor === 'single_60') {
+                if (kb === 'mechanical_num' && (monitor === 'single_60' || monitor === 'touch_enterprise')) {
                     mHeader.innerText = "🟢 Workspace Audit Successful: Data Station Optimized";
                     mHeader.style.color = "var(--accent-green)";
                     mBody.innerHTML = `🏆 <strong>Task Complete: Right-Sized Deployment Validated!</strong><br><br>
-                                       Excellent space management. Selecting the **Full-Size Mechanical Keyboard** integrates a physical tenkey numeric pad, which accelerates database cell entry metrics by over 40%. Bypassing expensive gaming displays or wide plotters keeps your infrastructure deployment well within standard corporate budget parameters.`;
+                                       Excellent space management. Selecting the **Full-Size Mechanical Keyboard** integrates a physical tenkey numeric pad, accelerating database entry speeds.<br><br>
+                                       • <strong>Interface Note:</strong> ${monitor === 'touch_enterprise' ? "Your selection of the Multi-Touch display layer adds direct UI navigation, enabling the operator to tap software commands immediately without constantly searching for a mouse pointer track." : "Standard monitor configuration forms a reliable baseline workspace architecture."}`;
                 } else if (kb !== 'mechanical_num') {
                     mHeader.innerText = "❌ Workspace Defect: Throttled Data Entry Metrics";
-                    mBody.innerHTML = "Configuration Rejection: You deployed a compact keyboard format that lacks an integrated numeric grid pad. This forces the clerk to rely on the top horizontal number row, significantly slowing down transaction input speeds and reducing efficiency.";
+                    mBody.innerHTML = "Configuration Rejection: You deployed a compact keyboard format that lacks an integrated numeric grid pad. This forces the clerk to rely on the top horizontal number row, significantly slowing down transaction input speeds.";
                 } else {
                     mHeader.innerText = "🟡 Budget Alert: Over-Provisioned Workspace Rails";
                     mBody.innerHTML = "Warning: The keyboard choice is correct, but you attached premium high-frequency OLED gaming displays or wide-format engineering plotters. These high-end devices provide zero efficiency returns for basic database text entry, resulting in a waste of IT hardware budgets.";
@@ -587,6 +608,13 @@
             } 
             else if (scenario === 'athlete') {
                 // TASK 2 COMPLIANCE CHECKS (ESPORTS HIGH-FREQUENCY ATHLETE)
+                if (monitor === 'touch_enterprise') {
+                    mHeader.innerText = "❌ Pipeline Stall: Excessive Polling & Processing Layer Lag";
+                    mBody.innerHTML = "Input Failure: You attached a touchscreen monitor to a competitive gaming rig. Touch interfaces rely on multi-layered capacitive filtering scripts that add significant processing delays. Additionally, physical hand friction and screen occlusion make this an unacceptable HID model for high-frequency esports scenarios.";
+                    modal.style.display = 'flex';
+                    return;
+                }
+                
                 const validDpi = (dpi >= 400 && dpi <= 1200);
                 if (kb === 'mechanical_linear' && monitor === 'oled_360' && validDpi) {
                     mHeader.innerText = "🟢 Workspace Audit Successful: Latency Barriers Obliterated";
@@ -606,6 +634,13 @@
             } 
             else if (scenario === 'artist') {
                 // TASK 3 COMPLIANCE CHECKS (DIGITAL MATTE ILLUSTRATOR)
+                if (monitor === 'touch_enterprise') {
+                    mHeader.innerText = "❌ Production Halt: Missing Pressure Sensitivity Layers";
+                    mBody.innerHTML = "Input Failure: Standard multi-touch enterprise displays only track a coordinate point via binary capacitive contact (finger touch on/off). They completely lack the pressure-sensitive depth tracking and stylus tilt sensors required for professional digital matte illustration. Switch back to an **EMR Digitizer** array.";
+                    modal.style.display = 'flex';
+                    return;
+                }
+
                 if (tablet === 'em_tablet' && monitor === 'dual_4k') {
                     mHeader.innerText = "🟢 Workspace Audit Successful: Spatial Digitizer Synced";
                     mHeader.style.color = "var(--accent-green)";
