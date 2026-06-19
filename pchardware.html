@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exploring the Big Three: Core PC Hardware Lab</title>
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --panel-bg: #131c2e;
+            --node-bg: #1e293b;
+            --accent-blue: #0ea5e9;
+            --accent-purple: #a855f7;
+            --accent-green: #22c55e;
+            --accent-orange: #f97316;
+            --accent-red: #ef4444;
+            --text-light: #f8fafc;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .lab-wrapper {
+            width: 100%;
+            max-width: 1450px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            background-color: var(--panel-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #1e293b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-info h1 {
+            margin: 0 0 8px 0;
+            font-size: 1.8rem;
+            color: var(--accent-blue);
+        }
+
+        .header-info p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .task-bar {
+            display: flex;
+            gap: 10px;
+            background-color: var(--panel-bg);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #1e293b;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .task-btn {
+            background-color: #1e293b;
+            color: var(--accent-blue);
+            border: 1px solid #334155;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .task-btn:hover {
+            background-color: #334155;
+            color: white;
+            border-color: var(--accent-blue);
+        }
+
+        .evidence-btn {
+            background-color: rgba(249, 115, 22, 0.1);
+            color: var(--accent-orange);
+            border: 1px solid rgba(249, 115, 22, 0.4);
+        }
+
+        .evidence-btn:hover {
+            background-color: var(--accent-orange);
+            color: var(--bg-dark);
+            border-color: var(--accent-orange);
+        }
+
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 380px 1fr 350px;
+            gap: 20px;
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .panel-title {
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #94a3b8;
+            border-bottom: 2px solid #1e293b;
+            padding-bottom: 8px;
+            margin-bottom: 5px;
+        }
+
+        .component-token {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: grab;
+            font-weight: 600;
+            text-align: center;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            border: 1px solid #1e40af;
+        }
+
+        .setting-control {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: rgba(15, 23, 42, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #1e293b;
+        }
+
+        .setting-control label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .control-purpose {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            line-height: 1.3;
+        }
+
+        select {
+            width: 100%;
+            background-color: var(--bg-dark);
+            border: 1px solid #334155;
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            outline: none;
+            box-sizing: border-box;
+            font-size: 0.85rem;
+        }
+
+        .board-canvas {
+            background-color: rgba(15, 23, 42, 0.5);
+            border: 2px solid #334155;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background-image: radial-gradient(#1e293b 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+
+        .socket-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .hardware-slot {
+            background: rgba(30, 41, 59, 0.7);
+            border: 2px dashed #475569;
+            border-radius: 8px;
+            padding: 20px 15px;
+            text-align: center;
+            min-height: 90px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .hardware-slot.drag-over {
+            border-color: var(--accent-blue);
+            background: rgba(14, 165, 233, 0.1);
+        }
+
+        .hardware-slot.occupied {
+            border-color: var(--accent-green);
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        .slot-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .scorecard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #1e293b;
+        }
+
+        .score-box {
+            text-align: center;
+            padding: 8px;
+            background: var(--bg-dark);
+            border-radius: 6px;
+            border: 1px solid #334155;
+        }
+
+        .score-val {
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--accent-blue);
+            margin-top: 4px;
+        }
+
+        .score-box.pass { border-color: var(--accent-green); }
+        .score-box.pass .score-val { color: var(--accent-green); }
+
+        .terminal-log {
+            background-color: var(--bg-dark);
+            border: 1px solid #1e293b;
+            border-radius: 6px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            height: 180px;
+            overflow-y: auto;
+            color: #34d399;
+        }
+
+        .action-btn {
+            background-color: var(--accent-blue);
+            color: var(--bg-dark);
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        .action-btn:hover { opacity: 0.9; }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(7, 10, 19, 0.9);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-card {
+            background-color: var(--panel-bg);
+            border: 2px solid #334155;
+            border-radius: 12px;
+            max-width: 650px;
+            width: 90%;
+            padding: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+
+        .modal-header {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .modal-body {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background-color: var(--accent-blue);
+            color: var(--bg-dark);
+            border: none; padding: 10px 20px;
+            border-radius: 6px; font-weight: bold; cursor: pointer;
+        }
+
+        .allocated-item {
+            background: #1e293b;
+            border: 1px solid #475569;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="lab-wrapper">
+        
+        <header>
+            <div class="header-info">
+                <h1>Exploring the "Big Three" Architecture Sandbox</h1>
+                <p>Interactive System Assembly: Aligning Motherboards, CPUs, and Memory Banks</p>
+            </div>
+            <div>
+                <span class="badge" style="background-color: #1e1b4b; color: #a78bfa; padding: 6px 12px; font-size: 0.85rem;">Hardware Module 1</span>
+            </div>
+        </header>
+
+        <div class="task-bar">
+            <span style="font-weight:bold; font-size:0.9rem; color:var(--text-muted); margin-right:10px;">📋 LAB TASKS:</span>
+            <button class="task-btn" onclick="showTaskGuide(1)">Task 1: POST Assembly</button>
+            <button class="task-btn" onclick="showTaskGuide(2)">Task 2: Memory Optimization</button>
+            <button class="task-btn" onclick="showTaskGuide(3)">Task 3: Bus Bottlenecks</button>
+            <button class="task-btn evidence-btn" onclick="showTaskGuide(4)">📸 Evidence Required</button>
+        </div>
+
+        <div class="workspace-grid">
+            
+            <div class="panel">
+                <div class="panel-title">1. Component Component Bin</div>
+                
+                <div class="setting-control">
+                    <label>Select Motherboard Form Factor</label>
+                    <div class="control-purpose">Determines the physical chassis dimension limitations and trace distribution layout.</div>
+                    <select id="board-select" onchange="updateBoardFormFactor()">
+                        <option value="none">-- Select Motherboard --</option>
+                        <option value="atx">Enterprise ATX Board (Intel LGA 1700, DDR5 Standard)</option>
+                        <option value="itx">Compact Mini-ITX Board (AMD AM5, DDR5 Standard)</option>
+                    </select>
+                </div>
+
+                <div class="setting-control">
+                    <label>Available Processors (Drag Source)</label>
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <div class="component-token" draggable="true" id="cpu-intel" data-type="cpu" data-spec="LGA1700">💾 Core i9 (Intel LGA 1700)</div>
+                        <div class="component-token" draggable="true" id="cpu-amd" data-type="cpu" data-spec="AM5">💾 Ryzen 9 (AMD AM5)</div>
+                    </div>
+                </div>
+
+                <div class="setting-control">
+                    <label>Available RAM Modules (Drag Source)</label>
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <div class="component-token" draggable="true" id="ram-dimm1" data-type="ram" data-spec="DDR5">🎚️ 16GB DDR5 DIMM Stick A</div>
+                        <div class="component-token" draggable="true" id="ram-dimm2" data-type="ram" data-spec="DDR5">🎚️ 16GB DDR5 DIMM Stick B</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel" style="gap: 15px;">
+                <div class="panel-title">2. Mainboard Assembly Topography</div>
+                
+                <div class="board-canvas">
+                    <div class="hardware-slot" id="slot-cpu" data-accept="cpu">
+                        <div class="slot-title">Central Processing Unit (CPU) Socket</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted);">Drop Processor Here</div>
+                    </div>
+
+                    <div class="socket-grid">
+                        <div class="hardware-slot" id="slot-ram-a1" data-accept="ram" data-channel="A">
+                            <div class="slot-title">DIMM Slot A1 (Channel A)</div>
+                            <div style="font-size:0.75rem; color:var(--text-muted);">Drop RAM Stick Here</div>
+                        </div>
+                        <div class="hardware-slot" id="slot-ram-b1" data-accept="ram" data-channel="B">
+                            <div class="slot-title">DIMM Slot B1 (Channel B)</div>
+                            <div style="font-size:0.75rem; color:var(--text-muted);">Drop RAM Stick Here</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="scorecard-grid">
+                    <div class="score-box" id="card-pin">
+                        <div style="font-size:0.75rem; color:var(--text-muted);">SOCKET PIN ALIGNMENT</div>
+                        <div class="score-val" id="val-pin">Unmapped</div>
+                    </div>
+                    <div class="score-box" id="card-capacity">
+                        <div style="font-size:0.75rem; color:var(--text-muted);">TOTAL VOLATILE POOL</div>
+                        <div class="score-val" id="val-capacity">0 GB</div>
+                    </div>
+                    <div class="score-box" id="card-topology">
+                        <div style="font-size:0.75rem; color:var(--text-muted);">CHANNEL INTERLEAVE</div>
+                        <div class="score-val" id="val-topology">Single-Channel</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">3. Power Rails & Bus Diagnostics</div>
+                
+                <div class="setting-control">
+                    <label>System Live Execution Log</label>
+                    <div class="terminal-log" id="log-stream">> Power rail ground loops verified. Deploy mainboard architecture parameters to seed trace connections...</div>
+                </div>
+
+                <button class="action-btn" id="btn-power">Depress Power Button (Trigger POST)</button>
+                <button class="action-btn" id="btn-reset" style="background-color:#334155; color:white;">Strip Hardware Rig</button>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="drill-modal">
+        <div class="modal-card">
+            <div class="modal-header" id="m-header">POST Diagnostic Initialization...</div>
+            <div class="modal-body" id="m-body">Analyzing hardware configurations...</div>
+            <div style="text-align: right;">
+                <button class="modal-close" onclick="closeDrillModal()">Acknowledge Rails Status</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const allocatedHardware = {};
+
+        const storageLog = document.getElementById('log-stream');
+        const boardSelect = document.getElementById('board-select');
+        const hardwareSlots = document.querySelectorAll('.hardware-slot');
+        const componentTokens = document.querySelectorAll('.component-token');
+        const btnPower = document.getElementById('btn-power');
+        const btnReset = document.getElementById('btn-reset');
+        
+        const modal = document.getElementById('drill-modal');
+        const mHeader = document.getElementById('m-header');
+        const mBody = document.getElementById('m-body');
+
+        const taskBriefings = {
+            1: {
+                title: "Task 1 Instructions: Achieve Flawless POST Execution",
+                body: `<strong>Objective:</strong> Successfully boot the machine into the BIOS by completing a proper Power-On Self-Test sequence.<br><br>
+                       <strong>Instructions:</strong><br>
+                       1. Select the <strong>Enterprise ATX Board</strong> form factor option.<br>
+                       2. Drag and drop the processor that matches the socket requirements of the board trace layout.<br>
+                       3. Install at least one memory module into an available DIMM socket.<br>
+                       4. Press the **Power Button** on the right panel to test for successful hardware handshakes.`
+            },
+            2: {
+                title: "Task 2 Instructions: Maximize Memory Interleaving",
+                body: `<strong>Objective:</strong> Configure the volatile RAM pool to run in an optimized Multi-Channel configurations schema.<br><br>
+                       <strong>Instructions:</strong><br>
+                       1. Keep your system configuration running smoothly from Task 1.<br>
+                       2. Look at how single-channel vs. multi-channel interleaving bus paths affect total throughput velocities.<br>
+                       3. Install both RAM sticks into separate, decoupled memory channels (Channel A vs. Channel B) to expand the memory data bus width from 64-bit to 128-bit, changing the scorecard indicator to **Dual-Channel**.`
+            },
+            3: {
+                title: "Task 3 Instructions: Socket Interoperability and Pin Failures",
+                body: `<strong>Objective:</strong> Analyze physical slot incompatibility behavior outcomes.<br><br>
+                       <strong>Instructions:</strong><br>
+                       1. Change your Motherboard parameter choice to the **Compact Mini-ITX Board** (which forces an AMD AM5 grid tracking landscape).<br>
+                       2. Attempt to seat the Intel Core i9 processor onto this platform topology and activate the Power Rail switch.<br>
+                       3. Examine the error log output response report card carefully to analyze physical pin mismatch logic patterns.`
+            },
+            4: {
+                title: "📸 EVALUATION SIGN-OFF: Evidence Requirements Matrix",
+                body: `<strong>Submission Deliverables:</strong><br>
+                       You must verify system design status profiles by capturing screenshots showing correct engineering solutions.<br><br>
+                       <strong>Requirements:</strong><br>
+                       Produce a successful <strong>Dual-Channel System Boot Clear</strong> sequence inside the modal popup window. Take a snippet demonstrating:<br>
+                       • The green scorecard indicators showing a combined 32 GB Volatile Pool in a Dual-Channel orientation state.<br>
+                       • The verification popup window displaying a successful POST boot handshake cycle log.<br><br>
+                       Label your output file as <em>'BigThree_Success_[YourName].png'</em> and send it to your training instructor for review.`
+            }
+        };
+
+        function showTaskGuide(id) {
+            mHeader.innerText = taskBriefings[id].title;
+            mHeader.style.color = (id === 4) ? "var(--accent-orange)" : "var(--accent-blue)";
+            mBody.innerHTML = taskBriefings[id].body;
+            modal.style.display = 'flex';
+        }
+
+        function updateBoardFormFactor() {
+            writeLog(`System: Mainboard topography array shifted to [${boardSelect.options[boardSelect.selectedIndex].text}].`);
+            evaluateHardwareStates();
+        }
+
+        componentTokens.forEach(token => {
+            token.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/id', token.id);
+                e.dataTransfer.setData('text/type', token.getAttribute('data-type'));
+                e.dataTransfer.setData('text/spec', token.getAttribute('data-spec'));
+            });
+        });
+
+        hardwareSlots.forEach(slot => {
+            slot.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                if (!slot.classList.contains('occupied')) slot.classList.add('drag-over');
+            });
+
+            slot.addEventListener('dragleave', () => slot.classList.remove('drag-over'));
+
+            slot.addEventListener('drop', (e) => {
+                e.preventDefault();
+                slot.classList.remove('drag-over');
+
+                const tokenId = e.dataTransfer.getData('text/id');
+                const tokenType = e.dataTransfer.getData('text/type');
+                const tokenSpec = e.dataTransfer.getData('text/spec');
+                const slotAccept = slot.getAttribute('data-accept');
+                const slotId = slot.id;
+
+                if (tokenType !== slotAccept) {
+                    writeLog(`❌ Interconnect Reject: Cannot seat a [${tokenType.toUpperCase()}] component inside a [${slotAccept.toUpperCase()}] motherboard trace array lane.`);
+                    return;
+                }
+
+                if (!allocatedHardware[slotId]) {
+                    const tokenNode = document.getElementById(tokenId);
+                    allocatedHardware[slotId] = {
+                        id: tokenId,
+                        name: tokenNode.innerText,
+                        spec: tokenSpec,
+                        type: tokenType,
+                        channel: slot.getAttribute('data-channel') || null
+                    };
+
+                    slot.classList.add('occupied');
+                    slot.innerHTML = `<div class="allocated-item">${allocatedHardware[slotId].name}</div>`;
+                    
+                    writeLog(`Traces Attached: Successfully seated component [${allocatedHardware[slotId].name}] onto slot socket index [${slotId.toUpperCase()}].`);
+                    evaluateHardwareStates();
+                }
+            });
+        });
+
+        function evaluateHardwareStates() {
+            const board = boardSelect.value;
+            let currentCpu = allocatedHardware['slot-cpu'] || null;
+            let ramA1 = allocatedHardware['slot-ram-a1'] || null;
+            let ramb1 = allocatedHardware['slot-ram-b1'] || null;
+
+            // Pin/Socket Alignment UI Check
+            const pinCard = document.getElementById('card-pin');
+            const pinVal = document.getElementById('val-pin');
+            if (currentCpu) {
+                if (board === 'atx' && currentCpu.spec === 'LGA1700') {
+                    pinVal.innerText = "Intel LGA1700 Align";
+                    pinCard.className = "score-box pass";
+                } else if (board === 'itx' && currentCpu.spec === 'AM5') {
+                    pinVal.innerText = "AMD AM5 Align";
+                    pinCard.className = "score-box pass";
+                } else {
+                    pinVal.innerText = "PIN MISMATCH MISALIGN";
+                    pinCard.className = "score-box";
+                    pinCard.style.borderColor = "var(--accent-red)";
+                }
+            } else {
+                pinVal.innerText = "Unmapped Socket";
+                pinCard.className = "score-box";
+                pinCard.style.borderColor = "#334155";
+            }
+
+            // Volatile Pool Aggregator calculation checks
+            let totalGb = 0;
+            if (ramA1) totalGb += 16;
+            if (ramb1) totalGb += 16;
+            document.getElementById('val-capacity').innerText = `${totalGb} GB`;
+            toggleMetricBoxPass('card-capacity', totalGb >= 16);
+
+            // Channel Width Bus Interleaving Tracking evaluation logic
+            const topCard = document.getElementById('card-topology');
+            const topVal = document.getElementById('val-topology');
+            if (ramA1 && ramb1) {
+                topVal.innerText = "Dual-Channel (128-Bit)";
+                topCard.className = "score-box pass";
+            } else if (ramA1 || ramb1) {
+                topVal.innerText = "Single-Channel (64-Bit)";
+                topCard.className = "score-box";
+            } else {
+                topVal.innerText = "No Memory Detected";
+                topCard.className = "score-box";
+            }
+        }
+
+        function toggleMetricBoxPass(elementId, isPassing) {
+            const el = document.getElementById(elementId);
+            if (isPassing) el.classList.add('pass');
+            else el.classList.remove('pass');
+        }
+
+        function writeLog(message) {
+            const timestamp = new Date().toISOString().slice(11, 19);
+            storageLog.innerHTML += `<br>[${timestamp}] ${message}`;
+            storageLog.scrollTop = storageLog.scrollHeight;
+        }
+
+        btnReset.addEventListener('click', () => {
+            Object.keys(allocatedHardware).forEach(k => delete allocatedHardware[k]);
+            boardSelect.value = "none";
+            
+            hardwareSlots.forEach(slot => {
+                slot.classList.remove('occupied');
+                const title = slot.id === 'slot-cpu' ? 'Central Processing Unit (CPU) Socket' : (slot.id === 'slot-ram-a1' ? 'DIMM Slot A1 (Channel A)' : 'DIMM Slot B1 (Channel B)');
+                slot.innerHTML = `<div class="slot-title">${title}</div><div style="font-size:0.75rem; color:var(--text-muted);">Drop Component Here</div>`;
+            });
+
+            evaluateHardwareStates();
+            writeLog("System Event: Hardware rig stripped completely clean down to raw test rails layout.");
+        });
+
+        // Diagnostics Evaluation POST Execution Engine
+        btnPower.addEventListener('click', () => {
+            const board = boardSelect.value;
+            let cpu = allocatedHardware['slot-cpu'] || null;
+            let ramCount = (allocatedHardware['slot-ram-a1'] ? 1 : 0) + (allocatedHardware['slot-ram-b1'] ? 1 : 0);
+
+            mHeader.style.color = "var(--accent-red)";
+            
+            if (board === 'none') {
+                mHeader.innerText = "⚙️ POST Error: System Logic Missing Board Trace Base";
+                mBody.innerHTML = "Hardware Failure: You cannot start a system without selecting an active **Motherboard Form Factor** base to complete the circuit paths.";
+                modal.style.display = 'flex';
+                return;
+            }
+
+            if (!cpu) {
+                mHeader.innerText = "🚨 POST Code 0x00: Missing CPU Core Controller";
+                mBody.innerHTML = "Fatal Error Code: Motherboard voltage rails detected but power cycle failed immediately. The **Central Processing Unit (CPU)** is completely missing from its ZIF socket anchor socket slot.";
+                modal.style.display = 'flex';
+                return;
+            }
+
+            // Socket Incompatibility Logic Handler
+            const validIntel = (board === 'atx' && cpu.spec === 'LGA1700');
+            const validAmd = (board === 'itx' && cpu.spec === 'AM5');
+            if (!validIntel && !validAmd) {
+                mHeader.innerText = "💥 POST Code 0x88: Severe Grid Socket Pin Crash";
+                mBody.innerHTML = `Fatal Hardware Error: Physical Destruction Event triggered on power trace layer lines.<br><br>
+                                   <strong>Forensic Output Trace Analysis:</strong> You forced an incompatible processor spec component directly onto a misaligned socket architecture grid interface trace pattern. Internal motherboard micro-pins have physically bent under trace layout tension pressure, resulting in an unrecoverable short-circuit across core data lines. System destroyed.`;
+                modal.style.display = 'flex';
+                return;
+            }
+
+            if (ramCount === 0) {
+                mHeader.innerText = "🔊 POST Code Beep 3-3-2: Missing Volatile Pool";
+                mBody.innerHTML = "POST Verification Crash: The CPU has initialized successfully, but the system speaker is emitting repeating error beeps. System cannot boot because there is zero **Random Access Memory (RAM)** assigned to serve as the volatile workspace runtime index register pool.";
+                modal.style.display = 'flex';
+                return;
+            }
+
+            // SUCCESS HANDLERS: Check system optimization levels
+            if (ramCount === 2) {
+                mHeader.innerText = "🟢 POST Status Clear: System Boot Code 200 OK";
+                mHeader.style.color = "var(--accent-green)";
+                mBody.innerHTML = `🏆 <strong>POST Verification Successful: Hardware Handshakes Complete!</strong><br><br>
+                                   The motherboard has verified all current voltage rails, the CPU has cleared basic instruction routines, and a **32 GB Volatile RAM pool** has passed parity indexing cleanly.<br><br>
+                                   • <strong>Bus Topology Optimization:</strong> MAXIMUM. Running your modules in a <strong>Dual-Channel configurations map</strong> expanded the width of your system memory address data pipelines from a constrained 64-bit string track to a wide, concurrent 128-bit array layout, eliminating standard runtime memory bottlenecks.`;
+            } else {
+                mHeader.innerText = "🟡 POST Status Clear: System Boot Unoptimized";
+                mHeader.style.color = "var(--accent-orange)";
+                mBody.innerHTML = `⚠️ <strong>System booted successfully but running in an unoptimized state.</strong><br><br>
+                                   The machine is functional, but your memory bus topology is running in a bottlenecked <strong>Single-Channel Configuration mode</strong>. This halves your available transfer performance data trace bandwidth because you only populated one channel socket. Install a matching module into the adjacent secondary slot track to clear memory bus constraints.`;
+            }
+
+            modal.style.display = 'flex';
+        });
+
+        function closeDrillModal() {
+            modal.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
