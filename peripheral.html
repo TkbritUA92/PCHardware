@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I/O Subsystems & Peripheral Matching Sandbox</title>
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --panel-bg: #131c2e;
+            --node-bg: #1e293b;
+            --accent-blue: #0ea5e9;
+            --accent-purple: #a855f7;
+            --accent-green: #22c55e;
+            --accent-orange: #f97316;
+            --accent-red: #ef4444;
+            --text-light: #f8fafc;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .lab-wrapper {
+            width: 100%;
+            max-width: 1450px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            background-color: var(--panel-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #1e293b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-info h1 {
+            margin: 0 0 8px 0;
+            font-size: 1.8rem;
+            color: var(--accent-blue);
+        }
+
+        .header-info p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .task-bar {
+            display: flex;
+            gap: 10px;
+            background-color: var(--panel-bg);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #1e293b;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .task-btn {
+            background-color: #1e293b;
+            color: var(--accent-blue);
+            border: 1px solid #334155;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .task-btn:hover {
+            background-color: #334155;
+            color: white;
+            border-color: var(--accent-blue);
+        }
+
+        .evidence-btn {
+            background-color: rgba(249, 115, 22, 0.1);
+            color: var(--accent-orange);
+            border: 1px solid rgba(249, 115, 22, 0.4);
+        }
+
+        .evidence-btn:hover {
+            background-color: var(--accent-orange);
+            color: var(--bg-dark);
+            border-color: var(--accent-orange);
+        }
+
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 430px 1fr 350px;
+            gap: 20px;
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .panel-title {
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #94a3b8;
+            border-bottom: 2px solid #1e293b;
+            padding-bottom: 8px;
+            margin-bottom: 5px;
+        }
+
+        .setting-control {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: rgba(15, 23, 42, 0.3);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #1e293b;
+        }
+
+        .setting-control label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .control-purpose {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            line-height: 1.3;
+        }
+
+        select, input[type="range"] {
+            width: 100%;
+            background-color: var(--bg-dark);
+            border: 1px solid #334155;
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            outline: none;
+            box-sizing: border-box;
+            font-size: 0.85rem;
+        }
+
+        .spec-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .spec-box {
+            background: var(--node-bg);
+            border: 1px solid #334155;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .spec-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .spec-val {
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: white;
+            margin-top: 4px;
+        }
+
+        .terminal-log {
+            background-color: var(--bg-dark);
+            border: 1px solid #1e293b;
+            border-radius: 6px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            height: 200px;
+            overflow-y: auto;
+            color: #34d399;
+        }
+
+        .action-btn {
+            background-color: var(--accent-blue);
+            color: var(--bg-dark);
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        .action-btn:hover { opacity: 0.9; }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(7, 10, 19, 0.9);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-card {
+            background-color: var(--panel-bg);
+            border: 2px solid #334155;
+            border-radius: 12px;
+            max-width: 650px;
+            width: 90%;
+            padding: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+
+        .modal-header {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .modal-body {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background-color: var(--accent-blue);
+            color: var(--bg-dark);
+            border: none; padding: 10px 20px;
+            border-radius: 6px; font-weight: bold; cursor: pointer;
+        }
+
+        .ticket-box {
+            background: rgba(14, 165, 233, 0.05);
+            border-left: 4px solid var(--accent-blue);
+            padding: 12px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="lab-wrapper">
+        
+        <header>
+            <div class="header-info">
+                <h1>I/O Subsystems & Peripheral Integration Sandbox</h1>
+                <p>Enterprise Workstation Provisioning: Optimizing HIDs, Spatial Resolvers, and Display Rails</p>
+            </div>
+            <div>
+                <span class="badge" style="background-color: #1e1b4b; color: #a78bfa; padding: 6px 12px; font-size: 0.85rem;">HID Module 1</span>
+            </div>
+        </header>
+
+        <div class="task-bar">
+            <span style="font-weight:bold; font-size:0.9rem; color:var(--text-muted); margin-right:10px;">📋 WORKSPACE CONFIGURATIONS:</span>
+            <button class="task-btn" onclick="showTaskGuide(1)">Task 1: Data Entry Clerk</button>
+            <button class="task-btn" onclick="showTaskGuide(2)">Task 2: Esports Athlete</button>
+            <button class="task-btn" onclick="showTaskGuide(3)">Task 3: Digital Illustrator</button>
+            <button class="task-btn" onclick="showTaskGuide(4)">Task 4: CAD Architect</button>
+            <button class="task-btn evidence-btn" onclick="showTaskGuide(5)">📸 Evidence Required</button>
+        </div>
+
+        <div class="workspace-grid">
+            
+            <div class="panel">
+                <div class="panel-title">1. Peripheral Array Input</div>
+
+                <div class="setting-control">
+                    <label for="scenario-select">Active Workspace Profile</label>
+                    <select id="scenario-select" onchange="applyScenarioPreset()">
+                        <option value="clerk">User Profile: Everyday Data Entry Clerk</option>
+                        <option value="athlete">User Profile: Competitive Esports Athlete</option>
+                        <option value="artist">User Profile: 3D Digital Matte Artist</option>
+                        <option value="cad">User Profile: CAD Engineering Architect</option>
+                    </select>
+                </div>
+
+                <div class="setting-control">
+                    <label for="keyboard-select">Keyboard Sub-System Type</label>
+                    <select id="keyboard-select" onchange="evaluateHardwareGrid()">
+                        <option value="none">-- Select Keyboard --</option>
+                        <option value="membrane">Standard Membrane Keyboard (Rubber Dome | High Actuation Delay)</option>
+                        <option value="mechanical_linear">Mechanical Linear Keyboard (Red Switches | 1ms Polling Rate)</option>
+                        <option value="mechanical_num">Full-Size Mechanical Keyboard (Tactile Switches + Integrated Numpad)</option>
+                    </select>
+                </div>
+
+                <div class="setting-control">
+                    <label for="mouse-dpi">Mouse Sensor Sensitivity (DPI)</label>
+                    <input type="range" id="mouse-dpi" min="400" max="16000" step="400" value="800" oninput="evaluateHardwareGrid()">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted); margin-top:2px;">
+                        <span>400 DPI</span>
+                        <span id="mouse-dpi-val" style="color:var(--accent-blue); font-weight:bold;">800 DPI</span>
+                        <span>16,000 DPI</span>
+                    </div>
+                </div>
+
+                <div class="setting-control">
+                    <label for="tablet-select">Spatial Digitizer (Drawing Tablet)</label>
+                    <select id="tablet-select" onchange="evaluateHardwareGrid()">
+                        <option value="none">No Digitizer Connected (Standard Mouse Control Only)</option>
+                        <option value="capacitive_stylus">Basic Capacitive Stylus Pad (No Pressure Sensitivity | USB 2.0)</option>
+                        <option value="em_tablet">Electromagnetic Resonance (EMR) Digitizer Display (8192 Pressure Levels | Tilt Tracking)</option>
+                    </select>
+                </div>
+
+                <div class="setting-control">
+                    <label for="monitor-select">Display Array Rail</label>
+                    <select id="monitor-select" onchange="evaluateHardwareGrid()">
+                        <option value="none">-- Select Display Array --</option>
+                        <option value="single_60">Single 24" 1080p Monitor (60Hz Refresh | Standard Color Depth)</option>
+                        <option value="dual_4k">Dual 27" 4K Enterprise Displays (60Hz | IPS Color Accuracy)</option>
+                        <option value="triple_cad">Ultra-Wide 49" Curved Display Array (120Hz | High Vector Panoramic Scope)</option>
+                        <option value="oled_360">27" QHD Gaming OLED Monitor (360Hz Refresh | 0.03ms Response)</option>
+                    </select>
+                </div>
+
+                <div class="setting-control">
+                    <label for="printer-select">External Hardcopy Output (Printer)</label>
+                    <select id="printer-select" onchange="evaluateHardwareGrid()">
+                        <option value="none">No Printing Asset Assigned</option>
+                        <option value="office_laser">High-Volume Monochrome Laser Printer (Duplex | Network Attached)</option>
+                        <option value="plotter">Wide-Format Engineering Vector Plotter (Roll-Fed | Architectural Line Accurate)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">2. Peripheral Pipeline Telemetry</div>
+                
+                <div class="ticket-box" id="ticket-display">
+                    Select a workspace target profile above to parse operational constraints...
+                </div>
+
+                <div class="silicon-inspector">
+                    <div class="spec-grid" style="margin-bottom: 15px;">
+                        <div class="spec-box"><div class="spec-label">Input Polling Delay</div><div class="spec-val" id="val-polling">N/A</div></div>
+                        <div class="spec-box"><div class="spec-label">Spatial Precision Index</div><div class="spec-val" id="val-precision" style="color:var(--accent-purple);">Standard</div></div>
+                    </div>
+                    <div class="spec-grid" style="margin-bottom: 15px;">
+                        <div class="spec-box"><div class="spec-label">Display Frame Window</div><div class="spec-val" id="val-refresh" style="color:var(--accent-orange);">0 Hz</div></div>
+                        <div class="spec-box"><div class="spec-label">I/O Infrastructure Load</div><div class="spec-val" id="val-load">0 Mbps</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">3. Bus Master & Verification</div>
+                
+                <div class="setting-control">
+                    <label>HID Interrupt Signal Log</label>
+                    <div class="terminal-log" id="log-stream">> Peripheral system tracks grounded. Select operational parameters to map external device buses...</div>
+                </div>
+
+                <button class="action-btn" id="btn-verify">Audit Workspace Configuration</button>
+                <button class="action-btn" id="btn-reset" style="background-color:#334155; color:white;">Strip Hardware Rig</button>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="drill-modal">
+        <div class="modal-card">
+            <div class="modal-header" id="m-header">Processing External Device Maps...</div>
+            <div class="modal-body" id="m-body">Analyzing device trace signatures...</div>
+            <div style="text-align: right;">
+                <button class="modal-close" onclick="closeDrillModal()">Acknowledge Status</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const logStream = document.getElementById('log-stream');
+        const scenarioSelect = document.getElementById('scenario-select');
+        const keyboardSelect = document.getElementById('keyboard-select');
+        const mouseDpi = document.getElementById('mouse-dpi');
+        const mouseDpiVal = document.getElementById('mouse-dpi-val');
+        const tabletSelect = document.getElementById('tablet-select');
+        const monitorSelect = document.getElementById('monitor-select');
+        const printerSelect = document.getElementById('printer-select');
+        const btnVerify = document.getElementById('btn-verify');
+        const btnReset = document.getElementById('btn-reset');
+        
+        const modal = document.getElementById('drill-modal');
+        const mHeader = document.getElementById('m-header');
+        const mBody = document.getElementById('m-body');
+        const ticketDisplay = document.getElementById('ticket-display');
+
+        const scenariosDatabase = {
+            clerk: {
+                title: "🎫 USER PROFILE: Everyday Data Entry Clerk",
+                desc: "<strong>Ergonomic & Operational Requirements:</strong> This profile continuously keys intensive alphanumeric index rows into database sheets. Requires an integrated tenkey numeric pad for optimal speed metrics, standard display rails, and no high-frequency requirements.",
+            },
+            athlete: {
+                title: "🎫 USER PROFILE: Competitive Esports Athlete",
+                desc: "<strong>Latency & HID Precision Requirements:</strong> Millisecond delays dictate winning parameters. Demands an elite, sub-millisecond mechanical input pipeline, a high-velocity display frame window (360Hz+), and fine-tuned spatial pointer control to avoid hardware translation bottlenecks.",
+            },
+            artist: {
+                title: "🎫 USER PROFILE: 3D Digital Matte Artist",
+                desc: "<strong>Spatial Digitizer & Color Fidelity Requirements:</strong> Freehand vector path drawing requires an advanced pressure-sensitive stylus surface layer with tilt tracking. Colors must be mathematically accurate across a highly accurate color space panel.",
+            },
+            cad: {
+                title: "🎫 USER PROFILE: CAD Engineering Architect",
+                desc: "<strong>Panoramic Scope & Vector Output Requirements:</strong> Generating architectural blueprints requires an immersive, wide field-of-view layout to scan massive schematic lines, fine cursor precision adjustments, and a heavy-duty wide-format vector hardcopy asset plotter output.",
+            }
+        };
+
+        const taskBriefings = {
+            1: {
+                title: "Task 1 Instructions: Optimize the Data Entry Workspace",
+                body: `<strong>Objective:</strong> Right-size peripherals to facilitate high-volume alphanumeric entry without deploying expensive, unnecessary high-frequency hardware.<br><br>
+                       <strong>Instructions:</strong><br>
+                       1. Set Active Workspace Profile to <strong>Everyday Data Entry Clerk</strong>.<br>
+                       2. Select the <strong>Full-Size Mechanical Keyboard</strong>. Note that its integrated physical numpad speeds up text entry metrics compared to compact tenkeyless variants.<br>
+                       3. Complete the setup with standard corporate items (Single 60Hz display, modest mouse DPI) and test configuration compliance.`
+            },
+            2: {
+                title: "Task 2 Instructions: Eliminate Latency Bottlenecks for the Esports Athlete",
+                body: `<strong>Objective:</strong> Minimize the signal polling loop delay and maximize the display window frame rate.<br><br>
+                       <strong>Instructions:</strong><br>
+                       1. Change Active Workspace to <strong>Competitive Esports Athlete</strong>.<br>
+                       2. Select a <strong>Mechanical Linear Keyboard</strong> for near-instant 1ms signal polling.<br>
+                       3. Slide the Mouse Sensor sensitivity down into the pro-athlete range (<strong>400 DPI - 1200 DPI</strong>) for steady tracking precision, and match it with a **360Hz OLED Display Array** to eliminate frame tears.`
+            },
+            3: {
+                title: "Task 3 Instructions: Deploy Spatial Digitizers for the Digital Illustrator",
+                body: `<strong>Objective:</strong> Provision advanced hardware layers for complex graphics creation.<br><br>
+                       <strong>Instructions:</strong><br>
+                       1. Set the active workspace parameter track to <strong>3D Digital Matte Artist</strong>.<br>
+                       2. Drop standard mouse control limitations—install an <strong>Electromagnetic Resonance (EMR) Digitizer Display</strong> to unlock pressure levels and tilt tracking vector mechanics.<br>
+                       3. Pair it with **Dual 4K Enterprise Displays** to ensure high image fidelity and precise color management layouts.`
+            },
+            4: {
+                title: "Task 4 Instructions: Engineer the Architectural CAD Layout Station",
+                body: `<strong>Objective:</strong> Support panoramic blueprint vectors and high-volume wide-format plotting outputs.<br><br>
+                       <strong>Instructions:</strong><br>
+                       1. Move the configuration profile to <strong>CAD Engineering Architect</strong>.<br>
+                       2. Maximize visual landscape tracing by selecting the **Ultra-Wide 49" Curved Display Array**.<br>
+                       3. Slide the Mouse DPI up to high resolution boundaries (<strong>3200+ DPI</strong>) to instantly glide vectors smoothly across panoramic view spaces, and attach the specialized **Wide-Format Engineering Vector Plotter**.`
+            },
+            5: {
+                title: "📸 COMPLIANCE SIGN-OFF: I/O Evidence Deliverables",
+                body: `<strong>Submission Deliverables:</strong><br>
+                       Apprentices must capture screen confirmations of verified workspace optimizations to fulfill grading audit targets.<br><br>
+                       <strong>Instructions:</strong><br>
+                       Successfully complete <strong>Task 3 (Digital Artist Optimization)</strong> or <strong>Task 4 (CAD Architect Engine)</strong>. Take a clear snippet showing:<br>
+                       • Your specialized input/output selections mapped on the left control dock panels.<br>
+                       • The green <strong>'Workspace Audit Successful'</strong> evaluation card showing optimal telemetry specs.<br><br>
+                       Label the capture file as <em>'IO_Subsystem_Success_[Name].png'</em> and send it to your instructor.`
+            }
+        };
+
+        function showTaskGuide(id) {
+            mHeader.innerText = taskBriefings[id].title;
+            mHeader.style.color = (id === 5) ? "var(--accent-orange)" : "var(--accent-blue)";
+            mBody.innerHTML = taskBriefings[id].body;
+            modal.style.display = 'flex';
+        }
+
+        function applyScenarioPreset() {
+            const key = scenarioSelect.value;
+            ticketDisplay.innerHTML = `${scenariosDatabase[key].desc}`;
+            writeLog(`System: Staging configuration profiles tracking targets for [${scenariosDatabase[key].title}].`);
+            evaluateHardwareGrid();
+        }
+
+        function evaluateHardwareGrid() {
+            const dpi = parseInt(mouseDpi.value);
+            const kb = keyboardSelect.value;
+            const tablet = tabletSelect.value;
+            const monitor = monitorSelect.value;
+            const printer = printerSelect.value;
+
+            mouseDpiVal.innerText = `${dpi.toLocaleString()} DPI`;
+
+            // Calculate live interactive hardware telemetry strings
+            let pollingVal = "N/A";
+            let precisionVal = "Standard Mouse Pointer";
+            let refreshVal = "0 Hz";
+            let loadVal = "12 Mbps";
+
+            if (kb === 'membrane') pollingVal = "16 ms (Slow Membrane)";
+            else if (kb === 'mechanical_linear' || kb === 'mechanical_num') pollingVal = "1 ms (High-Speed Polling)";
+
+            if (tablet === 'capacitive_stylus') precisionVal = "Basic Absolute Pos (0 Pressure)";
+            else if (tablet === 'em_tablet') precisionVal = "EMR Stylus (8192 Pressure Levels + Tilt)";
+            else if (dpi > 4000) precisionVal = "High-Res Hyper-Cursor Speed";
+            else if (dpi <= 1200 && dpi >= 400) precisionVal = "Pixel-Precise Low DPI Lock";
+
+            if (monitor === 'single_60') refreshVal = "60 Hz";
+            else if (monitor === 'dual_4k') refreshVal = "60 Hz Dual Redundant";
+            else if (monitor === 'triple_cad') refreshVal = "120 Hz Curved Sweep";
+            else if (monitor === 'oled_360') refreshVal = "360 Hz Ultra-Low Latency";
+
+            let aggregateMbps = Math.round((dpi / 1000) + (printer !== 'none' ? 45 : 5));
+            if (monitor === 'dual_4k') aggregateMbps += 850;
+            if (tablet === 'em_tablet') aggregateMbps += 85;
+
+            document.getElementById('val-polling').innerText = pollingVal;
+            document.getElementById('val-precision').innerText = precisionVal;
+            document.getElementById('val-refresh').innerText = refreshVal;
+            document.getElementById('val-load').innerText = `${aggregateMbps} Mbps`;
+        }
+
+        function writeLog(message) {
+            const timestamp = new Date().toISOString().slice(11, 19);
+            logStream.innerHTML += `<br>[${timestamp}] ${message}`;
+            logStream.scrollTop = logStream.scrollHeight;
+        }
+
+        btnReset.addEventListener('click', () => {
+            scenarioSelect.value = "clerk";
+            keyboardSelect.value = "none";
+            mouseDpi.value = "800";
+            tabletSelect.value = "none";
+            monitorSelect.value = "none";
+            printerSelect.value = "none";
+            applyScenarioPreset();
+            writeLog("System Alert: Purged active device mapping matrices. Restored staging rails to baseline.");
+        });
+
+        // I/O Interconnect Validation Architecture Logic Engine
+        btnVerify.addEventListener('click', () => {
+            const scenario = scenarioSelect.value;
+            const kb = keyboardSelect.value;
+            const dpi = parseInt(mouseDpi.value);
+            const tablet = tabletSelect.value;
+            const monitor = monitorSelect.value;
+            const printer = printerSelect.value;
+
+            mHeader.style.color = "var(--accent-red)";
+            writeLog(`⚡ Audit Signal: Checking Human Interface Device (HID) traces and output bus configurations...`);
+
+            if (kb === 'none' || monitor === 'none') {
+                mHeader.innerText = "⚙️ Audit Failure: Incomplete I/O Pipeline";
+                mBody.innerHTML = "Hardware Configuration Fault: A system cannot interface with human operators if it is missing an explicitly defined **Keyboard Type** or **Display Array** layout.";
+                modal.style.display = 'flex';
+                return;
+            }
+
+            if (scenario === 'clerk') {
+                // TASK 1 COMPLIANCE CHECKS (DATA ENTRY WORKSPACE)
+                if (kb === 'mechanical_num' && monitor === 'single_60') {
+                    mHeader.innerText = "🟢 Workspace Audit Successful: Data Station Optimized";
+                    mHeader.style.color = "var(--accent-green)";
+                    mBody.innerHTML = `🏆 <strong>Task Complete: Right-Sized Deployment Validated!</strong><br><br>
+                                       Excellent space management. Selecting the **Full-Size Mechanical Keyboard** integrates a physical tenkey numeric pad, which accelerates database cell entry metrics by over 40%. Bypassing expensive gaming displays or wide plotters keeps your infrastructure deployment well within standard corporate budget parameters.`;
+                } else if (kb !== 'mechanical_num') {
+                    mHeader.innerText = "❌ Workspace Defect: Throttled Data Entry Metrics";
+                    mBody.innerHTML = "Configuration Rejection: You deployed a compact keyboard format that lacks an integrated numeric grid pad. This forces the clerk to rely on the top horizontal number row, significantly slowing down transaction input speeds and reducing efficiency.";
+                } else {
+                    mHeader.innerText = "🟡 Budget Alert: Over-Provisioned Workspace Rails";
+                    mBody.innerHTML = "Warning: The keyboard choice is correct, but you attached premium high-frequency OLED gaming displays or wide-format engineering plotters. These high-end devices provide zero efficiency returns for basic database text entry, resulting in a waste of IT hardware budgets.";
+                }
+            } 
+            else if (scenario === 'athlete') {
+                // TASK 2 COMPLIANCE CHECKS (ESPORTS HIGH-FREQUENCY ATHLETE)
+                const validDpi = (dpi >= 400 && dpi <= 1200);
+                if (kb === 'mechanical_linear' && monitor === 'oled_360' && validDpi) {
+                    mHeader.innerText = "🟢 Workspace Audit Successful: Latency Barriers Obliterated";
+                    mHeader.style.color = "var(--accent-green)";
+                    mBody.innerHTML = `🏆 <strong>Task Complete: Elite Signal Processing Active!</strong><br><br>
+                                       Flawless layout coordination. Populating the **Mechanical Linear Keyboard** drops input polling delays to an ultra-low 1ms. Setting the mouse cursor tracking to ${dpi} DPI ensures pixel-perfect motor precision, while the **360Hz OLED Display Array** matches these fast inputs with an un-throttled, tear-free frame refresh window.`;
+                } else if (kb === 'membrane') {
+                    mHeader.innerText = "🚨 Bottleneck Alert: Severe Rubber Dome Membrane Delay";
+                    mBody.innerHTML = "Input Failure: The system suffers from high latency. Standard rubber-dome membrane keyboards carry a sluggish 16ms input propagation delay. In competitive arenas, this delay bottlenecks human inputs, causing slow mechanical response loops regardless of your display's refresh rate.";
+                } else if (monitor !== 'oled_360') {
+                    mHeader.innerText = "❌ Display Bottleneck: Frame Trapping Detected";
+                    mBody.innerHTML = "Output Failure: Your input devices are fast, but you hooked them up to a standard 60Hz or 120Hz display array. The monitor cannot refresh fast enough to match the high-speed input signals, creating display lag and severe screen-tearing errors.";
+                } else {
+                    mHeader.innerText = "🎯 Tracking Defect: Hyper-Cursor Overshoot Error";
+                    mBody.innerHTML = `Signal Chaos: You configured the mouse sensor to an extreme ${dpi.toLocaleString()} DPI. At this sensitivity, the slightest physical hand movement causes the cursor to overshoot target zones, destroying tracking consistency. Esports pros lower their DPI settings to stay precise.`;
+                }
+            } 
+            else if (scenario === 'artist') {
+                // TASK 3 COMPLIANCE CHECKS (DIGITAL MATTE ILLUSTRATOR)
+                if (tablet === 'em_tablet' && monitor === 'dual_4k') {
+                    mHeader.innerText = "🟢 Workspace Audit Successful: Spatial Digitizer Synced";
+                    mHeader.style.color = "var(--accent-green)";
+                    mBody.innerHTML = `🏆 <strong>Task Complete: Creative Station Provisioned!</strong><br><br>
+                                       Perfect component deployment. Replacing mouse control with an **Electromagnetic Resonance (EMR) Digitizer** unlocks 8192 levels of pressure sensitivity and tilt tracking, giving the artist precise vector control. Backing this array with **Dual 4K Enterprise Displays** ensures color accuracy and high canvas sharpness across the entire workspace layout.`;
+                } else if (tablet !== 'em_tablet') {
+                    mHeader.innerText = "❌ Production Halt: Inadequate Spatial Resolution Traces";
+                    mBody.innerHTML = "Input Failure: A standard mouse or a basic capacitive stylus lacks the pressure resolution layers needed for professional digital painting. Without EMR pressure depth tracking, brush strokes cannot adjust dynamically, stalling modern texture creation pipelines.";
+                } else {
+                    mHeader.innerText = "🟡 Color Space Warning: Limited Display Landscape Canvas";
+                    mBody.innerHTML = "Warning: Your EMR drawing pad is correctly mapped, but you paired it with a single 1080p display or an ultra-wide gaming panel. These screens lack the vertical height, pixel density, and high-fidelity color accuracy required for professional asset grading.";
+                }
+            } 
+            else if (scenario === 'cad') {
+                // TASK 4 COMPLIANCE CHECKS (CAD BLUEPRINT ARCHITECT)
+                if (monitor === 'triple_cad' && printer === 'plotter' && dpi >= 3200) {
+                    mHeader.innerText = "🟢 Workspace Audit Successful: Architectural Engine Active";
+                    mHeader.style.color = "var(--accent-green)";
+                    mBody.innerHTML = `🏆 <strong>Task Complete: Blueprints Platform Validated!</strong><br><br>
+                                       Superb engineering layout. The **Panoramic 49" Ultra-Wide Array** expands the visible field-of-view, allowing the architect to scan massive blueprint layouts without constant zooming. Boosting the cursor to ${dpi} DPI matches this wide canvas smoothly, while the **Wide-Format Vector Plotter** handles large-scale blueprint printouts flawlessly.`;
+                } else if (monitor !== 'triple_cad') {
+                    mHeader.innerText = "❌ Visibility Bottleneck: Constrained Field of View";
+                    mBody.innerHTML = "Display Failure: Standard 16:9 displays do not offer the wide horizontal field of view needed to review massive CAD blueprints. Architects waste valuable time zooming and scrolling across small viewports.";
+                } else if (printer !== 'plotter') {
+                    mHeader.innerText = "🚨 hardcopy Reject: Inadequate Print Dimension Bounds";
+                    mBody.innerHTML = "Output Failure: An office laser printer is restricted to standard sheet sizes (A4/A3). It cannot handle large, continuous roll-fed schematic vectors, making it impossible to produce full-scale architectural prints.";
+                } else {
+                    mHeader.innerText = "🧵 Input Drag Bottleneck: Slow Cursor Velocity Index";
+                    mBody.innerHTML = "Input Failure: Your display array and plotter are perfectly matched, but your mouse is set too low. Dragging fine schematic vectors across a massive 49\" screen at low DPI requires excessive physical hand movements, causing hand strain and reducing navigation efficiency.";
+                }
+            }
+
+            modal.style.display = 'flex';
+        });
+
+        function closeDrillModal() {
+            modal.style.display = 'none';
+        }
+
+        window.onload = applyScenarioPreset;
+    </script>
+</body>
+</html>
