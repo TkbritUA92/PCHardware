@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silicon Duel: Intel Core vs. AMD Ryzen Architecture Lab</title>
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --panel-bg: #131c2e;
+            --node-bg: #1e293b;
+            --accent-blue: #0ea5e9;
+            --accent-purple: #a855f7;
+            --accent-green: #22c55e;
+            --accent-orange: #f97316;
+            --accent-red: #ef4444;
+            --text-light: #f8fafc;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .lab-wrapper {
+            width: 100%;
+            max-width: 1400px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            background-color: var(--panel-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #1e293b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-info h1 {
+            margin: 0 0 8px 0;
+            font-size: 1.8rem;
+            color: var(--accent-blue);
+        }
+
+        .header-info p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .task-bar {
+            display: flex;
+            gap: 10px;
+            background-color: var(--panel-bg);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #1e293b;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .task-btn {
+            background-color: #1e293b;
+            color: var(--accent-blue);
+            border: 1px solid #334155;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .task-btn:hover {
+            background-color: #334155;
+            color: white;
+            border-color: var(--accent-blue);
+        }
+
+        .evidence-btn {
+            background-color: rgba(249, 115, 22, 0.1);
+            color: var(--accent-orange);
+            border: 1px solid rgba(249, 115, 22, 0.4);
+        }
+
+        .evidence-btn:hover {
+            background-color: var(--accent-orange);
+            color: var(--bg-dark);
+            border-color: var(--accent-orange);
+        }
+
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .panel-title {
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #94a3b8;
+            border-bottom: 2px solid #1e293b;
+            padding-bottom: 8px;
+            margin-bottom: 5px;
+        }
+
+        .setting-control {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: rgba(15, 23, 42, 0.3);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #1e293b;
+        }
+
+        .setting-control label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        select {
+            width: 100%;
+            background-color: var(--bg-dark);
+            border: 1px solid #334155;
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            outline: none;
+            box-sizing: border-box;
+            font-size: 0.85rem;
+        }
+
+        .silicon-inspector {
+            background-color: rgba(15, 23, 42, 0.4);
+            border: 1px solid #1e293b;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .spec-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .spec-box {
+            background: var(--node-bg);
+            border: 1px solid #334155;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .spec-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .spec-val {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+            margin-top: 4px;
+        }
+
+        .die-visualization {
+            background: #090d16;
+            border: 2px solid #1e293b;
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 120px;
+        }
+
+        .core-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .core-block {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: white;
+            text-transform: uppercase;
+        }
+
+        .p-core { background-color: #0284c7; border: 1px solid #0369a1; }
+        .e-core { background-color: #10b981; border: 1px solid #047857; }
+        .std-core { background-color: #6d28d9; border: 1px solid #5b21b6; }
+        .vcache { background-color: #a855f7; border: 1px solid #7e22ce; animation: pulse 2s infinite; }
+
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+
+        .terminal-log {
+            background-color: var(--bg-dark);
+            border: 1px solid #1e293b;
+            border-radius: 6px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            height: 140px;
+            overflow-y: auto;
+            color: #34d399;
+        }
+
+        .action-btn {
+            background-color: var(--accent-blue);
+            color: var(--bg-dark);
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        .action-btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+    <div class="lab-wrapper">
+        
+        <header>
+            <div class="header-info">
+                <h1>Micro-Architecture Silicon Inspector</h1>
+                <p>Comparative Core Topology Lab: Intel Hybrid Layouts vs. AMD Homogeneous Zen Engine</p>
+            </div>
+            <div>
+                <span class="badge" style="background-color: #1e1b4b; color: #a78bfa; padding: 6px 12px; font-size: 0.85rem;">Silicon Module 3</span>
+            </div>
+        </header>
+
+        <div class="task-bar">
+            <span style="font-weight:bold; font-size:0.9rem; color:var(--text-muted); margin-right:10px;">📋 LAB DRILLS:</span>
+            <button class="task-btn" onclick="showTaskGuide(1)">Task 1: Mainstream Tier (i5 vs R5)</button>
+            <button class="task-btn" onclick="showTaskGuide(2)">Task 2: Professional Tier (i7 vs R7)</button>
+            <button class="task-btn" onclick="showTaskGuide(3)">Task 3: Enthusiast Flagship (i9 vs R9)</button>
+            <button class="task-btn evidence-btn" onclick="showTaskGuide(4)">📸 Evidence Required</button>
+        </div>
+
+        <div class="workspace-grid">
+            
+            <div class="panel">
+                <div class="panel-title">1. Silicon Selector</div>
+
+                <div class="setting-control">
+                    <label for="brand-select">Select Chip Vendor</label>
+                    <select id="brand-select" onchange="syncProcessorTiers()">
+                        <option value="intel">Intel Corporation (Core Architecture)</option>
+                        <option value="amd">AMD (Zen Architecture)</option>
+                    </select>
+                </div>
+
+                <div class="setting-control">
+                    <label for="tier-select">Select Processor Market Tier</label>
+                    <select id="tier-select" onchange="inspectSilicon()">
+                        <option value="i5">Mid-Range Tier (Core i5 Equivalent)</option>
+                        <option value="i7">High-End Mainstream (Core i7 Equivalent)</option>
+                        <option value="i9">Flagship Enthusiast (Core i9 Equivalent)</option>
+                    </select>
+                </div>
+                
+                <div class="setting-control">
+                    <label>Internal Thread Dispatcher Logs</label>
+                    <div class="terminal-log" id="log-stream">> Trace lines active. Toggle components to parse logic configurations...</div>
+                </div>
+
+                <button class="action-btn" id="btn-benchmark">Execute Synthetic Load Run</button>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">2. Silicon Die Topography & Cache Layout Map</div>
+                
+                <div class="silicon-inspector">
+                    <div class="spec-grid">
+                        <div class="spec-box"><div class="spec-label">Total Core Count</div><div class="spec-val" id="val-cores">0</div></div>
+                        <div class="spec-box"><div class="spec-label">Total Execution Threads</div><div class="spec-val" id="val-threads">0</div></div>
+                        <div class="spec-box"><div class="spec-label">L3 Cache Pool</div><div class="spec-val" id="val-cache">0 MB</div></div>
+                    </div>
+
+                    <div class="die-visualization">
+                        <div class="spec-label" style="border-bottom: 1px solid #1e293b; padding-bottom:4px;" id="die-layout-title">Silicon Wafer Map Layout</div>
+                        <div class="core-pool" id="die-core-pool">
+                            </div>
+                    </div>
+
+                    <div class="setting-control" style="background: none; border: none; padding: 0;">
+                        <label>Micro-Architectural Strategy Profile</label>
+                        <p style="margin:0; font-size:0.85rem; color:#cbd5e1; line-height:1.4;" id="architecture-desc">
+                            Select a processor target to inspect code thread execution behavior.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="drill-modal">
+        <div class="modal-card">
+            <div class="modal-header" id="m-header">Processing Instruction Cycles...</div>
+            <div class="modal-body" id="m-body">Loading...</div>
+            <div style="text-align: right;">
+                <button class="modal-close" onclick="closeDrillModal()">Acknowledge Architecture</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const logStream = document.getElementById('log-stream');
+        const brandSelect = document.getElementById('brand-select');
+        const tierSelect = document.getElementById('tier-select');
+        const btnBenchmark = document.getElementById('btn-benchmark');
+        
+        const modal = document.getElementById('drill-modal');
+        const mHeader = document.getElementById('m-header');
+        const mBody = document.getElementById('m-body');
+
+        // Quantitative architectural dictionary data parameters mapping the exact specifications
+        const architectureDatabase = {
+            intel: {
+                i5: { name: "Intel Core i5-14600K", cores: 14, threads: 20, cache: 24, p: 6, e: 8, extra: false, desc: "<strong>Hybrid Core Topology:</strong> Merges 6 Performance-cores (P-cores) built for resource-intensive front-of-house tasks alongside 8 Efficiency-cores (E-cores) scaled to crunch system background variables. P-cores support hyper-threading; E-cores do not." },
+                i7: { name: "Intel Core i7-14700K", cores: 20, threads: 28, cache: 33, p: 8, e: 12, extra: false, desc: "<strong>Expanded Hybrid Fabric:</strong> Increases the performance profile width to 8 P-cores and 12 E-cores. This heavy thread count density enables robust video timeline multitasking and burst background asset compiling." },
+                i9: { name: "Intel Core i9-14900K", cores: 24, threads: 32, cache: 36, p: 8, e: 16, extra: false, desc: "<strong>Maximized Thread Array:</strong> Features 8 P-cores running alongside a massive 16-core E-core background matrix layer. Delivers unparalleled throughput in hybrid productivity tasks, but draws significant current from the voltage lines under full load." }
+            },
+            amd: {
+                i5: { name: "AMD Ryzen 5 9600X", cores: 6, threads: 12, cache: 32, p: 0, e: 0, std: 6, extra: false, desc: "<strong>Homogeneous Compute Die:</strong> Utilizes 6 uniform, identical high-performance cores running on the Zen architecture. Every single core features equal access to the shared L3 cache pool and supports Symmetric Multithreading (SMT)." },
+                i7: { name: "AMD Ryzen 7 9800X3D", cores: 8, threads: 16, cache: 96, p: 0, e: 0, std: 8, extra: "vcache", desc: "<strong>324 Stacked V-Cache:</strong> Uses 8 uniform high-performance Zen cores, but injects a revolutionary vertical 3D V-Cache layer to push L3 capacity to an unprecedented 96 MB. This colossal pool eliminates cache misses, making it highly optimized for gaming and real-time simulations." },
+                i9: { name: "AMD Ryzen 9 9950X", cores: 16, threads: 32, cache: 64, p: 0, e: 0, std: 16, extra: false, desc: "<strong>Dual Core Complex Dies (CCD):</strong> Combines two separate 8-core silicon complexes together onto a single infrastructure framework package. Delivers massive multi-threaded processing power for 3D rendering and software code compiling at very high power efficiency rates." }
+            }
+        };
+
+        const taskBriefings = {
+            1: {
+                title: "Task 1 Instructions: Mainstream Silicon Analysis (i5 vs. Ryzen 5)",
+                body: `<strong>Objective:</strong> Contrast the fundamental engineering approaches between Intel and AMD in the mainstream segment.<br><br>
+                       <strong>Instructions:</strong><br>
+                       1. Set Chip Vendor to <strong>Intel</strong> and Market Tier to <strong>Mid-Range (i5)</strong>. Click Execute and look at the wafer map.<br>
+                       2. Notice how Intel utilizes a **Hybrid Layout** splitting work between blue P-Cores and green E-Cores.<br>
+                       3. Switch Vendor to <strong>AMD</strong>. Notice how the layout alters to a **Homogeneous layout** of 6 uniform, identical high-performance cores.`
+            },
+            2: {
+                title: "Task 2 Instructions: Examine the 3D V-Cache Game Changer",
+                body: `<strong>Objective:</strong> Analyze the mechanical advantages of stacking cache pools vertically on silicon wafers.<br><br>
+                       <strong>Instructions:</strong><br>
+                       1. Set Vendor to <strong>AMD</strong> and Market Tier to <strong>High-End Mainstream (i7 Equivalent)</strong>.<br>
+                       2. Review the wafer visualization and look at the pulsing purple **3D V-Cache** blocks stacked directly onto the Core Complex Die (CCD).<br>
+                       3. Note the massive <strong>96 MB L3 Cache Pool</strong> size. Compare this against Intel’s Core i7 counterpart to see how memory access rules change.`
+            },
+            3: {
+                title: "Task 3 Instructions: Evaluate Heavyweight Multi-Threading (i9 vs. Ryzen 9)",
+                body: `<strong>Objective:</strong> Audit how flagship components organize core complexes to scale heavy background rendering and calculation workloads.<br><br>
+                       <strong>Instructions:</strong><br>
+                       1. Compare the core and thread layouts of the <strong>Intel Core i9</strong> against the <strong>AMD Ryzen 9</strong>.<br>
+                       2. Look at how Intel scales to 24 cores using a massive grid of 16 background efficiency cores, while AMD scales to 16 cores by linking two independent, identical 8-core silicon dies.`
+            },
+            4: {
+                title: "📸 EVALUATION SIGN-OFF: Silicon Evidence Requirements",
+                body: `<strong>Submission Deliverables:</strong><br>
+                       Apprentices must submit visual validation records demonstrating clear analysis of the horizontal silicon topologies.<br><br>
+                       <strong>Instructions:</strong><br>
+                       Select the **AMD Ryzen 7 9800X3D** configuration workspace profile. Take a snippet (<strong>Win+Shift+S</strong> or <strong>Cmd+Shift+4</strong>) showing:<br>
+                       • The scorecard reading a full 96 MB L3 Cache Pool.<br>
+                       • The pulsing purple 3D V-Cache blocks visible inside the Silicon Wafer map container layout grid.<br><br>
+                       Save the image as <em>'Silicon_Cache_Pass_[Name].png'</em> and forward it to your training coordinator for audit sign-off.`
+            }
+        };
+
+        function showTaskGuide(id) {
+            mHeader.innerText = taskBriefings[id].title;
+            mHeader.style.color = (id === 4) ? "var(--accent-orange)" : "var(--accent-blue)";
+            mBody.innerHTML = taskBriefings[id].body;
+            modal.style.display = 'flex';
+        }
+
+        function syncProcessorTiers() {
+            const vendor = brandSelect.value;
+            const tOption = tierSelect.options[tierSelect.selectedIndex];
+            writeLog(`System: Swapped vendor pipeline tracing context over to [${brandSelect.options[brandSelect.selectedIndex].text}].`);
+            inspectSilicon();
+        }
+
+        function inspectSilicon() {
+            const vendor = brandSelect.value;
+            const tier = tierSelect.value;
+            const targetData = architectureDatabase[vendor][tier];
+
+            // Hydrate text components
+            document.getElementById('die-layout-title').innerText = `Silicon Wafer Map Topology: ${targetData.name}`;
+            document.getElementById('val-cores').innerText = targetData.cores;
+            document.getElementById('val-threads').innerText = targetData.threads;
+            document.getElementById('val-cache').innerText = `${targetData.cache} MB`;
+            document.getElementById('architecture-desc').innerHTML = targetData.desc;
+
+            // Animate Die Block Topography Graphics
+            const pool = document.getElementById('die-core-pool');
+            pool.innerHTML = '';
+
+            if (vendor === 'intel') {
+                for(let i=0; i<targetData.p; i++) {
+                    pool.innerHTML += `<div class="core-block p-core">P-Core ${i+1}</div>`;
+                }
+                for(let i=0; i<targetData.e; i++) {
+                    pool.innerHTML += `<div class="core-block e-core">E-Core ${i+1}</div>`;
+                }
+            } else {
+                for(let i=0; i<targetData.std; i++) {
+                    pool.innerHTML += `<div class="core-block std-core">Zen Core ${i+1}</div>`;
+                }
+                if (targetData.extra === 'vcache') {
+                    pool.innerHTML += `<div class="core-block vcache">3D V-Cache Layer (Vertical Stack)</div>`;
+                }
+            }
+        }
+
+        function writeLog(message) {
+            const timestamp = new Date().toISOString().slice(11, 19);
+            logStream.innerHTML += `<br>[${timestamp}] ${message}`;
+            logStream.scrollTop = logStream.scrollHeight;
+        }
+
+        btnBenchmark.addEventListener('click', () => {
+            const vendor = brandSelect.value;
+            const tier = tierSelect.value;
+            const targetData = architectureDatabase[vendor][tier];
+
+            writeLog(`⚡ Load Test initiated: Injecting intensive synthetic trace instruction array sets into ${targetData.name}...`);
+            
+            setTimeout(() => {
+                mHeader.innerText = "🟢 Instruction Dispatch Cycle Trace Report";
+                mHeader.style.color = "var(--accent-green)";
+                
+                let feedbackHtml = `<strong>Thread Allocation Execution Completed Successfully!</strong><br><br>
+                                    <strong>Forensic Dispatch Observations:</strong><br>`;
+                
+                if (vendor === 'intel') {
+                    feedbackHtml += `• The system hardware thread director successfully isolated latency-sensitive foreground workloads onto the high-frequency **P-Cores**, while seamlessly funneling parallel background operations down to the **E-Cores** without context-switching penalties.`;
+                } else {
+                    feedbackHtml += `• The compiler successfully scaled operations evenly across standard, parallel **Zen execution cores**. `;
+                    if (targetData.extra === 'vcache') {
+                        feedbackHtml += `The enormous <strong>96MB L3 cache block</strong> successfully absorbed loop metrics, lowering latency delays to zero by preventing standard system memory bus callbacks.`;
+                    } else {
+                        feedbackHtml += `The symmetrical core layout design maximizes raw multi-core throughput efficiency per watt.`;
+                    }
+                }
+
+                mBody.innerHTML = feedbackHtml;
+                modal.style.display = 'flex';
+                writeLog(`System: Completed tracking benchmarks on ${targetData.name}. Trace registers flushed.`);
+            }, 600);
+        });
+
+        function closeDrillModal() {
+            modal.style.display = 'none';
+        }
+
+        // Trigger baseline generation instantly upon load
+        window.onload = inspectSilicon;
+    </script>
+</body>
+</html>
