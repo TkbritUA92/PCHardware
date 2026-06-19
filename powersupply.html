@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Infrastructure & PSU Efficiency Sandbox</title>
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --panel-bg: #131c2e;
+            --node-bg: #1e293b;
+            --accent-blue: #0ea5e9;
+            --accent-purple: #a855f7;
+            --accent-green: #22c55e;
+            --accent-orange: #f97316;
+            --accent-red: #ef4444;
+            --text-light: #f8fafc;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .lab-wrapper {
+            width: 100%;
+            max-width: 1450px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            background-color: var(--panel-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #1e293b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-info h1 {
+            margin: 0 0 8px 0;
+            font-size: 1.8rem;
+            color: var(--accent-blue);
+        }
+
+        .header-info p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .task-bar {
+            display: flex;
+            gap: 10px;
+            background-color: var(--panel-bg);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #1e293b;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .task-btn {
+            background-color: #1e293b;
+            color: var(--accent-blue);
+            border: 1px solid #334155;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .task-btn:hover {
+            background-color: #334155;
+            color: white;
+            border-color: var(--accent-blue);
+        }
+
+        .evidence-btn {
+            background-color: rgba(249, 115, 22, 0.1);
+            color: var(--accent-orange);
+            border: 1px solid rgba(249, 115, 22, 0.4);
+        }
+
+        .evidence-btn:hover {
+            background-color: var(--accent-orange);
+            color: var(--bg-dark);
+            border-color: var(--accent-orange);
+        }
+
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 380px 1fr 350px;
+            gap: 20px;
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .panel-title {
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #94a3b8;
+            border-bottom: 2px solid #1e293b;
+            padding-bottom: 8px;
+            margin-bottom: 5px;
+        }
+
+        .setting-control {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: rgba(15, 23, 42, 0.3);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #1e293b;
+        }
+
+        .setting-control label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .control-purpose {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            line-height: 1.3;
+        }
+
+        select, input[type="range"] {
+            width: 100%;
+            background-color: var(--bg-dark);
+            border: 1px solid #334155;
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            outline: none;
+            box-sizing: border-box;
+            font-size: 0.85rem;
+        }
+
+        .spec-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .spec-box {
+            background: var(--node-bg);
+            border: 1px solid #334155;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .spec-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .spec-val {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+            margin-top: 4px;
+        }
+
+        .load-visualization {
+            background: #090d16;
+            border: 2px solid #1e293b;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .meter-container {
+            background: var(--bg-dark);
+            height: 24px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid #334155;
+            position: relative;
+        }
+
+        .meter-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-orange), var(--accent-red));
+            transition: width 0.5s ease-out;
+        }
+
+        .meter-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+            font-family: monospace;
+        }
+
+        .terminal-log {
+            background-color: var(--bg-dark);
+            border: 1px solid #1e293b;
+            border-radius: 6px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            height: 180px;
+            overflow-y: auto;
+            color: #34d399;
+        }
+
+        .action-btn {
+            background-color: var(--accent-blue);
+            color: var(--bg-dark);
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        .action-btn:hover { opacity: 0.9; }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(7, 10, 19, 0.9);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-card {
+            background-color: var(--panel-bg);
+            border: 2px solid #334155;
+            border-radius: 12px;
+            max-width: 650px;
+            width: 90%;
+            padding: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+
+        .modal-header {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .modal-body {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background-color: var(--accent-blue);
+            color: var(--bg-dark);
+            border: none; padding: 10px 20px;
+            border-radius: 6px; font-weight: bold; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="lab-wrapper">
+        
+        <header>
+            <div class="header-info">
+                <h1>Power Supply Load Balancing & Efficiency sandbox</h1>
+                <p>Enterprise Infrastructure Lab: Balancing Wattage Curve Profiles and 80 PLUS Thermal Efficiency Rails</p>
+            </div>
+            <div>
+                <span class="badge" style="background-color: #311042; color: #f472b6; padding: 6px 12px; font-size: 0.85rem;">Power Module 1</span>
+            </div>
+        </header>
+
+        <div class="task-bar">
+            <span style="font-weight:bold; font-size:0.9rem; color:var(--text-muted); margin-right:10px;">📋 LAB DRILLS:</span>
+            <button class="task-btn" onclick="showTaskGuide(1)">Task 1: Desktop Scaling</button>
+            <button class="task-btn" onclick="showTaskGuide(2)">Task 2: Workstation vs. Gamer</button>
+            <button class="task-btn" onclick="showTaskGuide(3)">Task 3: AI Compute Server</button>
+            <button class="task-btn evidence-btn" onclick="showTaskGuide(4)">📸 Evidence Required</button>
+        </div>
+
+        <div class="workspace-grid">
+            
+            <div class="panel">
+                <div class="panel-title">1. Machine Workload Profile</div>
+
+                <div class="setting-control">
+                    <label for="machine-select">Target Machine Architecture Type</label>
+                    <div class="control-purpose">Each profile alters the hardware power signature, modifying total component draw parameters.</div>
+                    <select id="machine-select" onchange="updateMachineProfile()">
+                        <option value="desktop">Everyday Office Desktop (Integrated Graphics, Low-Draw CPU)</option>
+                        <option value="publisher">Desktop Publisher Workstation (Mid-Tier CPU, Render GPU)</option>
+                        <option value="gamer">Hardcore Gaming PC (Overclocked CPU, High-Tier Enthusiast GPU)</option>
+                        <option value="ai_server">Enterprise AI Server (Dual Core-Heavy CPUs, Quad Tensor AI Accelerator Cluster)</option>
+                    </select>
+                </div>
+
+                <div class="setting-control">
+                    <label for="psu-wattage">PSU Capacity Wattage Setting</label>
+                    <div class="control-purpose">Slide to adjust the absolute peak wattage threshold rating of the power supply.</div>
+                    <input type="range" id="psu-wattage" min="300" max="1600" step="50" value="500" oninput="calculatePowerMetrics()">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted); margin-top:2px;">
+                        <span>300W</span>
+                        <span id="psu-wattage-val" style="color:var(--accent-blue); font-weight:bold;">500W</span>
+                        <span>1600W</span>
+                    </div>
+                </div>
+
+                <div class="setting-control">
+                    <label for="efficiency-select">80 PLUS Efficiency Cert Certification</label>
+                    <select id="efficiency-select" onchange="calculatePowerMetrics()">
+                        <option value="0.75">Standard / Uncertified (75% Efficient under load)</option>
+                        <option value="0.85">80 PLUS Bronze (85% Efficient under load)</option>
+                        <option value="0.90">80 PLUS Gold (90% Efficient under load)</option>
+                        <option value="0.94">80 PLUS Titanium (94% Efficient under load)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">2. Telemetry and Rail Monitors</div>
+                
+                <div class="silicon-inspector">
+                    <div class="spec-grid" style="margin-bottom: 15px;">
+                        <div class="spec-box"><div class="spec-label">Component Total Draw</div><div class="spec-val" id="val-component-draw">0 W</div></div>
+                        <div class="spec-box"><div class="spec-label">Wall Outlet Consumption</div><div class="spec-val" id="val-wall-draw" style="color:var(--accent-orange);">0 W</div></div>
+                    </div>
+
+                    <div class="load-visualization">
+                        <div class="spec-label">PSU Capacity Load Safety Track</div>
+                        <div class="meter-container">
+                            <div class="meter-fill" id="load-meter-bar"></div>
+                            <div class="meter-text" id="load-meter-text">0% Load</div>
+                        </div>
+                        <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.4;" id="efficiency-analysis">
+                            Loading current curve data analysis...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">3. Power Grid Control Rail</div>
+                
+                <div class="setting-control">
+                    <label>Voltage Transistor Stream Logs</label>
+                    <div class="terminal-log" id="log-stream">> Power rails grounded. Choose a deployment target above to evaluate current draw maps...</div>
+                </div>
+
+                <button class="action-btn" id="btn-stress-test">Execute Full-Load System Stress Test</button>
+                <button class="action-btn" id="btn-reset" style="background-color:#334155; color:white;">Clear Staging Station</button>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="drill-modal">
+        <div class="modal-card">
+            <div class="modal-header" id="m-header">Stress Test Verification Log Completed...</div>
+            <div class="modal-body" id="m-body">Processing loop properties...</div>
+            <div style="text-align: right;">
+                <button class="modal-close" onclick="closeDrillModal()">Acknowledge Status</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const logStream = document.getElementById('log-stream');
+        const machineSelect = document.getElementById('machine-select');
+        const psuSlider = document.getElementById('psu-wattage');
+        const psuSliderVal = document.getElementById('psu-wattage-val');
+        const efficiencySelect = document.getElementById('efficiency-select');
+        const btnStressTest = document.getElementById('btn-stress-test');
+        const btnReset = document.getElementById('btn-reset');
+        
+        const modal = document.getElementById('drill-modal');
+        const mHeader = document.getElementById('m-header');
+        const mBody = document.getElementById('m-body');
+
+        // Combined data database tracking exact system component demands
+        const targetComponentDatabase = {
+            desktop: { name: "Office Desktop", draw: 180, desc: "Low-overhead profile. Uses integrated processing traces, drawing basic current rails safely handled by introductory components." },
+            publisher: { name: "Desktop Publisher Workstation", draw: 420, desc: "Balanced render profile. Incorporates dedicated image layout processors and mid-tier calculation matrix channels." },
+            gamer: { name: "Hardcore Gaming PC", draw: 750, desc: "High-overhead enthusiast configuration. Uses factory overclocked logic chips and premium rendering architecture demanding significant current stability." },
+            ai_server: { name: "Enterprise AI Infrastructure Server", draw: 1350, desc: "Maximum current draw profile. Houses multiple high-core server processors and an enterprise tensor cluster for deep-learning calculation trees." }
+        };
+
+        const taskBriefings = {
+            1: {
+                title: "Task 1 Instructions: Scaling the Everyday Office Desktop Baseline",
+                body: `<strong>Objective:</strong> Right-size the power supply for a basic office computer to match load safety curves.<br><br>
+                       <strong>Instructions:</strong><br>
+                       1. Set the Target Machine Type to <strong>Everyday Office Desktop</strong>.<br>
+                       2. Set your PSU Wattage Slider to **350W** and clear with Bronze or Gold efficiency cert choices.<br>
+                       3. Fire the System Stress Test to check rail stability. Note that low-draw configurations run efficiently without requiring high-wattage hardware.`
+            },
+            2: {
+                title: "Task 2 Instructions: Balance Workstation vs. Hardcore Gaming Demands",
+                body: `<strong>Objective:</strong> Support independent rendering graphics accelerators without tripping overcurrent voltage limits.<br><br>
+                       <strong>Instructions:</strong><br>
+                       1. Swap the Target Machine dropdown parameter choice to the **Hardcore Gaming PC** (750W component demand).<br>
+                       2. Leave your power supply configured down at **500W** and click Execute Full-Load System Stress Test.<br>
+                       3. Analyze the crash report logs. Then, adjust the wattage slider up to an optimized **950W** limit to activate the PSU's sweet spot efficiency window.`
+            },
+            3: {
+                title: "Task 3 Instructions: Provisioning the Enterprise AI Compute Server Array",
+                body: `<strong>Objective:</strong> Coordinate maximum current draw demands using 80 PLUS Titanium regulation frameworks.<br><br>
+                       <strong>Instructions:</strong><br>
+                       1. Shift your system selection type to the massive **Enterprise AI Server** layout (1350W component demand).<br>
+                       2. Notice how wall outlet power consumption changes based on your efficiency certification dropdown.<br>
+                       3. Target a **1600W Titanium** framework configuration to verify optimal system clear metrics.`
+            },
+            4: {
+                title: "📸 EVALUATION SIGN-OFF: Power Infrastructure Evidence Metrics",
+                body: `<strong>Submission Deliverables:</strong><br>
+                       Apprentices must capture screen snippets of their configurations demonstrating successful balancing parameters to pass this module evaluation check.<br><br>
+                       <strong>Requirements:</strong><br>
+                       Configure the **Enterprise AI Server** running cleanly on an optimized, safe power curve with zero voltage sags. Take a snippet demonstrating:<br>
+                       • The left selectors reading an active AI Server workload backed by a matching high-wattage, Titanium rating setup.<br>
+                       • The central load telemetry meter indicating a safe load curve range accompanied by a green **'Stress Test Successful'** verification popup card.<br><br>
+                       Label the file as <em>'PSU_Balancing_Success_[Name].png'</em> and send it to your training instructor.`
+            }
+        };
+
+        function showTaskGuide(id) {
+            mHeader.innerText = taskBriefings[id].title;
+            mHeader.style.color = (id === 4) ? "var(--accent-orange)" : "var(--accent-blue)";
+            mBody.innerHTML = taskBriefings[id].body;
+            modal.style.display = 'flex';
+        }
+
+        function updateMachineProfile() {
+            const key = machineSelect.value;
+            writeLog(`Workload Shift: Testing board calibrated to track [${targetComponentDatabase[key].name}] specifications.`);
+            calculatePowerMetrics();
+        }
+
+        function calculatePowerMetrics() {
+            const key = machineSelect.value;
+            const targetPsuWatts = parseInt(psuSlider.value);
+            const efficiencyModifier = parseFloat(efficiencySelect.value);
+            
+            psuSliderVal.innerText = `${targetPsuWatts}W`;
+
+            const componentDraw = targetComponentDatabase[key].draw;
+            const wallOutletDraw = Math.round(componentDraw / efficiencyModifier);
+            const loadPercentage = Math.round((componentDraw / targetPsuWatts) * 100);
+
+            // Hydrate text cards
+            document.getElementById('val-component-draw').innerText = `${componentDraw} W`;
+            document.getElementById('val-wall-draw').innerText = `${wallOutletDraw} W`;
+            
+            // Render loading graphics bar parameters
+            const bar = document.getElementById('load-meter-bar');
+            const txt = document.getElementById('load-meter-text');
+            txt.innerText = `${loadPercentage}% Load`;
+            bar.style.width = `${Math.min(loadPercentage, 100)}%`;
+
+            // Evaluate the efficiency curve optimization brackets
+            const analysisTxt = document.getElementById('efficiency-analysis');
+            if (loadPercentage > 100) {
+                analysisTxt.innerText = "❌ OVERLOAD ALERT: Total hardware component demand exceeds the power supply capacity. Running a stress test will trigger a system failure.";
+                analysisTxt.style.color = "var(--accent-red)";
+            } else if (loadPercentage >= 40 && loadPercentage <= 60) {
+                analysisTxt.innerText = "🟢 EXCELLENT OPTIMIZATION: Power load is positioned precisely inside the 40%-60% sweet-spot efficiency curve window. Thermal losses and power waste are minimized.";
+                analysisTxt.style.color = "var(--accent-green)";
+            } else if (loadPercentage > 80) {
+                analysisTxt.innerText = "🟡 CAUTION: Power supply is operating near peak thermal capabilities. Voltage rails are stable but increased heat generation will shorten component life.";
+                analysisTxt.style.color = "var(--accent-orange)";
+            } else {
+                analysisTxt.innerText = "🔵 UNDER-UTILIZED: System power rails are safe, but the supply is over-provisioned relative to your hardware demand profile.";
+                analysisTxt.style.color = "var(--accent-blue)";
+            }
+        }
+
+        function writeLog(message) {
+            const timestamp = new Date().toISOString().slice(11, 19);
+            logStream.innerHTML += `<br>[${timestamp}] ${message}`;
+            logStream.scrollTop = logStream.scrollHeight;
+        }
+
+        btnReset.addEventListener('click', () => {
+            machineSelect.value = "desktop";
+            psuSlider.value = "500";
+            efficiencySelect.value = "0.75";
+            updateMachineProfile();
+            writeLog("System Event: Testing array registers cleared back to safe office configuration metrics.");
+        });
+
+        // Stress Testing Evaluation Simulation Logic Engine
+        btnStressTest.addEventListener('click', () => {
+            const key = machineSelect.value;
+            const targetPsuWatts = parseInt(psuSlider.value);
+            const componentDraw = targetComponentDatabase[key].draw;
+            const efficiencyModifier = parseFloat(efficiencySelect.value);
+            const loadPercentage = Math.round((componentDraw / targetPsuWatts) * 100);
+            const wasteWatts = Math.round((componentDraw / efficiencyModifier) - componentDraw);
+
+            mHeader.style.color = "var(--accent-red)";
+            writeLog(`⚡ Stress Test Executing: Forcing all hardware lines into full load processing modules...`);
+
+            if (loadPercentage > 100) {
+                mHeader.innerText = "💥 System Crash: Over-Current Protection (OCP) Tripped";
+                mBody.innerHTML = `<strong>Hardware Diagnostic Failure Code: 0xPOWER_SHUTDOWN</strong><br><br>
+                                   The stress test failed instantly. Your configured hardware components demanded a combined <strong>${componentDraw}W</strong>, but your power supply is physically capped at a low <strong>${targetPsuWatts}W</strong>.<br><br>
+                                   • <strong>What happened:</strong> As soon as components initialized full rendering threads, current draw spiked across the +12V electrical rail. To prevent a catastrophic electrical fire or melted transistor lines, the PSU's internal <strong>Over-Current Protection (OCP)</strong> safety relay tripped the main power breaker, shutting down the entire machine. Increase your PSU capacity to clear the error.`;
+                modal.style.display = 'flex';
+                return;
+            }
+
+            if (loadPercentage > 85 && efficiencyModifier === 0.75) {
+                mHeader.innerText = "🔥 Thermal Crash: System Power Sag Instability";
+                mBody.innerHTML = `<strong>Hardware Diagnostic Failure Code: 0xVOLTAGE_DROP</strong><br><br>
+                                   The test ran for 45 seconds before collapsing into a Blue Screen loop.<br><br>
+                                   • <strong>What happened:</strong> You are running a high-load system near maximum capacity using an uncertified power supply. Because of its low 75% efficiency rating, the unit converted a massive <strong>${wasteWatts}W of raw electricity directly into heat</strong> inside the supply casing. The extreme heat caused voltage ripples across the motherboard lines, resulting in a system crash. Deploy an 80 PLUS certified model to stabilize voltage regulations.`;
+                modal.style.display = 'flex';
+                return;
+            }
+
+            // SUCCESS VALIDATION SCHEMAS
+            mHeader.style.color = "var(--accent-green)";
+            mHeader.innerText = "🟢 Stress Test Successful: Power Rails Stable";
+            
+            let reportHtml = `<strong>Power Infrastructure Evaluation Passed Cleanly!</strong><br><br>
+                              Your configuration maintained absolute voltage regulation stability across all active channels under full synthetic load conditions.<br><br>
+                              • <strong>Load Balance Target:</strong> Operating at <strong>${loadPercentage}%</strong> capacity.<br>
+                              • <strong>Thermal Footprint:</strong> Conversion efficiency filters successfully isolated electrical waste to ${wasteWatts}W.<br>`;
+
+            if (loadPercentage >= 40 && loadPercentage <= 60) {
+                reportHtml += `<br>🌟 <strong>BONUS AUDIT ARCHITECTURE CREDIT:</strong> You positioned the system perfectly inside the <strong>PSU Efficiency Sweet Spot Window</strong>. This guarantees optimal power conversion, lower electricity bills, and minimal component degradation over long deployment lifecycles.`;
+            }
+            
+            mBody.innerHTML = reportHtml;
+            modal.style.display = 'flex';
+            writeLog(`System: Stress test processing loops cleared successfully. Voltage logs generated.`);
+        });
+
+        function closeDrillModal() {
+            modal.style.display = 'none';
+        }
+
+        // Hydrate default baseline values on script initialization
+        window.onload = updateMachineProfile;
+    </script>
+</body>
+</html>
