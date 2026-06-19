@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exploring the Big Three: Core PC Hardware Lab</title>
+    <title>Exploring the Big Three: Advanced Core PC Hardware Lab</title>
     <style>
         :root {
             --bg-dark: #0b0f19;
@@ -103,7 +103,7 @@
 
         .workspace-grid {
             display: grid;
-            grid-template-columns: 380px 1fr 350px;
+            grid-template-columns: 390px 1fr 350px;
             gap: 20px;
         }
 
@@ -245,7 +245,7 @@
         }
 
         .score-val {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: bold;
             color: var(--accent-blue);
             margin-top: 4px;
@@ -339,61 +339,61 @@
         
         <header>
             <div class="header-info">
-                <h1>Exploring the "Big Three" Architecture Sandbox</h1>
-                <p>Interactive System Assembly: Aligning Motherboards, CPUs, and Memory Banks</p>
+                <h1>Exploring the "Big Three" Advanced Architecture Sandbox</h1>
+                <p>Enterprise System Integration: Voltage Regulation, Chipset Bounds, and Memory Timing Topographies</p>
             </div>
             <div>
-                <span class="badge" style="background-color: #1e1b4b; color: #a78bfa; padding: 6px 12px; font-size: 0.85rem;">Hardware Module 1</span>
+                <span class="badge" style="background-color: #1e1b4b; color: #a78bfa; padding: 6px 12px; font-size: 0.85rem;">Hardware Module 1 PRO</span>
             </div>
         </header>
 
         <div class="task-bar">
-            <span style="font-weight:bold; font-size:0.9rem; color:var(--text-muted); margin-right:10px;">📋 LAB TASKS:</span>
-            <button class="task-btn" onclick="showTaskGuide(1)">Task 1: POST Assembly</button>
-            <button class="task-btn" onclick="showTaskGuide(2)">Task 2: Memory Optimization</button>
-            <button class="task-btn" onclick="showTaskGuide(3)">Task 3: Bus Bottlenecks</button>
+            <span style="font-weight:bold; font-size:0.9rem; color:var(--text-muted); margin-right:10px;">📋 LAB DRILLS:</span>
+            <button class="task-btn" onclick="showTaskGuide(1)">Task 1: Matching Generation POST</button>
+            <button class="task-btn" onclick="showTaskGuide(2)">Task 2: VRM Thermal Throttling</button>
+            <button class="task-btn" onclick="showTaskGuide(3)">Task 3: Bus Clock Mismatch</button>
             <button class="task-btn evidence-btn" onclick="showTaskGuide(4)">📸 Evidence Required</button>
         </div>
 
         <div class="workspace-grid">
             
             <div class="panel">
-                <div class="panel-title">1. Component Component Bin</div>
+                <div class="panel-title">1. Advanced Component Component Bin</div>
                 
                 <div class="setting-control">
-                    <label>Select Motherboard Form Factor</label>
-                    <div class="control-purpose">Determines the physical chassis dimension limitations and trace distribution layout.</div>
+                    <label for="board-select">Select Motherboard Architecture Base</label>
+                    <div class="control-purpose">Each board dictates specific pin layouts, maximum TDP power budgets, and memory standard rails.</div>
                     <select id="board-select" onchange="updateBoardFormFactor()">
                         <option value="none">-- Select Motherboard --</option>
-                        <option value="atx">Enterprise ATX Board (Intel LGA 1700, DDR5 Standard)</option>
-                        <option value="itx">Compact Mini-ITX Board (AMD AM5, DDR5 Standard)</option>
+                        <option value="z790">Z790 Server Mainboard (LGA1700 Socket, 240W VRM Limit, DDR5 Slots)</option>
+                        <option value="b650">B650 Workstation Board (AM5 Socket, 125W VRM Limit, DDR5 Slots)</option>
                     </select>
                 </div>
 
                 <div class="setting-control">
-                    <label>Available Processors (Drag Source)</label>
+                    <label>Processors - TDP & Pin Metrics (Drag Source)</label>
                     <div style="display:flex; flex-direction:column; gap:8px;">
-                        <div class="component-token" draggable="true" id="cpu-intel" data-type="cpu" data-spec="LGA1700">💾 Core i9 (Intel LGA 1700)</div>
-                        <div class="component-token" draggable="true" id="cpu-amd" data-type="cpu" data-spec="AM5">💾 Ryzen 9 (AMD AM5)</div>
+                        <div class="component-token" draggable="true" id="cpu-high-intel" data-type="cpu" data-spec="LGA1700" data-tdp="253">💾 Core i9-14900K (LGA1700 | 253W TDP)</div>
+                        <div class="component-token" draggable="true" id="cpu-low-amd" data-type="cpu" data-spec="AM5" data-tdp="65">💾 Ryzen 5 7600 (AM5 | 65W TDP)</div>
                     </div>
                 </div>
 
                 <div class="setting-control">
-                    <label>Available RAM Modules (Drag Source)</label>
+                    <label>RAM - Clock Speeds & Strains (Drag Source)</label>
                     <div style="display:flex; flex-direction:column; gap:8px;">
-                        <div class="component-token" draggable="true" id="ram-dimm1" data-type="ram" data-spec="DDR5">🎚️ 16GB DDR5 DIMM Stick A</div>
-                        <div class="component-token" draggable="true" id="ram-dimm2" data-type="ram" data-spec="DDR5">🎚️ 16GB DDR5 DIMM Stick B</div>
+                        <div class="component-token" draggable="true" id="ram-fast" data-type="ram" data-spec="DDR5" data-speed="6000">🎚️ 16GB DDR5 High-Speed (6000 MHz)</div>
+                        <div class="component-token" draggable="true" id="ram-slow" data-type="ram" data-spec="DDR5" data-speed="4800">🎚️ 16GB DDR5 Entry-Value (4800 MHz)</div>
                     </div>
                 </div>
             </div>
 
             <div class="panel" style="gap: 15px;">
-                <div class="panel-title">2. Mainboard Assembly Topography</div>
+                <div class="panel-title">2. Mainboard Trace Topography</div>
                 
                 <div class="board-canvas">
                     <div class="hardware-slot" id="slot-cpu" data-accept="cpu">
                         <div class="slot-title">Central Processing Unit (CPU) Socket</div>
-                        <div style="font-size:0.75rem; color:var(--text-muted);">Drop Processor Here</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted);">Drop Processor Component Here</div>
                     </div>
 
                     <div class="socket-grid">
@@ -410,30 +410,30 @@
 
                 <div class="scorecard-grid">
                     <div class="score-box" id="card-pin">
-                        <div style="font-size:0.75rem; color:var(--text-muted);">SOCKET PIN ALIGNMENT</div>
-                        <div class="score-val" id="val-pin">Unmapped</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted);">SOCKET PIN LAYER</div>
+                        <div class="score-val" id="val-pin">Unassigned</div>
                     </div>
-                    <div class="score-box" id="card-capacity">
-                        <div style="font-size:0.75rem; color:var(--text-muted);">TOTAL VOLATILE POOL</div>
-                        <div class="score-val" id="val-capacity">0 GB</div>
+                    <div class="score-box" id="card-power">
+                        <div style="font-size:0.75rem; color:var(--text-muted);">VRM DELIVERABLE THERMAL</div>
+                        <div class="score-val" id="val-power">0W / 0W</div>
                     </div>
                     <div class="score-box" id="card-topology">
-                        <div style="font-size:0.75rem; color:var(--text-muted);">CHANNEL INTERLEAVE</div>
-                        <div class="score-val" id="val-topology">Single-Channel</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted);">SYSTEM BUS FREQUENCY</div>
+                        <div class="score-val" id="val-topology">0 MHz</div>
                     </div>
                 </div>
             </div>
 
             <div class="panel">
-                <div class="panel-title">3. Power Rails & Bus Diagnostics</div>
+                <div class="panel-title">3. Trace Controller Diagnostics</div>
                 
                 <div class="setting-control">
                     <label>System Live Execution Log</label>
-                    <div class="terminal-log" id="log-stream">> Power rail ground loops verified. Deploy mainboard architecture parameters to seed trace connections...</div>
+                    <div class="terminal-log" id="log-stream">> Ground rails loops stable. Standing by for topology component population sequences...</div>
                 </div>
 
                 <button class="action-btn" id="btn-power">Depress Power Button (Trigger POST)</button>
-                <button class="action-btn" id="btn-reset" style="background-color:#334155; color:white;">Strip Hardware Rig</button>
+                <button class="action-btn" id="btn-reset" style="background-color:#334155; color:white;">Strip Rig Back to Rails</button>
             </div>
 
         </div>
@@ -442,9 +442,9 @@
     <div class="modal-overlay" id="drill-modal">
         <div class="modal-card">
             <div class="modal-header" id="m-header">POST Diagnostic Initialization...</div>
-            <div class="modal-body" id="m-body">Analyzing hardware configurations...</div>
+            <div class="modal-body" id="m-body">Analyzing hardware traces configurations...</div>
             <div style="text-align: right;">
-                <button class="modal-close" onclick="closeDrillModal()">Acknowledge Rails Status</button>
+                <button class="modal-close" onclick="closeDrillModal()">Acknowledge Status</button>
             </div>
         </div>
     </div>
@@ -465,39 +465,38 @@
 
         const taskBriefings = {
             1: {
-                title: "Task 1 Instructions: Achieve Flawless POST Execution",
-                body: `<strong>Objective:</strong> Successfully boot the machine into the BIOS by completing a proper Power-On Self-Test sequence.<br><br>
+                title: "Task 1 Instructions: Resolve Socket and Generation POST Constraints",
+                body: `<strong>Objective:</strong> Match motherboard chipset constraints with the correct CPU pin assignment standard to execute a base boot layout loop.<br><br>
                        <strong>Instructions:</strong><br>
-                       1. Select the <strong>Enterprise ATX Board</strong> form factor option.<br>
-                       2. Drag and drop the processor that matches the socket requirements of the board trace layout.<br>
-                       3. Install at least one memory module into an available DIMM socket.<br>
-                       4. Press the **Power Button** on the right panel to test for successful hardware handshakes.`
+                       1. Select the <strong>Z790 Server Mainboard</strong> architecture base model configuration.<br>
+                       2. Drag and drop the processor designed for the LGA1700 electrical grid format layout into the socket.<br>
+                       3. Install an appropriate DDR5 memory module into DIMM slot A1, then trigger a system boot cycle test.`
             },
             2: {
-                title: "Task 2 Instructions: Maximize Memory Interleaving",
-                body: `<strong>Objective:</strong> Configure the volatile RAM pool to run in an optimized Multi-Channel configurations schema.<br><br>
+                title: "Task 2 Instructions: Balance VRM Power Phases to Halt Thermal Throttling",
+                body: `<strong>Objective:</strong> Understand Thermal Design Power (TDP) overdraw states.<br><br>
                        <strong>Instructions:</strong><br>
-                       1. Keep your system configuration running smoothly from Task 1.<br>
-                       2. Look at how single-channel vs. multi-channel interleaving bus paths affect total throughput velocities.<br>
-                       3. Install both RAM sticks into separate, decoupled memory channels (Channel A vs. Channel B) to expand the memory data bus width from 64-bit to 128-bit, changing the scorecard indicator to **Dual-Channel**.`
+                       1. Switch your mainboard configuration array over to the <strong>B650 Workstation Board</strong> (which carries a strict 125W delivery threshold).<br>
+                       2. Mount the low-power AMD Ryzen chip (65W TDP) along with memory modules.<br>
+                       3. Hit power and notice how matching processor demand with compliant Voltage Regulator Modules (VRM) layout loops guarantees maximum stability without triggering automatic hardware thermal shutdown events.`
             },
             3: {
-                title: "Task 3 Instructions: Socket Interoperability and Pin Failures",
-                body: `<strong>Objective:</strong> Analyze physical slot incompatibility behavior outcomes.<br><br>
+                title: "Task 3 Instructions: Analyze Memory Bus Velocity Downclocking Constraints",
+                body: `<strong>Objective:</strong> Discover how mixing bus frequencies forces memory controller downclock down-scaling rules.<br><br>
                        <strong>Instructions:</strong><br>
-                       1. Change your Motherboard parameter choice to the **Compact Mini-ITX Board** (which forces an AMD AM5 grid tracking landscape).<br>
-                       2. Attempt to seat the Intel Core i9 processor onto this platform topology and activate the Power Rail switch.<br>
-                       3. Examine the error log output response report card carefully to analyze physical pin mismatch logic patterns.`
+                       1. Reset to the <strong>Z790 Server Board</strong> and mount your compatible Core i9 processor.<br>
+                       2. Install the <strong>High-Speed 6000 MHz module</strong> in slot A1, and place the <strong>Entry-Value 4800 MHz module</strong> in slot B1.<br>
+                       3. Boot the rig and review the scorecard logs. See how the memory controller handles a frequency imbalance on the bus.`
             },
             4: {
-                title: "📸 EVALUATION SIGN-OFF: Evidence Requirements Matrix",
+                title: "📸 COMPLIANCE SIGN-OFF: Advanced Architecture Deliverables",
                 body: `<strong>Submission Deliverables:</strong><br>
-                       You must verify system design status profiles by capturing screenshots showing correct engineering solutions.<br><br>
+                       Apprentices must submit a snapshot proving perfect load coordination to complete this pro-tier module audit.<br><br>
                        <strong>Requirements:</strong><br>
-                       Produce a successful <strong>Dual-Channel System Boot Clear</strong> sequence inside the modal popup window. Take a snippet demonstrating:<br>
-                       • The green scorecard indicators showing a combined 32 GB Volatile Pool in a Dual-Channel orientation state.<br>
-                       • The verification popup window displaying a successful POST boot handshake cycle log.<br><br>
-                       Label your output file as <em>'BigThree_Success_[YourName].png'</em> and send it to your training instructor for review.`
+                       Assemble a dual-channel configuration running at an un-throttled, matched speed tier. Take a clear snippet showing:<br>
+                       • The metrics panel reading all green pass tags with matching memory frequency traces.<br>
+                       • The popup confirmation screen demonstrating a successful, optimal boot cycle index block execution layout report.<br><br>
+                       Send your target screenshot to your instructor to unlock grade authorization verification.`
             }
         };
 
@@ -509,7 +508,7 @@
         }
 
         function updateBoardFormFactor() {
-            writeLog(`System: Mainboard topography array shifted to [${boardSelect.options[boardSelect.selectedIndex].text}].`);
+            writeLog(`System: Mainboard bus context shifted to [${boardSelect.options[boardSelect.selectedIndex].text}].`);
             evaluateHardwareStates();
         }
 
@@ -518,6 +517,8 @@
                 e.dataTransfer.setData('text/id', token.id);
                 e.dataTransfer.setData('text/type', token.getAttribute('data-type'));
                 e.dataTransfer.setData('text/spec', token.getAttribute('data-spec'));
+                e.dataTransfer.setData('text/tdp', token.getAttribute('data-tdp') || '0');
+                e.dataTransfer.setData('text/speed', token.getAttribute('data-speed') || '0');
             });
         });
 
@@ -533,14 +534,16 @@
                 e.preventDefault();
                 slot.classList.remove('drag-over');
 
-                const tokenId = e.dataTransfer.getData('text/id');
-                const tokenType = e.dataTransfer.getData('text/type');
-                const tokenSpec = e.dataTransfer.getData('text/spec');
+                const tokenId = e.dataTransfer.setData('text/id');
+                const tokenType = e.dataTransfer.setData('text/type');
+                const tokenSpec = e.dataTransfer.setData('text/spec');
+                const tokenTdp = parseInt(e.dataTransfer.setData('text/tdp'));
+                const tokenSpeed = parseInt(e.dataTransfer.setData('text/speed'));
                 const slotAccept = slot.getAttribute('data-accept');
                 const slotId = slot.id;
 
                 if (tokenType !== slotAccept) {
-                    writeLog(`❌ Interconnect Reject: Cannot seat a [${tokenType.toUpperCase()}] component inside a [${slotAccept.toUpperCase()}] motherboard trace array lane.`);
+                    writeLog(`❌ Bus Mismatch: Cannot map a [${tokenType.toUpperCase()}] element directly onto a [${slotAccept.toUpperCase()}] motherboard lane loop.`);
                     return;
                 }
 
@@ -551,13 +554,14 @@
                         name: tokenNode.innerText,
                         spec: tokenSpec,
                         type: tokenType,
-                        channel: slot.getAttribute('data-channel') || null
+                        tdp: tokenTdp,
+                        speed: tokenSpeed
                     };
 
                     slot.classList.add('occupied');
                     slot.innerHTML = `<div class="allocated-item">${allocatedHardware[slotId].name}</div>`;
                     
-                    writeLog(`Traces Attached: Successfully seated component [${allocatedHardware[slotId].name}] onto slot socket index [${slotId.toUpperCase()}].`);
+                    writeLog(`Trace Bound: Embedded component [${allocatedHardware[slotId].name}] securely inside [${slotId.toUpperCase()}] socket.`);
                     evaluateHardwareStates();
                 }
             });
@@ -569,59 +573,51 @@
             let ramA1 = allocatedHardware['slot-ram-a1'] || null;
             let ramb1 = allocatedHardware['slot-ram-b1'] || null;
 
-            // Pin/Socket Alignment UI Check
+            // 1. Mechanical Socket Check
             const pinCard = document.getElementById('card-pin');
             const pinVal = document.getElementById('val-pin');
             if (currentCpu) {
-                if (board === 'atx' && currentCpu.spec === 'LGA1700') {
-                    pinVal.innerText = "Intel LGA1700 Align";
-                    pinCard.className = "score-box pass";
-                } else if (board === 'itx' && currentCpu.spec === 'AM5') {
-                    pinVal.innerText = "AMD AM5 Align";
-                    pinCard.className = "score-box pass";
+                if (board === 'z790' && currentCpu.spec === 'LGA1700') {
+                    pinVal.innerText = "LGA1700 Trace Matched"; pinCard.className = "score-box pass";
+                } else if (board === 'b650' && currentCpu.spec === 'AM5') {
+                    pinVal.innerText = "AM5 Trace Matched"; pinCard.className = "score-box pass";
                 } else {
-                    pinVal.innerText = "PIN MISMATCH MISALIGN";
-                    pinCard.className = "score-box";
-                    pinCard.style.borderColor = "var(--accent-red)";
+                    pinVal.innerText = "BENT MECHANICAL PINS"; pinCard.className = "score-box"; pinCard.style.borderColor = "var(--accent-red)";
                 }
             } else {
-                pinVal.innerText = "Unmapped Socket";
-                pinCard.className = "score-box";
-                pinCard.style.borderColor = "#334155";
+                pinVal.innerText = "Empty Socket"; pinCard.className = "score-box"; pinCard.style.borderColor = "#334155";
             }
 
-            // Volatile Pool Aggregator calculation checks
-            let totalGb = 0;
-            if (ramA1) totalGb += 16;
-            if (ramb1) totalGb += 16;
-            document.getElementById('val-capacity').innerText = `${totalGb} GB`;
-            toggleMetricBoxPass('card-capacity', totalGb >= 16);
+            // 2. Power Profile TDP Multi-Metric Evaluation Checks
+            const powerCard = document.getElementById('card-power');
+            const powerVal = document.getElementById('val-power');
+            let boardMaxTdp = board === 'z790' ? 240 : (board === 'b650' ? 125 : 0);
+            let cpuDemandTdp = currentCpu ? currentCpu.tdp : 0;
+            powerVal.innerText = `${cpuDemandTdp}W / ${boardMaxTdp}W`;
+            
+            if (cpuDemandTdp > 0 && cpuDemandTdp <= boardMaxTdp) {
+                powerCard.className = "score-box pass";
+            } else if (cpuDemandTdp > boardMaxTdp) {
+                powerCard.className = "score-box"; powerCard.style.borderColor = "var(--accent-orange)";
+            } else {
+                powerCard.className = "score-box"; powerCard.style.borderColor = "#334155";
+            }
 
-            // Channel Width Bus Interleaving Tracking evaluation logic
+            // 3. System Memory Bus Clock Frequency Downclock Tracking Logic
             const topCard = document.getElementById('card-topology');
             const topVal = document.getElementById('val-topology');
+            
             if (ramA1 && ramb1) {
-                topVal.innerText = "Dual-Channel (128-Bit)";
+                let busSpeed = Math.min(ramA1.speed, ramb1.speed);
+                topVal.innerText = `Dual Ch | ${busSpeed} MHz`;
                 topCard.className = "score-box pass";
             } else if (ramA1 || ramb1) {
-                topVal.innerText = "Single-Channel (64-Bit)";
-                topCard.className = "score-box";
+                let busSpeed = ramA1 ? ramA1.speed : ramb1.speed;
+                topVal.innerText = `Single Ch | ${busSpeed} MHz`;
+                topCard.className = "score-box pass";
             } else {
-                topVal.innerText = "No Memory Detected";
-                topCard.className = "score-box";
+                topVal.innerText = "0 MHz"; topCard.className = "score-box";
             }
-        }
-
-        function toggleMetricBoxPass(elementId, isPassing) {
-            const el = document.getElementById(elementId);
-            if (isPassing) el.classList.add('pass');
-            else el.classList.remove('pass');
-        }
-
-        function writeLog(message) {
-            const timestamp = new Date().toISOString().slice(11, 19);
-            storageLog.innerHTML += `<br>[${timestamp}] ${message}`;
-            storageLog.scrollTop = storageLog.scrollHeight;
         }
 
         btnReset.addEventListener('click', () => {
@@ -635,61 +631,81 @@
             });
 
             evaluateHardwareStates();
-            writeLog("System Event: Hardware rig stripped completely clean down to raw test rails layout.");
+            writeLog("System Event: Testing station variables reset to factory power parameters.");
         });
 
-        // Diagnostics Evaluation POST Execution Engine
+        // Execution Kernel POST Test Verification Logic Engine
         btnPower.addEventListener('click', () => {
             const board = boardSelect.value;
             let cpu = allocatedHardware['slot-cpu'] || null;
-            let ramCount = (allocatedHardware['slot-ram-a1'] ? 1 : 0) + (allocatedHardware['slot-ram-b1'] ? 1 : 0);
+            let ramA1 = allocatedHardware['slot-ram-a1'] || null;
+            let ramb1 = allocatedHardware['slot-ram-b1'] || null;
+            let ramCount = (ramA1 ? 1 : 0) + (ramb1 ? 1 : 0);
 
             mHeader.style.color = "var(--accent-red)";
             
             if (board === 'none') {
-                mHeader.innerText = "⚙️ POST Error: System Logic Missing Board Trace Base";
-                mBody.innerHTML = "Hardware Failure: You cannot start a system without selecting an active **Motherboard Form Factor** base to complete the circuit paths.";
+                mHeader.innerText = "⚙️ POST Failure 0xFF: Mainboard Unpowered";
+                mBody.innerHTML = "Hardware Failure: Power cannot circulate through tracking layers because you failed to select an operational **Motherboard Architecture Base** chipset loop.";
                 modal.style.display = 'flex';
                 return;
             }
 
             if (!cpu) {
-                mHeader.innerText = "🚨 POST Code 0x00: Missing CPU Core Controller";
-                mBody.innerHTML = "Fatal Error Code: Motherboard voltage rails detected but power cycle failed immediately. The **Central Processing Unit (CPU)** is completely missing from its ZIF socket anchor socket slot.";
+                mHeader.innerText = "🚨 POST Code 0x7F: CPU State Unassigned";
+                mBody.innerHTML = "Fatal Initialization Halt: Motherboard power phases initialized but system clock could not cycle. The **Central Processing Unit (CPU)** core controller has not been loaded into the ZIF anchor grid socket.";
                 modal.style.display = 'flex';
                 return;
             }
 
-            // Socket Incompatibility Logic Handler
-            const validIntel = (board === 'atx' && cpu.spec === 'LGA1700');
-            const validAmd = (board === 'itx' && cpu.spec === 'AM5');
+            // Cross-Platform Socket Protection check logic
+            const validIntel = (board === 'z790' && cpu.spec === 'LGA1700');
+            const validAmd = (board === 'b650' && cpu.spec === 'AM5');
             if (!validIntel && !validAmd) {
-                mHeader.innerText = "💥 POST Code 0x88: Severe Grid Socket Pin Crash";
-                mBody.innerHTML = `Fatal Hardware Error: Physical Destruction Event triggered on power trace layer lines.<br><br>
-                                   <strong>Forensic Output Trace Analysis:</strong> You forced an incompatible processor spec component directly onto a misaligned socket architecture grid interface trace pattern. Internal motherboard micro-pins have physically bent under trace layout tension pressure, resulting in an unrecoverable short-circuit across core data lines. System destroyed.`;
+                mHeader.innerText = "💥 POST Code 0xC1: Mechanical Grid Pins Severed";
+                mBody.innerHTML = `Fatal Architectural Defect: Physical Destruction State Logged.<br><br>
+                                   <strong>Microscope Trace Inspection:</strong> You forced an execution core onto an incompatible mechanical pin array grid layout. Motherboard copper traces have physically snapped under execution layout pressure, triggering short circuits. Board destroyed.`;
                 modal.style.display = 'flex';
                 return;
             }
 
             if (ramCount === 0) {
-                mHeader.innerText = "🔊 POST Code Beep 3-3-2: Missing Volatile Pool";
-                mBody.innerHTML = "POST Verification Crash: The CPU has initialized successfully, but the system speaker is emitting repeating error beeps. System cannot boot because there is zero **Random Access Memory (RAM)** assigned to serve as the volatile workspace runtime index register pool.";
+                mHeader.innerText = "🔊 POST Code Beep 4-4-1: Missing Volatile Pool Index";
+                mBody.innerHTML = "POST Fault: Processor core passed initial voltage handshakes, but memory training tests failed. The system cannot write execution arrays because zero **Random Access Memory (RAM)** modules are present to handle memory index registers.";
                 modal.style.display = 'flex';
                 return;
             }
 
-            // SUCCESS HANDLERS: Check system optimization levels
+            // VRM Thermal Profile Constraint Evaluation Check
+            let boardMaxTdp = board === 'z790' ? 240 : 125;
+            if (cpu.tdp > boardMaxTdp) {
+                mHeader.innerText = "🔥 POST Code 0xDD: VRM Thermal Phase Overdraw Overload";
+                mBody.innerHTML = `Fatal System Degradation: Excessive power rails current draw detected.<br><br>
+                                   <strong>Telemetry Data Output:</strong> The high-end processor you seated demands a high **253W TDP power profile**. However, your selected motherboard's Voltage Regulator Modules (VRM) have a safe phase limit of exactly **125W**. Turning on power caused the VRMs to instantaneously heat spike beyond thermal limits, causing emergency auto-shutdown lines to trip to shield the board from catching fire. Upgrade to an enterprise board with higher power phase counts to solve this bottleneck.`;
+                modal.style.display = 'flex';
+                return;
+            }
+
+            // ADVANCED OPTIMIZATION AND DOWNCLOCKING VERIFICATION REPORT CARD CONTEXT
             if (ramCount === 2) {
-                mHeader.innerText = "🟢 POST Status Clear: System Boot Code 200 OK";
-                mHeader.style.color = "var(--accent-green)";
-                mBody.innerHTML = `🏆 <strong>POST Verification Successful: Hardware Handshakes Complete!</strong><br><br>
-                                   The motherboard has verified all current voltage rails, the CPU has cleared basic instruction routines, and a **32 GB Volatile RAM pool** has passed parity indexing cleanly.<br><br>
-                                   • <strong>Bus Topology Optimization:</strong> MAXIMUM. Running your modules in a <strong>Dual-Channel configurations map</strong> expanded the width of your system memory address data pipelines from a constrained 64-bit string track to a wide, concurrent 128-bit array layout, eliminating standard runtime memory bottlenecks.`;
+                if (ramA1.speed !== ramb1.speed) {
+                    mHeader.innerText = "🟡 POST Clear: System Operational (Bus Downclocked)";
+                    mHeader.style.color = "var(--accent-orange)";
+                    mBody.innerHTML = `⚠️ <strong>Boot Completed but Running Under Memory Frequency Constraints.</strong><br><br>
+                                       The machine cleared basic BIOS tracking tasks, but your memory controller encountered a frequency mismatch. You mixed a **6000 MHz module** with a **4800 MHz module**.<br><br>
+                                       • <strong>Internal Resolution Mechanics:</strong> To guarantee memory stability on a shared synchronous data bus, the memory controller applied down-scaling constraints, forcing your fast RAM to downclock and match the slower 4800 MHz module speed. This removes performance optimization advantages from the premium module.`;
+                } else {
+                    mHeader.innerText = "🟢 POST Status Clear: System Boot Code 200 OK";
+                    mHeader.style.color = "var(--accent-green)";
+                    mBody.innerHTML = `🏆 <strong>Advanced Architecture Handshake Passed Cleanly!</strong><br><br>
+                                       The motherboard power delivery systems are stable, your CPU voltage profile is perfectly balanced, and the high-speed synchronous parallel data bus is verified.<br><br>
+                                       • <strong>Bus Performance Optimization:</strong> MAXIMUM. Populating separate memory channels unlocked true **Dual-Channel Interleaving layout tracks**, expanding your parallel memory width data bus from 64-bit to 128-bit concurrency and maximizing transactional execution speeds.`;
+                }
             } else {
-                mHeader.innerText = "🟡 POST Status Clear: System Boot Unoptimized";
+                mHeader.innerText = "🟡 POST Clear: Non-Interleaved Baseline State";
                 mHeader.style.color = "var(--accent-orange)";
-                mBody.innerHTML = `⚠️ <strong>System booted successfully but running in an unoptimized state.</strong><br><br>
-                                   The machine is functional, but your memory bus topology is running in a bottlenecked <strong>Single-Channel Configuration mode</strong>. This halves your available transfer performance data trace bandwidth because you only populated one channel socket. Install a matching module into the adjacent secondary slot track to clear memory bus constraints.`;
+                mBody.innerHTML = `⚠️ <strong>Boot Completed in unoptimized, bottlenecked single-channel mode.</strong><br><br>
+                                   The server is functional, but your memory trace lanes are restricted to a narrow 64-bit pipeline path because you only mounted a single module. Balance the bus lanes by inserting a matching memory stick into the secondary open channel to leverage interleaved dual-channel bandwidth parameters.`;
             }
 
             modal.style.display = 'flex';
