@@ -366,12 +366,7 @@
                             </div>
                     </div>
 
-                    <div class="setting-control" style="background: none; border: none; padding: 0;">
-                        <label>Micro-Architectural Strategy Profile</label>
-                        <p style="margin:0; font-size:0.85rem; color:#cbd5e1; line-height:1.4;" id="architecture-desc">
-                            Select a processor target to inspect code thread execution behavior.
-                        </p>
-                    </div>
+                    <button class="action-btn" style="background-color: #334155; color: white;" onclick="showStrategyBriefing()">View Strategy Architecture Profile</button>
                 </div>
             </div>
 
@@ -401,14 +396,14 @@
 
         const architectureDatabase = {
             intel: {
-                i5: { name: "Intel Core i5-14600K", cores: 14, threads: 20, cache: 24, p: 6, e: 8, extra: false, desc: "<strong>Hybrid Core Topology:</strong> Merges 6 Performance-cores (P-cores) built for resource-intensive front-of-house tasks alongside 8 Efficiency-cores (E-cores) scaled to crunch system background variables. P-cores support hyper-threading; E-cores do not." },
-                i7: { name: "Intel Core i7-14700K", cores: 20, threads: 28, cache: 33, p: 8, e: 12, extra: false, desc: "<strong>Expanded Hybrid Fabric:</strong> Increases the performance profile width to 8 P-cores and 12 E-cores. This heavy thread count density enables robust video timeline multitasking and burst background asset compiling." },
-                i9: { name: "Intel Core i9-14900K", cores: 24, threads: 32, cache: 36, p: 8, e: 16, extra: false, desc: "<strong>Hardcore Thread Array:</strong> Features 8 P-cores running alongside a massive 16-core E-core background matrix layer. Delivers unparalleled throughput in hybrid productivity tasks, but draws significant current from the voltage lines under full load." }
+                i5: { name: "Intel Core i5-14600K", cores: 14, threads: 20, cache: 24, p: 6, e: 8, extra: false, desc: "<strong>Intel Hybrid Core Topology:</strong> Merges 6 Performance-cores (P-cores) built for resource-intensive front-of-house tasks alongside 8 Efficiency-cores (E-cores) scaled to crunch system background variables. P-cores support hyper-threading; E-cores do not." },
+                i7: { name: "Intel Core i7-14700K", cores: 20, threads: 28, cache: 33, p: 8, e: 12, extra: false, desc: "<strong>Intel Expanded Hybrid Fabric:</strong> Increases the performance profile width to 8 P-cores and 12 E-cores. This heavy thread count density enables robust video timeline multitasking and burst background asset compiling." },
+                i9: { name: "Intel Core i9-14900K", cores: 24, threads: 32, cache: 36, p: 8, e: 16, extra: false, desc: "<strong>Intel Hardcore Thread Array:</strong> Features 8 P-cores running alongside a massive 16-core E-core background matrix layer. Delivers unparalleled throughput in hybrid productivity tasks, but draws significant current from the voltage lines under full load." }
             },
             amd: {
-                i5: { name: "AMD Ryzen 5 9600X", cores: 6, threads: 12, cache: 32, p: 0, e: 0, std: 6, extra: false, desc: "<strong>Homogeneous Compute Die:</strong> Utilizes 6 uniform, identical high-performance cores running on the Zen architecture. Every single core features equal access to the shared L3 cache pool and supports Symmetric Multithreading (SMT)." },
-                i7: { name: "AMD Ryzen 7 9800X3D", cores: 8, threads: 16, cache: 96, p: 0, e: 0, std: 8, extra: "vcache", desc: "<strong>Stacked 3D V-Cache:</strong> Uses 8 uniform high-performance Zen cores, but injects a revolutionary vertical 3D V-Cache layer to push L3 capacity to an unprecedented 96 MB. This colossal pool eliminates cache misses, making it highly optimized for gaming and real-time simulations." },
-                i9: { name: "AMD Ryzen 9 9950X", cores: 16, threads: 32, cache: 64, p: 0, e: 0, std: 16, extra: false, desc: "<strong>Dual Core Complex Dies (CCD):</strong> Combines two separate 8-core silicon complexes together onto a single infrastructure framework package. Delivers massive multi-threaded processing power for 3D rendering and software code compiling at very high power efficiency rates." }
+                i5: { name: "AMD Ryzen 5 9600X", cores: 6, threads: 12, cache: 32, p: 0, e: 0, std: 6, extra: false, desc: "<strong>AMD Homogeneous Compute Die:</strong> Utilizes 6 uniform, identical high-performance cores running on the Zen architecture. Every single core features equal access to the shared L3 cache pool and supports Symmetric Multithreading (SMT)." },
+                i7: { name: "AMD Ryzen 7 9800X3D", cores: 8, threads: 16, cache: 96, p: 0, e: 0, std: 8, extra: "vcache", desc: "<strong>AMD Stacked 3D V-Cache:</strong> Uses 8 uniform high-performance Zen cores, but injects a revolutionary vertical 3D V-Cache layer to push L3 capacity to an unprecedented 96 MB. This colossal pool eliminates cache misses, making it highly optimized for gaming and real-time simulations." },
+                i9: { name: "AMD Ryzen 9 9950X", cores: 16, threads: 32, cache: 64, p: 0, e: 0, std: 16, extra: false, desc: "<strong>AMD Dual Core Complex Dies (CCD):</strong> Combines two separate 8-core silicon complexes together onto a single infrastructure framework package. Delivers massive multi-threaded processing power for 3D rendering and software code compiling at very high power efficiency rates." }
             }
         };
 
@@ -418,7 +413,7 @@
                 body: `<strong>Objective:</strong> Contrast the fundamental engineering approaches between Intel and AMD in the mainstream segment.<br><br>
                        <strong>Your Mission:</strong><br>
                        1. Set Chip Vendor to <strong>Intel</strong> and Market Tier to <strong>Mid-Range (i5)</strong>. Click Execute and look at the wafer map.<br>
-                       2. Notice how Intel utilizes a **Asymmetric Hybrid Layout** splitting work between blue P-Cores and green E-Cores.<br>
+                       2. Notice how Intel utilizes an **Asymmetric Hybrid Layout** splitting work between blue P-Cores and green E-Cores.<br>
                        3. Switch Vendor to <strong>AMD</strong>. Notice how the layout alters to a **Symmetric Homogeneous layout** of 6 uniform, identical high-performance cores.`
             },
             2: {
@@ -456,6 +451,18 @@
             modal.style.display = 'flex';
         }
 
+        function showStrategyBriefing() {
+            const vendor = brandSelect.value;
+            const tier = tierSelect.value;
+            const targetData = architectureDatabase[vendor][tier];
+            
+            mHeader.innerText = `Micro-Architectural Summary: ${targetData.name}`;
+            mHeader.style.color = "var(--accent-blue)";
+            mBody.innerHTML = targetData.desc;
+            modalCloseBtn.innerText = "Close Profile Summary";
+            modal.style.display = 'flex';
+        }
+
         function syncProcessorTiers() {
             writeLog(`System: Swapped vendor pipeline tracing context over to [${brandSelect.options[brandSelect.selectedIndex].text}].`);
             inspectSilicon();
@@ -471,7 +478,6 @@
             document.getElementById('val-cores').innerText = targetData.cores;
             document.getElementById('val-threads').innerText = targetData.threads;
             document.getElementById('val-cache').innerText = `${targetData.cache} MB`;
-            document.getElementById('architecture-desc').innerHTML = targetData.desc;
 
             // Animate Die Block Topography Graphics
             const pool = document.getElementById('die-core-pool');
@@ -513,6 +519,7 @@
                 mHeader.innerText = "🟢 Instruction Dispatch Cycle Trace Report";
                 
                 let feedbackHtml = `<strong>Thread Allocation Execution Completed Successfully!</strong><br><br>
+                                    <strong>Processor Profile Under Test:</strong> ${targetData.name}<br><br>
                                     <strong>Forensic Dispatch Observations:</strong><br>`;
                 
                 if (vendor === 'intel') {
