@@ -144,12 +144,6 @@
             color: var(--accent-blue);
         }
 
-        .control-purpose {
-            font-size: 0.75rem;
-            color: #94a3b8;
-            line-height: 1.3;
-        }
-
         select {
             width: 100%;
             background-color: var(--bg-dark);
@@ -285,7 +279,7 @@
 
         <div class="task-bar">
             <span style="font-weight:bold; font-size:0.9rem; color:var(--text-muted); margin-right:10px;">📋 HARDWARE DISPATCHES:</span>
-            <button class="task-btn" onclick="showTaskGuide(1)">Task 1: Legacy Legacy Recovery</button>
+            <button class="task-btn" onclick="showTaskGuide(1)">Task 1: Legacy Recovery</button>
             <button class="task-btn" onclick="showTaskGuide(2)">Task 2: Office Productivity</button>
             <button class="task-btn" onclick="showTaskGuide(3)">Task 3: Simulation Studio</button>
             <button class="task-btn evidence-btn" onclick="showTaskGuide(4)">📸 Evidence Required</button>
@@ -408,7 +402,7 @@
             },
             simulation: {
                 title: "🎫 DISPATCH TICKET #903: Real-Time AI Simulation Studio Engine",
-                desc: "<strong>User Ticket Context:</strong> 'Our content division is spinning up an advanced 2026 AI rendering node. The system must process heavy vector paths and stream real-time physics output to a 4K display array at 240Hz+.'",
+                desc: "<strong>User Ticket Context:</strong> 'Our content division is spinning up an advanced AI rendering node. The system must process heavy vector paths and stream real-time physics output to a 4K display array at 240Hz+.'",
                 targetRefresh: "240 Hz+ Ultra-Low Latency"
             }
         };
@@ -503,9 +497,6 @@
             writeLog("System Event: Testing station variables reset to factory parameters.");
         });
 
-        // Pipeline Verification Validation Logic Engine
-        btnStressTest.onclick = function() { btnVerifyPipeline(); };
-
         btnStress.addEventListener('click', () => {
             const scenario = scenarioSelect.value;
             const gpu = gpuSelect.value;
@@ -523,7 +514,6 @@
             }
 
             if (scenario === 'legacy') {
-                // TASK 1 VALIDATION MATRIX (RETRO POS RESTORE)
                 if (gpu === 'ati_128' && cpu === 'pentium' && ram === '256mb') {
                     mHeader.innerText = "🟢 Pipeline Verification Clear: POS Terminal Online";
                     mHeader.style.color = "var(--accent-green)";
@@ -538,7 +528,6 @@
                 }
             } 
             else if (scenario === 'office') {
-                // TASK 2 VALIDATION MATRIX (PRODUCTIVITY WORKSTATION)
                 if (gpu === 'intel_uhd' && cpu === 'i5' && ram === '16gb') {
                     mHeader.innerText = "🟢 Pipeline Verification Clear: Workload Optimized";
                     mHeader.style.color = "var(--accent-green)";
@@ -556,7 +545,6 @@
                 }
             } 
             else if (scenario === 'simulation') {
-                // TASK 3 VALIDATION MATRIX (AI & SIMULATION STUDIO ENGINE)
                 if (gpu === 'rtx_4090' && cpu === 'i9' && ram === '64gb') {
                     mHeader.innerText = "🟢 Pipeline Verification Clear: Elite Simulation Node Active";
                     mHeader.style.color = "var(--accent-green)";
@@ -581,7 +569,6 @@
             modal.style.display = 'none';
         }
 
-        // Initialize default view state on baseline load
         window.onload = applyScenarioPreset;
     </script>
 </body>
