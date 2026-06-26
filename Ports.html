@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interface Topology & Port Alignment Lab</title>
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --panel-bg: #131c2e;
+            --node-bg: #1e293b;
+            --accent-blue: #0ea5e9;
+            --accent-purple: #a855f7;
+            --accent-green: #22c55e;
+            --accent-orange: #f97316;
+            --accent-red: #ef4444;
+            --text-light: #f8fafc;
+            --text-muted: #64748b;
+            
+            --success-bg: rgba(34, 197, 94, 0.1);
+            --error-bg: rgba(239, 68, 68, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .lab-container {
+            width: 100%;
+            max-width: 1300px;
+            background-color: var(--panel-bg);
+            padding: 35px;
+            border-radius: 12px;
+            border: 1px solid var(--node-bg);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        header {
+            border-bottom: 1px solid var(--node-bg);
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .header-info h1 {
+            margin: 0 0 8px 0;
+            font-size: 1.8rem;
+            color: var(--accent-purple);
+        }
+
+        .header-info p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .task-bar {
+            display: flex;
+            gap: 10px;
+            background-color: var(--bg-dark);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--node-bg);
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .task-btn {
+            background-color: var(--node-bg);
+            color: var(--accent-purple);
+            border: 1px solid #334155;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .task-btn:hover {
+            background-color: #334155;
+            color: white;
+            border-color: var(--accent-purple);
+        }
+
+        .evidence-btn {
+            background-color: rgba(14, 165, 233, 0.1);
+            color: var(--accent-blue);
+            border: 1px solid rgba(14, 165, 233, 0.4);
+        }
+
+        .evidence-btn:hover {
+            background-color: var(--accent-blue);
+            color: var(--bg-dark);
+            border-color: var(--accent-blue);
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .matrix-table th {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            text-align: left;
+            padding: 14px;
+            font-weight: 700;
+            border-bottom: 2px solid var(--node-bg);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .matrix-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--node-bg);
+            vertical-align: middle;
+        }
+
+        .hardware-name {
+            font-weight: bold;
+            color: var(--text-light);
+            font-size: 14px;
+            display: block;
+        }
+
+        .hardware-desc {
+            display: block;
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: normal;
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+
+        select {
+            width: 100%;
+            background-color: var(--bg-dark);
+            border: 1px solid #334155;
+            color: var(--text-light);
+            padding: 8px;
+            border-radius: 6px;
+            outline: none;
+            box-sizing: border-box;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+
+        select:focus { border-color: var(--accent-purple); }
+        select option { background-color: var(--panel-bg); color: var(--text-light); }
+
+        .controls {
+            margin-top: 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        button.action-btn {
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-submit { background-color: var(--accent-purple); color: var(--bg-dark); border: none; }
+        .btn-submit:hover { opacity: 0.9; }
+        .btn-reset { background-color: var(--node-bg); color: var(--text-light); border: 1px solid #334155; }
+        .btn-reset:hover { background-color: #334155; border-color: var(--text-muted); }
+
+        .score-display {
+            font-size: 0.95rem;
+            font-weight: bold;
+            display: none;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            flex-grow: 1;
+            border: 1px solid transparent;
+        }
+
+        .input-correct { border-color: var(--accent-green) !important; background-color: var(--success-bg) !important; }
+        .input-error { border-color: var(--accent-red) !important; background-color: var(--error-bg) !important; }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(7, 10, 19, 0.85);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-card {
+            background-color: var(--panel-bg);
+            border: 2px solid #334155;
+            border-radius: 12px;
+            max-width: 650px;
+            width: 90%;
+            padding: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+
+        .modal-header { font-size: 1.3rem; font-weight: bold; margin-bottom: 15px; }
+        .modal-body { font-size: 0.95rem; line-height: 1.6; color: #cbd5e1; margin-bottom: 20px; }
+        .modal-close { background-color: var(--accent-purple); color: var(--bg-dark); border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+<div class="lab-container">
+    <header>
+        <div class="header-info">
+            <h1>Physical Interface & Bus Alignment Module</h1>
+            <p>Legacy vs. Modern Topology: Evaluating signaling architectures, target hardware links, and maximum throughput ceilings</p>
+        </div>
+        <div>
+            <span style="background-color: var(--node-bg); color: var(--accent-purple); padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; font-weight: bold; border: 1px solid #334155;">Module 3</span>
+        </div>
+    </header>
+
+    <div class="task-bar">
+        <span style="font-weight:bold; font-size:0.85rem; color:var(--text-muted); margin-right:10px; uppercase; letter-spacing: 0.05em;">Assign Interface Task:</span>
+        <button class="task-btn" onclick="showTask(1)">Task 1: Video Rails Analysis</button>
+        <button class="task-btn" onclick="showTask(2)">Task 2: Alphanumeric & Serial I/O</button>
+        <button class="task-btn evidence-btn" onclick="showTask(3)">📸 Portfolio Sign-Off</button>
+    </div>
+
+    <table class="matrix-table">
+        <thead>
+            <tr>
+                <th style="width: 28%;">Physical Interface Port</th>
+                <th style="width: 24%;">1. Signaling Topology Type</th>
+                <th style="width: 24%;">2. Target Hardware Component Match</th>
+                <th style="width: 24%;">3. Peak Standard Throughput</th>
+            </tr>
+        </thead>
+        <tbody id="matrix-body"></tbody>
+    </table>
+
+    <div class="controls">
+        <button class="btn-reset action-btn" onclick="resetForm()">Strip Hardware Matrix</button>
+        <div id="scoreBox" class="score-display"></div>
+        <button class="btn-submit action-btn" onclick="evaluateMatrix()">Verify Interface Map</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="task-modal">
+    <div class="modal-card">
+        <div class="modal-header" id="m-header">Task Setup</div>
+        <div class="modal-body" id="m-body">Task Content</div>
+        <div style="text-align: right;">
+            <button class="modal-close" onclick="closeModal()">Close Guide</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const dataset = [
+        { id: "hdmi", name: "HDMI (High-Definition Multimedia Interface)", desc: "Standard consumer/business multimedia port pushing video and uncompressed audio.", ans1: "digital", ans2: "monitor_audio", ans3: "48gbps" },
+        { id: "vga", name: "VGA (Video Graphics Array / DB-15)", desc: "Classic 15-pin three-row connector standard introduced in 1987.", ans1: "analog", ans2: "crt", ans3: "analog_video" },
+        { id: "dvi", name: "DVI-I (Digital Visual Interface - Integrated)", desc: "A hybrid multi-pin connector built to bridge transition-era workstation hardware.", ans1: "hybrid", ans2: "lcd_panel", ans3: "792gbps" },
+        { id: "dp", name: "DisplayPort", desc: "VESA open-standard interface focusing on high-performance PC workstation display configurations.", ans1: "digital", ans2: "daisy_chain", ans3: "80gbps" },
+        { id: "svideo", name: "S-Video (Separate Video)", desc: "Legacy analog connection that splits luminance (Y) and chrominance (C) video signals.", ans1: "analog", ans2: "cctv", ans3: "analog_video" },
+        { id: "serial", name: "RS-232 Serial (DB-9)", desc: "Legacy 9-pin bidirectional interface common on old networking nodes and terminal platforms.", ans1: "serial_bus", ans2: "modem", ans3: "115kbps" },
+        { id: "usb_c", name: "USB Type-C (Universal Serial Bus)", desc: "Modern reversible multi-lane serial interface pipeline running multi-protocol streams.", ans1: "serial_bus", ans2: "nvme_dock", ans3: "40gbps" },
+        { id: "ps2", name: "PS/2 (Mini-DIN 6-Pin)", desc: "Obsolete dedicated interface colored purple (keyboard) or green (mouse).", ans1: "serial_bus", ans2: "legacy_kb", ans3: "12kbps" },
+        { id: "usb_a", name: "USB Type-A (USB 3.0 Standard)", desc: "The ubiquitous standard rectangular system input interface housing 9 internal pins.", ans1: "serial_bus", ans2: "ext_hdd", ans3: "5gbps" },
+        { id: "ieee", name: "IEEE 1394 (FireWire 400)", desc: "Legacy high-speed parallel tracking serial bus favored by old multimedia video storage components.", ans1: "serial_bus", ans2: "camcorder", ans3: "400mbps" }
+    ];
+
+    const tasks = {
+        1: {
+            title: "Task 1: Video Rail Signaling Systems Analysis",
+            color: "var(--accent-purple)",
+            body: "<strong>Objective:</strong> Audit the evolution of computer video output rails from legacy analog scan lines to multi-lane digital networks.<br><br><strong>Instructions:</strong> Target the <em>HDMI, VGA, DVI-I, DisplayPort,</em> and <em>S-Video</em> listings inside the matrix. Track their unique signaling variations. Note how older systems separated luminance/chrominance waves, while modern pipelines packetize extreme video feeds across high-bandwidth digital pins."
+        },
+        2: {
+            title: "Task 2: Alphanumeric Peripheral & Legacy Serial Buses",
+            color: "var(--accent-green)",
+            body: "<strong>Objective:</strong> Map bidirectional system data lines connecting keyboards, communication equipment, and storage accessories.<br><br><strong>Instructions:</strong> Configure parameters for the <em>RS-232 Serial port, USB-C, PS/2, USB-A,</em> and <em>IEEE 1394 FireWire</em>. Pay close attention to historical throughput scaling: trace the pipeline expansion from an absolute 12 Kbps on older PS/2 console lanes up to modern 40 Gbps topologies."
+        },
+        3: {
+            title: "📸 Part 3 Portfolio Submission Sign-Off",
+            color: "var(--accent-blue)",
+            body: "<strong>Evidence Requirements:</strong><br>Apprentices must evaluate all 30 configuration coordinates within the interface topology matrix array map.<br><br>Once every single row is verified green by the execution engine, grab a clean snippet of the verified workspace layout (<strong>Win+Shift+S</strong>) and log it into your BUD e-portfolio structure under the physical layer hardware architecture deliverables section."
+        }
+    };
+
+    function showTask(id) {
+        const modal = document.getElementById('task-modal');
+        const header = document.getElementById('m-header');
+        const body = document.getElementById('m-body');
+        header.innerText = tasks[id].title;
+        header.style.color = tasks[id].color;
+        body.innerHTML = tasks[id].body;
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() { document.getElementById('task-modal').style.display = 'none'; }
+
+    function renderMatrix() {
+        document.getElementById('matrix-body').innerHTML = dataset.map(row => `
+            <tr>
+                <td><span class="hardware-name">${row.name}</span><span class="hardware-desc">${row.desc}</span></td>
+                <td>
+                    <select class="col1" data-correct="${row.ans1}">
+                        <option value="">-- Choose Signaling --</option>
+                        <option value="analog">Pure Analog Waveform</option>
+                        <option value="digital">Pure Packetized Digital</option>
+                        <option value="hybrid">Hybrid Integrated (Analog & Digital)</option>
+                        <option value="serial_bus">Bidirectional Serial Data Bus</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="col2" data-correct="${row.ans2}">
+                        <option value="">-- Choose Component Match --</option>
+                        <option value="monitor_audio">Flat-Panel Display with Integrated Audio Speakers</option>
+                        <option value="crt">Legacy CRT Monitor / Analog Projector Grid</option>
+                        <option value="lcd_panel">Early Desktop LCD Panel Workspace</option>
+                        <option value="daisy_chain">High-Refresh Multi-Monitor Workstation (Daisy Chaining)</option>
+                        <option value="cctv">Analog Television CRT Tube / Legacy CCTV Receiver</option>
+                        <option value="modem">External Dial-Up Modem / Legacy Telemetry Terminal</option>
+                        <option value="nvme_dock">High-Speed NVMe RAID Storage Docking Hub</option>
+                        <option value="legacy_kb">Legacy IBM Mechanical Keyboard / Console Mouse</option>
+                        <option value="ext_hdd">Standard External USB 3.0 Hard Disk Drive</option>
+                        <option value="camcorder">Legacy MiniDV Digital Camcorder / Storage Array</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="col3" data-correct="${row.ans3}">
+                        <option value="">-- Choose Peak Throughput --</option>
+                        <option value="48gbps">48 Gbps (HDMI 2.1 Standard)</option>
+                        <option value="analog_video">N/A (Analog - Bound by Cable Shielding Resolution)</option>
+                        <option value="792gbps">7.92 Gbps (Dual-Link Digital Mode)</option>
+                        <option value="80gbps">80 Gbps (DisplayPort 2.0 Standard)</option>
+                        <option value="115kbps">115.2 Kbps (RS-232 Communication Cap)</option>
+                        <option value="40gbps">40 Gbps (Thunderbolt Type-C Base Link)</option>
+                        <option value="12kbps">12 Kbps (Fixed Interrupt Polling Rail)</option>
+                        <option value="5gbps">5.0 Gbps (SuperSpeed Operation)</option>
+                        <option value="400mbps">400 Mbps (Half-Duplex Parallel Sync)</option>
+                    </select>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function evaluateMatrix() {
+        let correctPoints = 0;
+        const dropdowns = document.querySelectorAll('#matrix-body select');
+        dropdowns.forEach(select => {
+            if (select.value === select.getAttribute('data-correct')) {
+                select.className = "input-correct"; correctPoints++;
+            } else { select.className = "input-error"; }
+        });
+        const scoreBox = document.getElementById('scoreBox');
+        scoreBox.style.display = 'block';
+        scoreBox.innerText = `Port Analysis Complete: Successfully verified ${correctPoints} / ${dropdowns.length} interface parameters.`;
+        if (correctPoints === dropdowns.length) {
+            scoreBox.style.backgroundColor = 'var(--success-bg)'; scoreBox.style.borderColor = 'var(--accent-green)'; scoreBox.style.color = 'var(--accent-green)';
+        } else {
+            scoreBox.style.backgroundColor = 'var(--error-bg)'; scoreBox.style.borderColor = 'var(--accent-red)'; scoreBox.style.color = 'var(--accent-red)';
+        }
+    }
+
+    function resetForm() { renderMatrix(); document.getElementById('scoreBox').style.display = 'none'; }
+    window.onload = renderMatrix;
+</script>
+</body>
+</html>
