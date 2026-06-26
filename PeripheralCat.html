@@ -3,78 +3,286 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Peripheral Categorization</title>
+    <title>Advanced Peripheral Matrix Lab</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #f0f4f8; padding: 20px; }
-        .card { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
-        select { padding: 6px; border-radius: 4px; border: 1px solid #ccc; }
-        button { width: 100%; margin-top: 20px; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
-        button:hover { background: #0056b3; }
-        .feedback { margin-top: 15px; text-align: center; font-weight: bold; }
+        :root {
+            --primary: #1e293b;
+            --accent: #2563eb;
+            --success: #16a34a;
+            --error: #dc2626;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--primary);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .lab-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        header {
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+
+        h1 { margin: 0 0 10px 0; color: #0f172a; font-size: 28px; }
+        .instructions { color: #64748b; font-size: 15px; margin: 0; }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .matrix-table th {
+            background-color: #f1f5f9;
+            color: #334155;
+            text-align: left;
+            padding: 12px;
+            font-weight: 600;
+            border-bottom: 2px solid #cbd5e1;
+        }
+
+        .matrix-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .hardware-name {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .hardware-desc {
+            display: block;
+            font-size: 12px;
+            color: #64748b;
+            font-weight: normal;
+            margin-top: 4px;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            background-color: #fff;
+            color: #334155;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-submit { background-color: var(--accent); color: white; }
+        .btn-submit:hover { background-color: #1d4ed8; }
+        .btn-reset { background-color: #e2e8f0; color: #475569; }
+        .btn-reset:hover { background-color: #cbd5e1; }
+
+        .score-display {
+            font-size: 18px;
+            font-weight: bold;
+            display: none;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        /* Validation Styles */
+        .input-correct { border-color: var(--success) !important; background-color: #f0fdf4; color: #166534; }
+        .input-error { border-color: var(--error) !important; background-color: #fef2f2; color: #991b1b; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Peripheral Classification</h2>
-    <p>Classify each hardware device correctly:</p>
-    
-    <div class="row">
-        <span>1. Optical Mark Reader (OMR)</span>
-        <select class="quiz-select" data-ans="special">
-            <option value="">-- Choose --</option>
-            <option value="standard">Standard I/O</option>
-            <option value="special">Specialized Tool</option>
-        </select>
-    </div>
-    <div class="row">
-        <span>2. Computer Mouse</span>
-        <select class="quiz-select" data-ans="standard">
-            <option value="">-- Choose --</option>
-            <option value="standard">Standard I/O</option>
-            <option value="special">Specialized Tool</option>
-        </select>
-    </div>
-    <div class="row">
-        <span>3. Oscilloscope (USB-linked)</span>
-        <select class="quiz-select" data-ans="special">
-            <option value="">-- Choose --</option>
-            <option value="standard">Standard I/O</option>
-            <option value="special">Specialized Tool</option>
-        </select>
-    </div>
-    <div class="row">
-        <span>4. LED Monitor</span>
-        <select class="quiz-select" data-ans="standard">
-            <option value="">-- Choose --</option>
-            <option value="standard">Standard I/O</option>
-            <option value="special">Specialized Tool</option>
-        </select>
-    </div>
+<div class="lab-container">
+    <header>
+        <h1>Engineering Lab: Hardware Matrix Architecture</h1>
+        <p class="instructions">
+            <strong>Task:</strong> Analyze the technical profiles of standard and specialized hardware profiles. For each device, map its classification archetype, standard physical interface connector, and typical bus data load requirements.
+        </p>
+    </header>
 
-    <button onclick="checkAnswers()">Check Answers</button>
-    <div class="feedback" id="feedback"></div>
+    <table class="matrix-table">
+        <thead>
+            <tr>
+                <th style="width: 30%;">Hardware Profile</th>
+                <th style="width: 23%;">1. Classification</th>
+                <th style="width: 23%;">2. Primary Connector</th>
+                <th style="width: 24%;">3. Data Pipeline Demands</th>
+            </tr>
+        </thead>
+        <tbody id="matrix-body">
+            <!-- Rows injected by JavaScript -->
+        </tbody>
+    </table>
+
+    <div class="controls">
+        <button class="btn-reset" onclick="resetForm()">Reset Matrix</button>
+        <div id="scoreBox" class="score-display"></div>
+        <button class="btn-submit" onclick="evaluateMatrix()">Verify Architecture</button>
+    </div>
 </div>
 
 <script>
-    function checkAnswers() {
-        const selects = document.querySelectorAll('.quiz-select');
-        let correctCount = 0;
-        
-        selects.forEach(select => {
-            if(select.value === select.getAttribute('data-ans')) {
-                select.style.borderColor = "#28a745";
-                correctCount++;
-            } else {
-                select.style.borderColor = "#dc3545";
-            }
-        });
-        
-        const feedback = document.getElementById('feedback');
-        feedback.innerText = `You got ${correctCount} out of ${selects.length} right!`;
-        feedback.style.color = correctCount === selects.length ? "#28a745" : "#dc3545";
+    const dataset = [
+        {
+            id: "omr",
+            name: "Optical Mark Reader (OMR)",
+            desc: "Scans physical bubble-sheets to gather batch assessment data.",
+            ans1: "special",
+            ans2: "usb",
+            ans3: "static"
+        },
+        {
+            id: "mouse",
+            name: "Ergonomic Optical Mouse",
+            desc: "Standard pointer device tracking human hand movement coordinates.",
+            ans1: "standard",
+            ans2: "usb",
+            ans3: "latency"
+        },
+        {
+            id: "oscilloscope",
+            name: "USB-Linked Oscilloscope",
+            desc: "Captures and streams real-time signal voltage waveforms to computers.",
+            ans1: "special",
+            ans2: "usb",
+            ans3: "telemetry"
+        },
+        {
+            id: "monitor",
+            name: "External 4K LED Monitor",
+            desc: "High-density display screen rendering desktop workspace frames.",
+            ans1: "standard",
+            ans2: "hdmi",
+            ans3: "video"
+        },
+        {
+            id: "condenser_mic",
+            name: "Studio Condenser Microphone",
+            desc: "High-fidelity analog audio capture tracking sound waves.",
+            ans1: "special",
+            ans2: "xlr",
+            ans3: "telemetry"
+        }
+    ];
+
+    function renderMatrix() {
+        const tbody = document.getElementById('matrix-body');
+        tbody.innerHTML = dataset.map(row => `
+            <tr data-id="${row.id}">
+                <td>
+                    <span class="hardware-name">${row.name}</span>
+                    <span class="hardware-desc">${row.desc}</span>
+                </td>
+                <td>
+                    <select class="col1" data-correct="${row.ans1}">
+                        <option value="">-- Choose --</option>
+                        <option value="standard">Standard I/O</option>
+                        <option value="special">Specialized Tech Tool</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="col2" data-correct="${row.ans2}">
+                        <option value="">-- Choose --</option>
+                        <option value="usb">USB-A / USB-C</option>
+                        <option value="hdmi">HDMI / DisplayPort</option>
+                        <option value="xlr">XLR 3-Pin</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="col3" data-correct="${row.ans3}">
+                        <option value="">-- Choose --</option>
+                        <option value="latency">Low Latency / Pure Control</option>
+                        <option value="video">High Video Bandwidth</option>
+                        <option value="telemetry">High Frequency Telemetry</option>
+                        <option value="static">Low Data / Static Batches</option>
+                    </select>
+                </td>
+            </tr>
+        `).join('');
     }
+
+    function evaluateMatrix() {
+        const rows = document.querySelectorAll('#matrix-body tr');
+        let correctPoints = 0;
+        let totalPoints = dataset.length * 3;
+
+        rows.forEach(row => {
+            const selects = row.querySelectorAll('select');
+            selects.forEach(select => {
+                const choice = select.value;
+                const correct = select.getAttribute('data-correct');
+
+                if (choice === correct) {
+                    select.className = select.className.split(' ')[0] + ' input-correct';
+                    correctPoints++;
+                } else {
+                    select.className = select.className.split(' ')[0] + ' input-error';
+                }
+            });
+        });
+
+        const scoreBox = document.getElementById('scoreBox');
+        scoreBox.style.display = 'block';
+        scoreBox.innerText = `Score: ${correctPoints} / ${totalPoints} metrics verified correctly.`;
+
+        if (correctPoints === totalPoints) {
+            scoreBox.style.backgroundColor = '#dcfce7';
+            scoreBox.style.color = '#166534';
+        } else {
+            scoreBox.style.backgroundColor = '#fee2e2';
+            scoreBox.style.color = '#991b1b';
+        }
+    }
+
+    function resetForm() {
+        renderMatrix();
+        const scoreBox = document.getElementById('scoreBox');
+        scoreBox.style.display = 'none';
+    }
+
+    // Initial load
+    renderMatrix();
 </script>
 </body>
 </html>
