@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USB Bus Interface Sandbox</title>
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --panel-bg: #131c2e;
+            --node-bg: #1e293b;
+            --accent-purple: #a855f7;
+            --accent-blue: #0ea5e9;
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
+            --text-light: #f8fafc;
+            --text-muted: #64748b;
+            
+            --success-bg: rgba(34, 197, 94, 0.15);
+            --hover-bg: rgba(14, 165, 233, 0.15);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .lab-container {
+            width: 100%;
+            max-width: 1250px;
+            background-color: var(--panel-bg);
+            padding: 35px;
+            border-radius: 12px;
+            border: 1px solid var(--node-bg);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        header {
+            border-bottom: 1px solid var(--node-bg);
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .header-info h1 {
+            margin: 0 0 8px 0;
+            font-size: 1.8rem;
+            color: var(--accent-blue);
+        }
+
+        .header-info p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .task-bar {
+            background-color: var(--bg-dark);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--node-bg);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #cbd5e1;
+            margin-bottom: 30px;
+        }
+
+        .sandbox-layout {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 40px;
+            margin-top: 20px;
+        }
+
+        .source-column {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background-color: var(--bg-dark);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--node-bg);
+            max-height: 680px;
+            overflow-y: auto;
+        }
+
+        .column-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: bold;
+            margin-bottom: 5px;
+            border-bottom: 1px solid var(--node-bg);
+            padding-bottom: 6px;
+        }
+
+        .drag-node {
+            background-color: var(--node-bg);
+            border: 1px solid #334155;
+            color: var(--text-light);
+            padding: 12px;
+            border-radius: 6px;
+            cursor: grab;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            user-select: none;
+        }
+
+        .drag-node:hover {
+            border-color: var(--accent-blue);
+            background-color: #243147;
+        }
+
+        .drag-node .node-spec {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: normal;
+        }
+
+        .drag-node.assigned {
+            opacity: 0.3;
+            cursor: not-allowed;
+            border-style: dashed;
+        }
+
+        .target-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            max-height: 680px;
+            overflow-y: auto;
+        }
+
+        .drop-card {
+            background-color: var(--bg-dark);
+            border: 1px solid var(--node-bg);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .device-info h3 {
+            margin: 0;
+            font-size: 0.95rem;
+            color: var(--text-light);
+        }
+
+        .device-info p {
+            margin: 4px 0 0 0;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .drop-zone {
+            background-color: var(--panel-bg);
+            border: 2px dashed #334155;
+            border-radius: 6px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+            padding: 4px;
+        }
+
+        .drop-zone.drag-hover {
+            background-color: var(--hover-bg);
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .drop-zone.correct-match {
+            background-color: var(--success-bg);
+            border-color: var(--accent-green);
+            color: var(--text-light);
+            border-style: solid;
+        }
+
+        .drop-zone.incorrect-match {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-color: var(--accent-red);
+            color: var(--text-light);
+            border-style: solid;
+        }
+
+        .snapped-item {
+            background-color: var(--node-bg);
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 4px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 0.85rem;
+            border: 1px solid var(--accent-blue);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .snapped-item div {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .remove-btn {
+            background: none;
+            border: none;
+            color: var(--accent-red);
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.2rem;
+            padding: 0 5px;
+        }
+
+        .controls {
+            margin-top: 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        button.action-btn {
+            padding: 12px 24px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-submit { background-color: var(--accent-blue); color: var(--bg-dark); border: none; }
+        .btn-submit:hover { opacity: 0.9; }
+        .btn-reset { background-color: var(--node-bg); color: var(--text-light); border: 1px solid #334155; }
+        .btn-reset:hover { background-color: #334155; }
+
+        .score-display {
+            font-size: 0.95rem;
+            font-weight: bold;
+            display: none;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            flex-grow: 1;
+            border: 1px solid transparent;
+        }
+    </style>
+</head>
+<body>
+
+<div class="lab-container">
+    <header>
+        <div class="header-info">
+            <h1>Universal Serial Bus (USB) Topology Sandbox</h1>
+            <p>Bus Infrastructure: Route exact physical interface connector form factors and profiles to host system ports.</p>
+        </div>
+        <div>
+            <span style="background-color: var(--node-bg); color: var(--accent-blue); padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; font-weight: bold; border: 1px solid #334155;">Module 4</span>
+        </div>
+    </header>
+
+    <div class="task-bar">
+        <strong>⚡ Subsystem Directives:</strong> Map the physical cable connector profiles to the matching destination system port description blocks. <em>Diagnostic Note:</em> Look closely at the standard color codings, throughput ceilings, and unique power constraints to prevent pipeline mismatches.
+    </div>
+
+    <div class="sandbox-layout">
+        <div class="source-column" id="source-nodes">
+            <div class="column-title">USB Connectors</div>
+            </div>
+
+        <div class="target-grid" id="target-devices">
+            </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn-reset action-btn" onclick="resetSandbox()">Strip USB Mesh</button>
+        <div id="scoreBox" class="score-display"></div>
+        <button class="btn-submit action-btn" onclick="verifyTopology()">Verify USB Mesh</button>
+    </div>
+</div>
+
+<script>
+    const connectors = [
+        { id: "u1", type: "usba_black", name: "USB Type-A (Black Interior)", spec: "USB 2.0 | 480 Mbps | 5V, 0.5A" },
+        { id: "u2", type: "usba_blue", name: "USB Type-A (Blue Interior)", spec: "USB 3.0 SuperSpeed | 5 Gbps | 5V, 0.9A" },
+        { id: "u3", type: "usba_red", name: "USB Type-A (Red/Yellow Interior)", spec: "Always-On Charging | Sleep-and-Charge Rail" },
+        { id: "u4", type: "usbc_data", name: "USB Type-C Standard", spec: "USB 3.2 Gen 2 | 10 Gbps | Standard Data" },
+        { id: "u5", type: "usbc_tb", name: "USB Type-C (Thunderbolt 4 / PD)", spec: "Alt Mode | 40 Gbps Layer | 100W+ Power Delivery" },
+        { id: "u6", type: "usb_b", name: "USB Type-B Square", spec: "Legacy Peripheral Cable | Upstream Bus Link" },
+        { id: "u7", type: "mini_b", name: "Mini-USB (Mini-B 5-Pin)", spec: "Early 2000s Legacy Mobile | Trapped Form Factor" },
+        { id: "u8", type: "micro_b", name: "Micro-USB (Micro-B 5-Pin)", spec: "Standard Legacy Mobile Base | Trapezoidal Profile" },
+        { id: "u9", type: "micro_b_3", name: "USB 3.0 Micro-B Split Connector", spec: "Dual-Element Structure | SuperSpeed Parallel Extended" }
+    ];
+
+    const targets = [
+        { id: "t1", name: "Legacy Business Workstation Peripheral", desc: "Connects a standard low-polling desktop keyboard over an original black legacy motherboard trace.", match: "usba_black" },
+        { id: "t2", name: "External USB 3.0 Storage Enclosure", desc: "Requires a legacy rectangular port layout supporting a blue plastic spacer with 5 additional high-speed sync lanes.", match: "usba_blue" },
+        { id: "t3", name: "Dedicated Charging Portal", desc: "A port that maintains active voltage delivery even when the host system's CPU drops into an S3 sleep low-power mode.", match: "usba_red" },
+        { id: "t4", name: "High-Speed External NVMe Enclosure", desc: "Requires a reversible interface capable of sustaining 10 Gbps across symmetric interface paths.", match: "usbc_data" },
+        { id: "t5", name: "Dual 4K Monitor Display Docking Station", desc: "Requires a symmetric line supporting alternative video modes and 100W Power Delivery channels simultaneously.", match: "usbc_tb" },
+        { id: "t6", name: "Desktop Laser Office Printer", desc: "Connects to a large square upstream receptacle port on the device side to feed print queues.", match: "usb_b" },
+        { id: "t7", name: "Legacy Graphing Calculator / Early GPS", desc: "Accepts an older, thick, blocky 5-pin miniature interface node common before 2007.", match: "mini_b" },
+        { id: "t8", name: "Legacy Android Smartphone (Pre-2017)", desc: "Accepts a flat, thin, wide connector featuring two bottom latching hooks and angled side edges.", match: "micro_b" },
+        { id: "t9", name: "Legacy USB 3.0 Portable External HDD", desc: "Requires a composite connector split into a standard Micro-B segment and an adjacent 5-pin data expansion block.", match: "micro_b_3" }
+    ];
+
+    function initSandbox() {
+        const sourceCol = document.getElementById('source-nodes');
+        sourceCol.innerHTML = '<div class="column-title">USB Connectors</div>';
+        connectors.forEach(conn => {
+            const node = document.createElement('div');
+            node.className = 'drag-node';
+            node.id = conn.id;
+            node.draggable = true;
+            node.innerHTML = `<span>${conn.name}</span><span class="node-spec">${conn.spec}</span>`;
+            node.setAttribute('data-type', conn.type);
+            node.addEventListener('dragstart', e => {
+                if(node.classList.contains('assigned')) { e.preventDefault(); return; }
+                e.dataTransfer.setData('text/plain', e.target.closest('.drag-node').id);
+            });
+            sourceCol.appendChild(node);
+        });
+
+        const targetGrid = document.getElementById('target-devices');
+        targetGrid.innerHTML = '';
+        targets.forEach(t => {
+            const card = document.createElement('div');
+            card.className = 'drop-card';
+            card.innerHTML = `
+                <div class="device-info">
+                    <h3>${t.name}</h3>
+                    <p>${t.desc}</p>
+                </div>
+                <div class="drop-zone" id="zone-${t.id}" data-match="${t.match}">
+                    Drop Correct USB Protocol Node Here
+                </div>
+            `;
+            targetGrid.appendChild(card);
+            
+            const zone = card.querySelector('.drop-zone');
+            zone.addEventListener('dragover', e => {
+                e.preventDefault();
+                if(!zone.classList.contains('correct-match') && !zone.querySelector('.snapped-item')) {
+                    zone.classList.add('drag-hover');
+                }
+            });
+            zone.addEventListener('dragleave', () => zone.classList.remove('drag-hover'));
+            zone.addEventListener('drop', e => {
+                e.preventDefault();
+                zone.classList.remove('drag-hover');
+                if (zone.querySelector('.snapped-item') || zone.classList.contains('correct-match')) return;
+
+                const nodeId = e.dataTransfer.getData('text/plain');
+                const dragNode = document.getElementById(nodeId);
+                if (!dragNode) return;
+
+                zone.innerHTML = `
+                    <div class="snapped-item" data-source-id="${nodeId}" data-type="${dragNode.getAttribute('data-type')}">
+                        <div>
+                            <span>${dragNode.querySelector('span').innerText}</span>
+                            <span style="font-size:11px; color:var(--text-muted);">${dragNode.querySelector('.node-spec').innerText}</span>
+                        </div>
+                        <button class="remove-btn" onclick="removeNode('${zone.id}', '${nodeId}')">×</button>
+                    </div>
+                `;
+                dragNode.classList.add('assigned');
+                document.getElementById('scoreBox').style.display = 'none';
+            });
+        });
+    }
+
+    function removeNode(zoneId, nodeId) {
+        const zone = document.getElementById(zoneId);
+        const node = document.getElementById(nodeId);
+        zone.innerHTML = "Drop Correct USB Protocol Node Here";
+        zone.className = "drop-zone";
+        if (node) node.classList.remove('assigned');
+        document.getElementById('scoreBox').style.display = 'none';
+    }
+
+    function verifyTopology() {
+        const zones = document.querySelectorAll('.drop-zone');
+        let correctPoints = 0;
+
+        zones.forEach(zone => {
+            const snapped = zone.querySelector('.snapped-item');
+            const matchTarget = zone.getAttribute('data-match');
+            
+            if (!snapped) { zone.className = "drop-zone incorrect-match"; return; }
+
+            if (snapped.getAttribute('data-type') === matchTarget) {
+                zone.className = "drop-zone correct-match";
+                const btn = zone.querySelector('.remove-btn');
+                if (btn) btn.remove();
+                correctPoints++;
+            } else {
+                zone.className = "drop-zone incorrect-match";
+            }
+        });
+
+        const scoreBox = document.getElementById('scoreBox');
+        scoreBox.style.display = 'block';
+        scoreBox.innerText = `USB Bus Assessment: Successfully mapped ${correctPoints} / ${targets.length} interface paths.`;
+
+        if (correctPoints === targets.length) {
+            scoreBox.style.backgroundColor = 'var(--success-bg)';
+            scoreBox.style.borderColor = 'var(--accent-green)';
+            scoreBox.style.color = 'var(--accent-green)';
+        } else {
+            scoreBox.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+            scoreBox.style.borderColor = 'var(--accent-red)';
+            scoreBox.style.color = 'var(--accent-red)';
+        }
+    }
+
+    function resetSandbox() {
+        initSandbox();
+        document.getElementById('scoreBox').style.display = 'none';
+    }
+
+    window.onload = initSandbox;
+</script>
+</body>
+</html>
