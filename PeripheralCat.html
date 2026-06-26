@@ -3,143 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Peripheral Matrix Lab</title>
+    <title>Hardware Matrix Architecture Lab</title>
     <style>
         :root {
-            --bg-main: #121212;
-            --bg-card: #0A0A0A;
-            --bg-input: #1A1A1A;
-            --accent: #CCFF00;
-            --text-main: #FFFFFF;
-            --text-muted: #A1A1AA;
-            --border: #333333;
+            --bg-dark: #0b0f19;
+            --panel-bg: #131c2e;
+            --node-bg: #1e293b;
+            --accent-blue: #0ea5e9;
+            --accent-purple: #a855f7;
+            --accent-green: #22c55e;
+            --accent-orange: #f97316;
+            --accent-red: #ef4444;
+            --text-light: #f8fafc;
+            --text-muted: #64748b;
             
-            /* Status Indicators matched to theme */
-            --success-border: #28a745;
-            --success-bg: rgba(40, 167, 69, 0.15);
-            --error-border: #dc3545;
-            --error-bg: rgba(220, 53, 69, 0.15);
+            /* Status Indicators integrated into the theme */
+            --success-border: rgba(34, 197, 94, 0.4);
+            --success-bg: rgba(34, 197, 94, 0.1);
+            --error-border: rgba(239, 68, 68, 0.4);
+            --error-bg: rgba(239, 68, 68, 0.1);
         }
 
         body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
             margin: 0;
             padding: 40px 20px;
-            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
         }
 
         .lab-container {
-            max-width: 1100px;
-            margin: 0 auto;
-            background: var(--bg-card);
-            padding: 40px;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            position: relative;
-        }
-
-        /* Subtle top glow bar accent */
-        .lab-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--accent), transparent);
-            border-top-left-radius: 16px;
-            border-top-right-radius: 16px;
+            width: 100%;
+            max-width: 1200px;
+            background-color: var(--panel-bg);
+            padding: 35px;
+            border-radius: 12px;
+            border: 1px solid var(--node-bg);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
         }
 
         header {
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 24px;
-            margin-bottom: 30px;
+            border-bottom: 1px solid var(--node-bg);
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
         }
 
-        h1 { 
-            margin: 0 0 12px 0; 
-            color: var(--text-main); 
-            font-size: 32px; 
-            font-weight: 700;
-        }
-        
-        h1 span {
-            color: var(--accent);
+        .header-info h1 {
+            margin: 0 0 8px 0;
+            font-size: 1.8rem;
+            color: var(--accent-blue);
         }
 
-        .instructions { 
-            color: var(--text-muted); 
-            font-size: 16px; 
-            margin: 0; 
+        .header-info p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
         }
 
         .matrix-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            font-size: 15px;
+            font-size: 14px;
         }
 
         .matrix-table th {
-            background-color: var(--bg-input);
-            color: var(--accent);
+            background-color: var(--bg-dark);
+            color: var(--text-light);
             text-align: left;
-            padding: 16px;
-            font-weight: 600;
-            border-bottom: 2px solid var(--border);
+            padding: 14px;
+            font-weight: 700;
+            border-bottom: 2px solid var(--node-bg);
             text-transform: uppercase;
-            font-size: 13px;
+            font-size: 0.75rem;
             letter-spacing: 0.05em;
         }
 
         .matrix-table td {
-            padding: 16px;
-            border-bottom: 1px solid var(--border);
+            padding: 16px 14px;
+            border-bottom: 1px solid var(--node-bg);
             vertical-align: middle;
         }
 
         .hardware-name {
-            font-weight: 600;
-            color: var(--text-main);
-            font-size: 16px;
+            font-weight: bold;
+            color: var(--text-light);
+            font-size: 15px;
             display: block;
         }
 
         .hardware-desc {
             display: block;
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-muted);
             font-weight: normal;
             margin-top: 4px;
+            line-height: 1.4;
         }
 
         select {
             width: 100%;
+            background-color: var(--bg-dark);
+            border: 1px solid #334155;
+            color: var(--text-light);
             padding: 10px;
             border-radius: 6px;
-            border: 1px solid var(--border);
-            background-color: var(--bg-input);
-            color: var(--text-main);
-            font-family: inherit;
-            cursor: pointer;
+            outline: none;
+            box-sizing: border-box;
+            font-size: 0.85rem;
             transition: all 0.2s ease;
         }
 
         select:focus {
-            outline: none;
-            border-color: var(--accent);
+            border-color: var(--accent-blue);
         }
 
         select option {
-            background-color: var(--bg-card);
-            color: var(--text-main);
+            background-color: var(--panel-bg);
+            color: var(--text-light);
         }
 
         .controls {
-            margin-top: 40px;
+            margin-top: 35px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -147,55 +140,56 @@
         }
 
         button {
-            padding: 14px 28px;
-            font-size: 16px;
-            font-weight: 600;
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
             border-radius: 6px;
             cursor: pointer;
-            border: none;
             transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .btn-submit { 
-            background-color: var(--accent); 
-            color: #000000; 
+            background-color: var(--accent-blue); 
+            color: var(--bg-dark); 
+            border: none;
         }
         .btn-submit:hover { 
-            background-color: #b3ff00; 
-            transform: translateY(-1px);
+            opacity: 0.9;
         }
         
         .btn-reset { 
-            background-color: transparent; 
-            color: var(--text-muted); 
-            border: 1px solid var(--border);
+            background-color: var(--node-bg); 
+            color: var(--text-light); 
+            border: 1px solid #334155;
         }
         .btn-reset:hover { 
-            background-color: rgba(255, 255, 255, 0.05); 
-            color: var(--text-main);
+            background-color: #334155;
+            border-color: var(--text-muted);
         }
 
         .score-display {
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 0.95rem;
+            font-weight: bold;
             display: none;
-            padding: 14px;
+            padding: 12px;
             border-radius: 6px;
             text-align: center;
             flex-grow: 1;
             border: 1px solid transparent;
         }
 
-        /* Architectural Validation States */
+        /* Validation Overrides using explicit sandbox naming schemas */
         .input-correct { 
-            border-color: var(--success-border) !important; 
+            border-color: var(--accent-green) !important; 
             background-color: var(--success-bg) !important; 
-            color: #81c784 !important; 
+            color: var(--text-light) !important; 
         }
         .input-error { 
-            border-color: var(--error-border) !important; 
+            border-color: var(--accent-red) !important; 
             background-color: var(--error-bg) !important; 
-            color: #e57373 !important; 
+            color: var(--text-light) !important; 
         }
     </style>
 </head>
@@ -203,19 +197,22 @@
 
 <div class="lab-container">
     <header>
-        <h1>Hardware Matrix <span>Architecture Lab</span></h1>
-        <p class="instructions">
-            <strong>System Task:</strong> Match each device profile to its specific classification archetype, standard physical interface connector, and baseline throughput demand.
-        </p>
+        <div class="header-info">
+            <h1>Hardware Matrix Alignment Module</h1>
+            <p>Peripheral Subsystems: Evaluating interface buses, connectors, and data loop behaviors</p>
+        </div>
+        <div>
+            <span style="background-color: var(--node-bg); color: var(--accent-purple); padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; font-weight: bold; border: 1px solid #334155;">Module 2</span>
+        </div>
     </header>
 
     <table class="matrix-table">
         <thead>
             <tr>
-                <th style="width: 32%;">Hardware Profile</th>
-                <th style="width: 22%;">1. Classification</th>
-                <th style="width: 22%;">2. Interface Connector</th>
-                <th style="width: 24%;">3. Throughput Pipeline</th>
+                <th style="width: 34%;">Hardware Unit Profile</th>
+                <th style="width: 22%;">1. System Classification</th>
+                <th style="width: 22%;">2. Physical Interface Connector</th>
+                <th style="width: 22%;">3. Bus Pipeline Throughput</th>
             </tr>
         </thead>
         <tbody id="matrix-body">
@@ -223,9 +220,9 @@
     </table>
 
     <div class="controls">
-        <button class="btn-reset" onclick="resetForm()">Reset Matrix</button>
+        <button class="btn-reset" onclick="resetForm()">Strip Hardware Matrix</button>
         <div id="scoreBox" class="score-display"></div>
-        <button class="btn-submit" onclick="evaluateMatrix()">Verify Configuration</button>
+        <button class="btn-submit" onclick="evaluateMatrix()">Verify System Configuration</button>
     </div>
 </div>
 
@@ -234,7 +231,7 @@
         {
             id: "omr",
             name: "Optical Mark Reader (OMR)",
-            desc: "Processes localized bubble-sheet assessment sheets in legacy batches.",
+            desc: "Parses human-marked document bubbles into data arrays for batch tracking logs.",
             ans1: "special",
             ans2: "usb",
             ans3: "static"
@@ -242,7 +239,7 @@
         {
             id: "mouse",
             name: "Ergonomic Optical Mouse",
-            desc: "Standard Human Interface Device (HID) tracking basic structural inputs.",
+            desc: "Standard Human Interface Device (HID) capturing variable geometric coordinates.",
             ans1: "standard",
             ans2: "usb",
             ans3: "latency"
@@ -250,7 +247,7 @@
         {
             id: "oscilloscope",
             name: "USB-Linked Oscilloscope",
-            desc: "Diagnostic device capturing ongoing real-time electrical waveforms.",
+            desc: "Telemetry capture block plotting continuous high-frequency trace configurations.",
             ans1: "special",
             ans2: "usb",
             ans3: "telemetry"
@@ -258,7 +255,7 @@
         {
             id: "monitor",
             name: "External 4K LED Monitor",
-            desc: "High-density matrix output screen rendering graphical frames.",
+            desc: "High-density display screen rendering serialized image arrays over a constant video feed.",
             ans1: "standard",
             ans2: "hdmi",
             ans3: "video"
@@ -266,7 +263,7 @@
         {
             id: "condenser_mic",
             name: "Studio Condenser Microphone",
-            desc: "Professional production audio unit capturing balanced wave telemetry.",
+            desc: "Professional audio recording component tracking balanced signaling paths.",
             ans1: "special",
             ans2: "xlr",
             ans3: "telemetry"
@@ -283,22 +280,22 @@
                 </td>
                 <td>
                     <select class="col1" data-correct="${row.ans1}">
-                        <option value="">-- Choose --</option>
-                        <option value="standard">Standard I/O</option>
-                        <option value="special">Specialized Tech Tool</option>
+                        <option value="">-- Select Archetype --</option>
+                        <option value="standard">Standard I/O Component</option>
+                        <option value="special">Specialized Technical Tool</option>
                     </select>
                 </td>
                 <td>
                     <select class="col2" data-correct="${row.ans2}">
-                        <option value="">-- Choose --</option>
-                        <option value="usb">USB-A / USB-C</option>
-                        <option value="hdmi">HDMI / DisplayPort</option>
-                        <option value="xlr">XLR 3-Pin</option>
+                        <option value="">-- Select Connector --</option>
+                        <option value="usb">USB-A / USB-C Bus</option>
+                        <option value="hdmi">HDMI / DisplayPort Bus</option>
+                        <option value="xlr">Balanced XLR 3-Pin</option>
                     </select>
                 </td>
                 <td>
                     <select class="col3" data-correct="${row.ans3}">
-                        <option value="">-- Choose --</option>
+                        <option value="">-- Select Loop Target --</option>
                         <option value="latency">Low Latency / Pure Control</option>
                         <option value="video">High Video Bandwidth</option>
                         <option value="telemetry">High Frequency Telemetry</option>
@@ -331,16 +328,16 @@
 
         const scoreBox = document.getElementById('scoreBox');
         scoreBox.style.display = 'block';
-        scoreBox.innerText = `Verification Report: ${correctPoints} / ${totalPoints} structural metrics successfully aligned.`;
+        scoreBox.innerText = `System Verification Report: Aligned ${correctPoints} / ${totalPoints} structural architecture parameters.`;
 
         if (correctPoints === totalPoints) {
-            scoreBox.style.backgroundColor = 'rgba(40, 167, 69, 0.1)';
-            scoreBox.style.borderColor = 'var(--success-border)';
-            scoreBox.style.color = '#81c784';
+            scoreBox.style.backgroundColor = 'var(--success-bg)';
+            scoreBox.style.borderColor = 'var(--accent-green)';
+            scoreBox.style.color = 'var(--accent-green)';
         } else {
-            scoreBox.style.backgroundColor = 'rgba(220, 53, 69, 0.1)';
-            scoreBox.style.borderColor = 'var(--error-border)';
-            scoreBox.style.color = '#e57373';
+            scoreBox.style.backgroundColor = 'var(--error-bg)';
+            scoreBox.style.borderColor = 'var(--accent-red)';
+            scoreBox.style.color = 'var(--accent-red)';
         }
     }
 
@@ -350,8 +347,8 @@
         scoreBox.style.display = 'none';
     }
 
-    // Initialize layout
-    renderMatrix();
+    // Initialize layout variables on script mount
+    window.onload = renderMatrix;
 </script>
 </body>
 </html>
