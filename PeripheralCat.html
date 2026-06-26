@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hardware Matrix Architecture Lab</title>
+    <title>Hardware Matrix Architecture Lab - Part 1</title>
     <style>
         :root {
             --bg-dark: #0b0f19;
@@ -17,10 +17,7 @@
             --text-light: #f8fafc;
             --text-muted: #64748b;
             
-            /* Status Indicators integrated into the theme */
-            --success-border: rgba(34, 197, 94, 0.4);
             --success-bg: rgba(34, 197, 94, 0.1);
-            --error-border: rgba(239, 68, 68, 0.4);
             --error-bg: rgba(239, 68, 68, 0.1);
         }
 
@@ -68,10 +65,51 @@
             font-size: 0.95rem;
         }
 
+        .task-bar {
+            display: flex;
+            gap: 10px;
+            background-color: var(--bg-dark);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--node-bg);
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .task-btn {
+            background-color: var(--node-bg);
+            color: var(--accent-blue);
+            border: 1px solid #334155;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .task-btn:hover {
+            background-color: #334155;
+            color: white;
+            border-color: var(--accent-blue);
+        }
+
+        .evidence-btn {
+            background-color: rgba(249, 115, 22, 0.1);
+            color: var(--accent-orange);
+            border: 1px solid rgba(249, 115, 22, 0.4);
+        }
+
+        .evidence-btn:hover {
+            background-color: var(--accent-orange);
+            color: var(--bg-dark);
+            border-color: var(--accent-orange);
+        }
+
         .matrix-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
             font-size: 14px;
         }
 
@@ -122,14 +160,8 @@
             transition: all 0.2s ease;
         }
 
-        select:focus {
-            border-color: var(--accent-blue);
-        }
-
-        select option {
-            background-color: var(--panel-bg);
-            color: var(--text-light);
-        }
+        select:focus { border-color: var(--accent-blue); }
+        select option { background-color: var(--panel-bg); color: var(--text-light); }
 
         .controls {
             margin-top: 35px;
@@ -139,7 +171,7 @@
             gap: 20px;
         }
 
-        button {
+        button.action-btn {
             padding: 10px 20px;
             font-size: 0.85rem;
             font-weight: bold;
@@ -150,24 +182,10 @@
             letter-spacing: 0.05em;
         }
 
-        .btn-submit { 
-            background-color: var(--accent-blue); 
-            color: var(--bg-dark); 
-            border: none;
-        }
-        .btn-submit:hover { 
-            opacity: 0.9;
-        }
-        
-        .btn-reset { 
-            background-color: var(--node-bg); 
-            color: var(--text-light); 
-            border: 1px solid #334155;
-        }
-        .btn-reset:hover { 
-            background-color: #334155;
-            border-color: var(--text-muted);
-        }
+        .btn-submit { background-color: var(--accent-blue); color: var(--bg-dark); border: none; }
+        .btn-submit:hover { opacity: 0.9; }
+        .btn-reset { background-color: var(--node-bg); color: var(--text-light); border: 1px solid #334155; }
+        .btn-reset:hover { background-color: #334155; border-color: var(--text-muted); }
 
         .score-display {
             font-size: 0.95rem;
@@ -180,17 +198,33 @@
             border: 1px solid transparent;
         }
 
-        /* Validation Overrides using explicit sandbox naming schemas */
-        .input-correct { 
-            border-color: var(--accent-green) !important; 
-            background-color: var(--success-bg) !important; 
-            color: var(--text-light) !important; 
+        .input-correct { border-color: var(--accent-green) !important; background-color: var(--success-bg) !important; }
+        .input-error { border-color: var(--accent-red) !important; background-color: var(--error-bg) !important; }
+
+        /* Modal Overlay Styling */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(7, 10, 19, 0.85);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
         }
-        .input-error { 
-            border-color: var(--accent-red) !important; 
-            background-color: var(--error-bg) !important; 
-            color: var(--text-light) !important; 
+
+        .modal-card {
+            background-color: var(--panel-bg);
+            border: 2px solid #334155;
+            border-radius: 12px;
+            max-width: 650px;
+            width: 90%;
+            padding: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
         }
+
+        .modal-header { font-size: 1.3rem; font-weight: bold; margin-bottom: 15px; }
+        .modal-body { font-size: 0.95rem; line-height: 1.6; color: #cbd5e1; margin-bottom: 20px; }
+        .modal-close { background-color: var(--accent-blue); color: var(--bg-dark); border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; }
     </style>
 </head>
 <body>
@@ -198,13 +232,20 @@
 <div class="lab-container">
     <header>
         <div class="header-info">
-            <h1>Hardware Matrix Alignment Module</h1>
-            <p>Peripheral Subsystems: Evaluating interface buses, connectors, and data loop behaviors</p>
+            <h1>Hardware Matrix Alignment Module — Part 1</h1>
+            <p>Peripheral Subsystems: Evaluating interface buses, connectors, and baseline throughput profiles</p>
         </div>
         <div>
             <span style="background-color: var(--node-bg); color: var(--accent-purple); padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; font-weight: bold; border: 1px solid #334155;">Module 2</span>
         </div>
     </header>
+
+    <div class="task-bar">
+        <span style="font-weight:bold; font-size:0.85rem; color:var(--text-muted); margin-right:10px; uppercase; letter-spacing: 0.05em;">Assign Lab Deliverable:</span>
+        <button class="task-btn" onclick="showTask(1)">Task 1: Core Standard Architecture</button>
+        <button class="task-btn" onclick="showTask(2)">Task 2: Specialized Diagnostics Mapping</button>
+        <button class="task-btn evidence-btn" onclick="showTask(3)">📸 Submission Sign-Off</button>
+    </div>
 
     <table class="matrix-table">
         <thead>
@@ -215,139 +256,95 @@
                 <th style="width: 22%;">3. Bus Pipeline Throughput</th>
             </tr>
         </thead>
-        <tbody id="matrix-body">
-            </tbody>
+        <tbody id="matrix-body"></tbody>
     </table>
 
     <div class="controls">
-        <button class="btn-reset" onclick="resetForm()">Strip Hardware Matrix</button>
+        <button class="btn-reset action-btn" onclick="resetForm()">Strip Hardware Matrix</button>
         <div id="scoreBox" class="score-display"></div>
-        <button class="btn-submit" onclick="evaluateMatrix()">Verify System Configuration</button>
+        <button class="btn-submit action-btn" onclick="evaluateMatrix()">Verify System Configuration</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="task-modal">
+    <div class="modal-card">
+        <div class="modal-header" id="m-header">Task Setup</div>
+        <div class="modal-body" id="m-body">Task Content</div>
+        <div style="text-align: right;">
+            <button class="modal-close" onclick="closeModal()">Close Guide</button>
+        </div>
     </div>
 </div>
 
 <script>
     const dataset = [
-        {
-            id: "omr",
-            name: "Optical Mark Reader (OMR)",
-            desc: "Parses human-marked document bubbles into data arrays for batch tracking logs.",
-            ans1: "special",
-            ans2: "usb",
-            ans3: "static"
-        },
-        {
-            id: "mouse",
-            name: "Ergonomic Optical Mouse",
-            desc: "Standard Human Interface Device (HID) capturing variable geometric coordinates.",
-            ans1: "standard",
-            ans2: "usb",
-            ans3: "latency"
-        },
-        {
-            id: "oscilloscope",
-            name: "USB-Linked Oscilloscope",
-            desc: "Telemetry capture block plotting continuous high-frequency trace configurations.",
-            ans1: "special",
-            ans2: "usb",
-            ans3: "telemetry"
-        },
-        {
-            id: "monitor",
-            name: "External 4K LED Monitor",
-            desc: "High-density display screen rendering serialized image arrays over a constant video feed.",
-            ans1: "standard",
-            ans2: "hdmi",
-            ans3: "video"
-        },
-        {
-            id: "condenser_mic",
-            name: "Studio Condenser Microphone",
-            desc: "Professional audio recording component tracking balanced signaling paths.",
-            ans1: "special",
-            ans2: "xlr",
-            ans3: "telemetry"
-        }
+        { id: "omr", name: "Optical Mark Reader (OMR)", desc: "Parses human-marked document bubbles into data arrays for batch tracking logs.", ans1: "special", ans2: "usb", ans3: "static" },
+        { id: "mouse", name: "Ergonomic Optical Mouse", desc: "Standard Human Interface Device (HID) capturing variable geometric coordinates.", ans1: "standard", ans2: "usb", ans3: "latency" },
+        { id: "oscilloscope", name: "USB-Linked Oscilloscope", desc: "Telemetry capture block plotting continuous high-frequency trace configurations.", ans1: "special", ans2: "usb", ans3: "telemetry" },
+        { id: "monitor", name: "External 4K LED Monitor", desc: "High-density matrix output screen rendering serialized image arrays over a constant video feed.", ans1: "standard", ans2: "hdmi", ans3: "video" },
+        { id: "condenser_mic", name: "Studio Condenser Microphone", desc: "Professional audio recording component tracking balanced signaling paths.", ans1: "special", ans2: "xlr", ans3: "telemetry" }
     ];
 
+    const tasks = {
+        1: {
+            title: "Task 1: Standard Core Components Assessment",
+            color: "var(--accent-blue)",
+            body: "<strong>Objective:</strong> Isolate universal standard client human-interface components from customized industrial units.<br><br><strong>Instructions:</strong> Locate the <em>Ergonomic Optical Mouse</em> and the <em>External 4K LED Monitor</em> inside the configuration matrix. Map out their base structural attributes by choosing their default classification, standardized interface plug layout, and data pipeline load models."
+        },
+        2: {
+            title: "Task 2: Specialized Telemetry Mapping Profiles",
+            color: "var(--accent-purple)",
+            body: "<strong>Objective:</strong> Map data pipeline specifications for scientific and high-volume data-capture peripherals.<br><br><strong>Instructions:</strong> Configure the properties for the <em>Optical Mark Reader</em>, <em>USB Oscilloscope</em>, and <em>Studio Condenser Microphone</em>. Pay specific attention to how specialized tools might still share standard hardware physical connections (like USB) but maintain entirely unique transport stream metrics (like High-Frequency Telemetry vs. Static Batches)."
+        },
+        3: {
+            title: "📸 Part 1 Assessment Deliverables Sign-Off",
+            color: "var(--accent-orange)",
+            body: "<strong>Evidence Requirements:</strong><br>Apprentices must complete all 15 parameters inside the matrix array tracking map. Correct entries will change system bounds green upon testing execution.<br><br>Once all fields display clear parameters and your verification report passes successfully at 100%, clip a screen capture of the compiled frame (<strong>Win+Shift+S</strong>) and upload it to your e-portfolio system."
+        }
+    };
+
+    function showTask(id) {
+        const modal = document.getElementById('task-modal');
+        const header = document.getElementById('m-header');
+        const body = document.getElementById('m-body');
+        header.innerText = tasks[id].title;
+        header.style.color = tasks[id].color;
+        body.innerHTML = tasks[id].body;
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() { document.getElementById('task-modal').style.display = 'none'; }
+
     function renderMatrix() {
-        const tbody = document.getElementById('matrix-body');
-        tbody.innerHTML = dataset.map(row => `
-            <tr data-id="${row.id}">
-                <td>
-                    <span class="hardware-name">${row.name}</span>
-                    <span class="hardware-desc">${row.desc}</span>
-                </td>
-                <td>
-                    <select class="col1" data-correct="${row.ans1}">
-                        <option value="">-- Select Archetype --</option>
-                        <option value="standard">Standard I/O Component</option>
-                        <option value="special">Specialized Technical Tool</option>
-                    </select>
-                </td>
-                <td>
-                    <select class="col2" data-correct="${row.ans2}">
-                        <option value="">-- Select Connector --</option>
-                        <option value="usb">USB-A / USB-C Bus</option>
-                        <option value="hdmi">HDMI / DisplayPort Bus</option>
-                        <option value="xlr">Balanced XLR 3-Pin</option>
-                    </select>
-                </td>
-                <td>
-                    <select class="col3" data-correct="${row.ans3}">
-                        <option value="">-- Select Loop Target --</option>
-                        <option value="latency">Low Latency / Pure Control</option>
-                        <option value="video">High Video Bandwidth</option>
-                        <option value="telemetry">High Frequency Telemetry</option>
-                        <option value="static">Low Data / Static Batches</option>
-                    </select>
-                </td>
+        document.getElementById('matrix-body').innerHTML = dataset.map(row => `
+            <tr>
+                <td><span class="hardware-name">${row.name}</span><span class="hardware-desc">${row.desc}</span></td>
+                <td><select class="col1" data-correct="${row.ans1}"><option value="">-- Select Archetype --</option><option value="standard">Standard I/O Component</option><option value="special">Specialized Technical Tool</option></select></td>
+                <td><select class="col2" data-correct="${row.ans2}"><option value="">-- Select Connector --</option><option value="usb">USB-A / USB-C Bus</option><option value="hdmi">HDMI / DisplayPort Bus</option><option value="xlr">Balanced XLR 3-Pin</option></select></td>
+                <td><select class="col3" data-correct="${row.ans3}"><option value="">-- Select Loop Target --</option><option value="latency">Low Latency / Pure Control</option><option value="video">High Video Bandwidth</option><option value="telemetry">High Frequency Telemetry</option><option value="static">Low Data / Static Batches</option></select></td>
             </tr>
         `).join('');
     }
 
     function evaluateMatrix() {
-        const rows = document.querySelectorAll('#matrix-body tr');
         let correctPoints = 0;
-        let totalPoints = dataset.length * 3;
-
-        rows.forEach(row => {
-            const selects = row.querySelectorAll('select');
-            selects.forEach(select => {
-                const choice = select.value;
-                const correct = select.getAttribute('data-correct');
-
-                if (choice === correct) {
-                    select.className = select.className.split(' ')[0] + ' input-correct';
-                    correctPoints++;
-                } else {
-                    select.className = select.className.split(' ')[0] + ' input-error';
-                }
-            });
+        const dropdowns = document.querySelectorAll('#matrix-body select');
+        dropdowns.forEach(select => {
+            if (select.value === select.getAttribute('data-correct')) {
+                select.className = "input-correct"; correctPoints++;
+            } else { select.className = "input-error"; }
         });
-
         const scoreBox = document.getElementById('scoreBox');
         scoreBox.style.display = 'block';
-        scoreBox.innerText = `System Verification Report: Aligned ${correctPoints} / ${totalPoints} structural architecture parameters.`;
-
-        if (correctPoints === totalPoints) {
-            scoreBox.style.backgroundColor = 'var(--success-bg)';
-            scoreBox.style.borderColor = 'var(--accent-green)';
-            scoreBox.style.color = 'var(--accent-green)';
+        scoreBox.innerText = `System Verification Report: Aligned ${correctPoints} / ${dropdowns.length} parameters.`;
+        if (correctPoints === dropdowns.length) {
+            scoreBox.style.backgroundColor = 'var(--success-bg)'; scoreBox.style.borderColor = 'var(--accent-green)'; scoreBox.style.color = 'var(--accent-green)';
         } else {
-            scoreBox.style.backgroundColor = 'var(--error-bg)';
-            scoreBox.style.borderColor = 'var(--accent-red)';
-            scoreBox.style.color = 'var(--accent-red)';
+            scoreBox.style.backgroundColor = 'var(--error-bg)'; scoreBox.style.borderColor = 'var(--accent-red)'; scoreBox.style.color = 'var(--accent-red)';
         }
     }
 
-    function resetForm() {
-        renderMatrix();
-        const scoreBox = document.getElementById('scoreBox');
-        scoreBox.style.display = 'none';
-    }
-
-    // Initialize layout variables on script mount
+    function resetForm() { renderMatrix(); document.getElementById('scoreBox').style.display = 'none'; }
     window.onload = renderMatrix;
 </script>
 </body>
