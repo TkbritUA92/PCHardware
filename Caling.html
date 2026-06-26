@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cable Infrastructure Lab</title>
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --panel-bg: #131c2e;
+            --node-bg: #1e293b;
+            --accent-blue: #0ea5e9;
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
+            --text-light: #f8fafc;
+            --text-muted: #64748b;
+            --success-bg: rgba(34, 197, 94, 0.15);
+            --error-bg: rgba(239, 68, 68, 0.15);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            margin: 0; padding: 40px 20px;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+
+        .lab-container {
+            width: 100%; max-width: 1100px;
+            background-color: var(--panel-bg); padding: 35px;
+            border-radius: 12px; border: 1px solid var(--node-bg);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        header { border-bottom: 1px solid var(--node-bg); padding-bottom: 20px; margin-bottom: 25px; }
+        h1 { margin: 0 0 8px 0; font-size: 1.8rem; color: var(--accent-blue); }
+        p { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
+
+        .matrix-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+        .matrix-table th {
+            background-color: var(--bg-dark); color: var(--text-light);
+            text-align: left; padding: 12px; font-weight: 700;
+            border-bottom: 2px solid var(--node-bg); text-transform: uppercase; font-size: 0.75rem;
+        }
+
+        .matrix-table td { padding: 14px 12px; border-bottom: 1px solid var(--node-bg); vertical-align: middle; }
+        .cable-title { font-weight: bold; display: block; }
+        
+        select {
+            width: 100%; background-color: var(--bg-dark); border: 1px solid #334155;
+            color: var(--text-light); padding: 8px; border-radius: 6px; outline: none;
+        }
+
+        select.correct { border-color: var(--accent-green) !important; background-color: var(--success-bg); }
+        select.incorrect { border-color: var(--accent-red) !important; background-color: var(--error-bg); }
+
+        .controls { margin-top: 30px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+        button {
+            padding: 12px 24px; font-size: 0.85rem; font-weight: bold; border-radius: 6px;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; border: none;
+        }
+        .btn-submit { background-color: var(--accent-blue); color: var(--bg-dark); }
+        .btn-reset { background-color: var(--node-bg); color: var(--text-light); border: 1px solid #334155; }
+
+        #report { display: none; padding: 12px; border-radius: 6px; font-weight: bold; flex-grow: 1; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="lab-container">
+    <header>
+        <h1>Cabling Subsystems Verification Sandbox</h1>
+        <p>Verify your deployment guide properties before finalizing documentation blueprints.</p>
+    </header>
+
+    <table class="matrix-table">
+        <thead>
+            <tr>
+                <th style="width: 30%;">Cabling System</th>
+                <th style="width: 35%;">1. Medium & Signaling Layer</th>
+                <th style="width: 35%;">2. Target Production Workload</th>
+            </tr>
+        </thead>
+        <tbody id="lab-rows">
+            </tbody>
+    </table>
+
+    <div class="controls">
+        <button class="btn-reset" onclick="resetLab()">Reset Layout</button>
+        <div id="report"></div>
+        <button class="btn-submit" onclick="verifyLab()">Validate Infrastructure</button>
+    </div>
+</div>
+
+<script>
+    const data = [
+        { id: "hdmi", name: "HDMI 2.1 Assembly", s: "dig_av", w: "conf" },
+        { id: "dp", name: "DisplayPort 2.0 Cable", s: "dig_v", w: "multi" },
+        { id: "vga", name: "VGA (DB-15) Analog Cable", s: "ana_v", w: "crt" },
+        { id: "usbc", name: "USB-C (Thunderbolt 4)", s: "ser_high", w: "dock" },
+        { id: "usba", name: "USB 3.0 Type-A (Blue)", s: "ser_mid", w: "hdd" },
+        { id: "serial", name: "RS-232 Serial (DB-9)", s: "ser_low", w: "term" },
+        { id: "cat6a", name: "RJ-45 Copper Patch (Cat6a)", s: "wired_cu", w: "nas" },
+        { id: "fiber", name: "SFP+ Optical Transceiver Cable", s: "wired_opt", w: "core" }
+    ];
+
+    function buildLab() {
+        document.getElementById('lab-rows').innerHTML = data.map(row => `
+            <tr>
+                <td><span class="cable-title">${row.name}</span></td>
+                <td>
+                    <select class="signaling" data-ans="${row.s}">
+                        <option value="">-- Select Topology --</option>
+                        <option value="dig_av">Pure Packetized Digital (Synchronous Audio & Video)</option>
+                        <option value="dig_v">Pure Packetized Digital (Display Stream Compression / Multi-Monitor Focus)</option>
+                        <option value="ana_v">Differential Continuous Analog Waves</option>
+                        <option value="ser_high">Multi-Lane Reversible Serial Data Bus (with Alternate Display / Power Delivery)</option>
+                        <option value="ser_mid">Standard USB SuperSpeed Serial Data Bus (5 Gbps Architecture)</option>
+                        <option value="ser_low">Legacy Bidirectional Asynchronous Serial Link</option>
+                        <option value="wired_cu">8P8C Base-T Copper Balanced Twisted-Pair</option>
+                        <option value="wired_opt">Single-Mode Modulated Light Glass Fiber Core</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="workload" data-ans="${row.w}">
+                        <option value="">-- Select Workload Match --</option>
+                        <option value="conf">Corporate Teleconferencing Center / Media Array</option>
+                        <option value="multi">High-Performance Multi-Screen Desktop Working Environments</option>
+                        <option value="crt">Legacy CRT Monitor / Analog Workspace Display</option>
+                        <option value="dock">Workstation Single-Cable Docking Nodes (100W Power Target)</option>
+                        <option value="hdd">Standard Mass External Client Desktop Backup Drive</option>
+                        <option value="term">Out-of-Band Network Terminal Mainframe Administration</option>
+                        <option value="nas">Enterprise Local Office High-Speed Network Storage (NAS Array)</option>
+                        <option value="core">Core Network Distribution Layer Rackmount Switches</option>
+                    </select>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function verifyLab() {
+        let score = 0;
+        const drops = document.querySelectorAll('select');
+        drops.forEach(d => {
+            if (d.value === d.getAttribute('data-ans')) {
+                d.className = "correct"; score++;
+            } else { d.className = "incorrect"; }
+        });
+
+        const r = document.getElementById('report');
+        r.style.display = "block";
+        r.innerText = `Validation Report: ${score} / ${drops.length} properties securely mapped.`;
+        if (score === drops.length) {
+            r.style.backgroundColor = "var(--success-bg)"; r.style.color = "var(--accent-green)";
+        } else {
+            r.style.backgroundColor = "var(--error-bg)"; r.style.color = "var(--accent-red)";
+        }
+    }
+
+    function resetLab() { buildLab(); document.getElementById('report').style.display = "none"; }
+    window.onload = buildLab;
+</script>
+</body>
+</html>
