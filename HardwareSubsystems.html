@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hardware Subsystems Lab - Part 2</title>
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --panel-bg: #131c2e;
+            --node-bg: #1e293b;
+            --accent-blue: #0ea5e9;
+            --accent-purple: #a855f7;
+            --accent-green: #22c55e;
+            --accent-orange: #f97316;
+            --accent-red: #ef4444;
+            --text-light: #f8fafc;
+            --text-muted: #64748b;
+            
+            --success-bg: rgba(34, 197, 94, 0.1);
+            --error-bg: rgba(239, 68, 68, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .lab-container {
+            width: 100%;
+            max-width: 1200px;
+            background-color: var(--panel-bg);
+            padding: 35px;
+            border-radius: 12px;
+            border: 1px solid var(--node-bg);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        header {
+            border-bottom: 1px solid var(--node-bg);
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .header-info h1 {
+            margin: 0 0 8px 0;
+            font-size: 1.8rem;
+            color: var(--accent-orange);
+        }
+
+        .header-info p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .matrix-table th {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            text-align: left;
+            padding: 14px;
+            font-weight: 700;
+            border-bottom: 2px solid var(--node-bg);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .matrix-table td {
+            padding: 16px 14px;
+            border-bottom: 1px solid var(--node-bg);
+            vertical-align: middle;
+        }
+
+        .hardware-name {
+            font-weight: bold;
+            color: var(--text-light);
+            font-size: 15px;
+            display: block;
+        }
+
+        .hardware-desc {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: normal;
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+
+        select {
+            width: 100%;
+            background-color: var(--bg-dark);
+            border: 1px solid #334155;
+            color: var(--text-light);
+            padding: 10px;
+            border-radius: 6px;
+            outline: none;
+            box-sizing: border-box;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        select:focus {
+            border-color: var(--accent-orange);
+        }
+
+        select option {
+            background-color: var(--panel-bg);
+            color: var(--text-light);
+        }
+
+        .controls {
+            margin-top: 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-submit { 
+            background-color: var(--accent-orange); 
+            color: var(--bg-dark); 
+            border: none;
+        }
+        .btn-submit:hover { 
+            opacity: 0.9;
+        }
+        
+        .btn-reset { 
+            background-color: var(--node-bg); 
+            color: var(--text-light); 
+            border: 1px solid #334155;
+        }
+        .btn-reset:hover { 
+            background-color: #334155;
+            border-color: var(--text-muted);
+        }
+
+        .score-display {
+            font-size: 0.95rem;
+            font-weight: bold;
+            display: none;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            flex-grow: 1;
+            border: 1px solid transparent;
+        }
+
+        .input-correct { 
+            border-color: var(--accent-green) !important; 
+            background-color: var(--success-bg) !important; 
+            color: var(--text-light) !important; 
+        }
+        .input-error { 
+            border-color: var(--accent-red) !important; 
+            background-color: var(--error-bg) !important; 
+            color: var(--text-light) !important; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="lab-container">
+    <header>
+        <div class="header-info">
+            <h1>Hardware Matrix Alignment Module — Part 2</h1>
+            <p>Advanced Diagnostics: Signal Degradation, Protocol Constraints, and Host Communication Modes</p>
+        </div>
+        <div>
+            <span style="background-color: var(--node-bg); color: var(--accent-orange); padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; font-weight: bold; border: 1px solid #334155;">Module 2: Advanced</span>
+        </div>
+    </header>
+
+    <table class="matrix-table">
+        <thead>
+            <tr>
+                <th style="width: 34%;">System Architecture Scenario</th>
+                <th style="width: 22%;">1. Primary Engineering Failure Mode</th>
+                <th style="width: 22%;">2. Core Protocol/Physical Limit</th>
+                <th style="width: 22%;">3. Resolution Strategy</th>
+            </tr>
+        </thead>
+        <tbody id="matrix-body">
+            </tbody>
+    </table>
+
+    <div class="controls">
+        <button class="btn-reset" onclick="resetForm()">Strip Hardware Matrix</button>
+        <div id="scoreBox" class="score-display"></div>
+        <button class="btn-submit" onclick="evaluateMatrix()">Verify System Configuration</button>
+    </div>
+</div>
+
+<script>
+    const dataset = [
+        {
+            id: "vr_latency",
+            name: "High-Refresh Mixed Reality Headset",
+            desc: "A user connects a VR array to a passive hub link. Sensors drop sync whenever video frames peak.",
+            ans1: "bandwidth",
+            ans2: "usb_limit",
+            ans3: "discrete"
+        },
+        {
+            id: "omr_driver",
+            name: "Legacy OMR Terminal Deployment",
+            desc: "An industrial optical scanner times out on a modern OS during raw batch ingestion routines.",
+            ans1: "driver",
+            ans2: "polling",
+            ans3: "kernel"
+        },
+        {
+            id: "osc_noise",
+            name: "High-Frequency USB Oscilloscope",
+            desc: "Waveform readings display severe harmonic interference patterns when deployed next to high-current power switch rails.",
+            ans1: "emi",
+            ans2: "attenuation",
+            ans3: "shield"
+        },
+        {
+            id: "audio_drop",
+            name: "Multi-Channel XLR Production Rig",
+            desc: "Audio interface streams show intermittent crackling and dropouts during multi-track mic tracking sessions.",
+            ans1: "latency",
+            ans2: "buffer",
+            ans3: "asio"
+        },
+        {
+            id: "display_color",
+            name: "4K Color-Grading Mastering Display",
+            desc: "A display running over a long passive alternative display link drops its output depth back down to standard 8-bit color spaces.",
+            ans1: "bandwidth",
+            ans2: "attenuation",
+            ans3: "active"
+        }
+    ];
+
+    function renderMatrix() {
+        const tbody = document.getElementById('matrix-body');
+        tbody.innerHTML = dataset.map(row => `
+            <tr data-id="${row.id}">
+                <td>
+                    <span class="hardware-name">${row.name}</span>
+                    <span class="hardware-desc">${row.desc}</span>
+                </td>
+                <td>
+                    <select class="col1" data-correct="${row.ans1}">
+                        <option value="">-- Diagnose Failure --</option>
+                        <option value="bandwidth">Bus Bandwidth Saturation</option>
+                        <option value="emi">EMI / Cross-Talk Injection</option>
+                        <option value="driver">Driver Hook Abstraction Failure</option>
+                        <option value="latency">Host CPU Interrupt Latency</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="col2" data-correct="${row.ans2}">
+                        <option value="">-- Protocol Constraint --</option>
+                        <option value="usb_limit">USB 2.0 Max Pipeline (480 Mbps)</option>
+                        <option value="polling">Synchronous Input Polling Loops</option>
+                        <option value="attenuation">High-Frequency Signal Attenuation</option>
+                        <option value="buffer">Ring-Buffer Latency Exhaustion</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="col3" data-correct="${row.ans3}">
+                        <option value="">-- Apply Resolution --</option>
+                        <option value="discrete">Deploy Root Discrete Controller</option>
+                        <option value="kernel">Compile Custom Kernel Extensions</option>
+                        <option value="shield">Isolate Cable Core Shielding</option>
+                        <option value="asio">Implement Direct ASIO Hardware Paths</option>
+                        <option value="active">Integrate Active Booster Signal Chips</option>
+                    </select>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function evaluateMatrix() {
+        const rows = document.querySelectorAll('#matrix-body tr');
+        let correctPoints = 0;
+        let totalPoints = dataset.length * 3;
+
+        rows.forEach(row => {
+            const selects = row.querySelectorAll('select');
+            selects.forEach(select => {
+                const choice = select.value;
+                const correct = select.getAttribute('data-correct');
+
+                if (choice === correct) {
+                    select.className = select.className.split(' ')[0] + ' input-correct';
+                    correctPoints++;
+                } else {
+                    select.className = select.className.split(' ')[0] + ' input-error';
+                }
+            });
+        });
+
+        const scoreBox = document.getElementById('scoreBox');
+        scoreBox.style.display = 'block';
+        scoreBox.innerText = `Advanced Diagnostics Verified: Aligned ${correctPoints} / ${totalPoints} structural failure metrics.`;
+
+        if (correctPoints === totalPoints) {
+            scoreBox.style.backgroundColor = 'var(--success-bg)';
+            scoreBox.style.borderColor = 'var(--accent-green)';
+            scoreBox.style.color = 'var(--accent-green)';
+        } else {
+            scoreBox.style.backgroundColor = 'var(--error-bg)';
+            scoreBox.style.borderColor = 'var(--accent-red)';
+            scoreBox.style.color = 'var(--accent-red)';
+        }
+    }
+
+    function resetForm() {
+        renderMatrix();
+        const scoreBox = document.getElementById('scoreBox');
+        scoreBox.style.display = 'none';
+    }
+
+    window.onload = renderMatrix;
+</script>
+</body>
+</html>
