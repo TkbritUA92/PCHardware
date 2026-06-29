@@ -6,13 +6,13 @@
     <title>Interactive OSI Model Matrix</title>
     <style>
         :root {
-            --bg-color: #0A0A0A;
-            --card-bg: #121212;
-            --border-color: #333333;
+            --bg-color: #0b0f19;
+            --card-bg: #131c2e;
+            --border-color: #22314d;
             --accent-color: #CCFF00;
             --error-color: #FF3333;
             --text-main: #FFFFFF;
-            --text-muted: #888888;
+            --text-muted: #8fa0bc;
         }
 
         body {
@@ -71,7 +71,7 @@
         }
 
         .btn-reset:hover {
-            border-color: #555555;
+            border-color: #3b5177;
             color: var(--text-main);
         }
 
@@ -102,7 +102,7 @@
         }
 
         .layer-number {
-            background-color: #1a1a1a;
+            background-color: #0e1524;
             padding: 20px;
             font-weight: bold;
             border-right: 1px solid var(--border-color);
@@ -127,7 +127,7 @@
 
         .layer-dropzone.drag-over {
             border-color: var(--accent-color);
-            background-color: #151a00;
+            background-color: #1a261a;
         }
 
         /* Draggable Item Styles */
@@ -152,7 +152,7 @@
         }
 
         .drag-item {
-            background-color: #1a1a1a;
+            background-color: #0e1524;
             border: 1px solid var(--border-color);
             padding: 12px 15px;
             border-radius: 4px;
@@ -171,4 +171,70 @@
         /* Row Feedback Validation States */
         .layer-row.correct {
             border-color: var(--accent-color);
-            box-shadow: 0 0 8px rgba(204, 255, 0, 0
+            box-shadow: 0 0 8px rgba(204, 255, 0, 0.15);
+        }
+        .layer-row.correct .layer-number {
+            color: var(--accent-color);
+            border-right-color: var(--accent-color);
+        }
+
+        .layer-row.incorrect {
+            border-color: var(--error-color);
+            box-shadow: 0 0 8px rgba(255, 51, 51, 0.15);
+        }
+        .layer-row.incorrect .layer-number {
+            color: var(--error-color);
+            border-right-color: var(--error-color);
+        }
+
+        .status-banner {
+            display: none;
+            padding: 15px 30px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-align: center;
+            width: 100%;
+            max-width: 1200px;
+            box-sizing: border-box;
+        }
+
+        .status-banner.success {
+            background-color: #111e16;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .status-banner.fail {
+            background-color: #241212;
+            border: 1px solid var(--error-color);
+            color: var(--error-color);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>OSI Model Matrix Challenge</h1>
+    <p class="instructions">Drag each profile block to its correct OSI Layer, then click "Verify Matrix" to check your alignment.</p>
+
+    <div class="controls">
+        <button class="btn-verify" onclick="verifyMatrix()">Verify Matrix</button>
+        <button class="btn-reset" onclick="resetMatrix()">Reset Task</button>
+    </div>
+
+    <div class="status-banner" id="statusBanner"></div>
+
+    <div class="container">
+        <div class="osi-stack">
+            <div class="layer-row" id="row-7" data-layer="7">
+                <div class="layer-number">Layer 7: Application</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+            <div class="layer-row" id="row-6" data-layer="6">
+                <div class="layer-number">Layer 6: Presentation</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+            <div class="layer-row" id="row-5" data-layer="5">
+                <div class="layer-number">Layer 5: Session</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event
