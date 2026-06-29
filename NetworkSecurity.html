@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Security & Protocols Lab</title>
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --panel-bg: #131c2e;
+            --node-bg: #1e293b;
+            --accent-blue: #0ea5e9;
+            --accent-purple: #a855f7;
+            --accent-green: #22c55e;
+            --accent-orange: #f97316;
+            --accent-red: #ef4444;
+            --text-light: #f8fafc;
+            --text-muted: #64748b;
+            
+            --success-bg: rgba(34, 197, 94, 0.1);
+            --error-bg: rgba(239, 68, 68, 0.1);
+        }
+
+        html, body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            width: 100vw;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            padding: 20px;
+            align-items: center;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            color: var(--text-light);
+            margin: 0 0 5px 0;
+            font-weight: 600;
+            font-size: 1.8rem;
+        }
+
+        p.instructions {
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        /* Task Selector Tab Controls */
+        .task-selector {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            background-color: var(--panel-bg);
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid var(--node-bg);
+        }
+
+        .tab-btn {
+            background-color: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-light);
+        }
+
+        .tab-btn.active {
+            background-color: var(--node-bg);
+            color: var(--accent-blue);
+            border-color: rgba(14, 165, 233, 0.2);
+        }
+
+        .controls {
+            margin: 5px 0 15px 0;
+            display: flex;
+            gap: 15px;
+        }
+
+        .action-btn {
+            background-color: transparent;
+            font-weight: bold;
+            font-size: 0.95rem;
+            padding: 10px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-verify {
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .btn-verify:hover {
+            background-color: var(--accent-green);
+            color: var(--bg-dark);
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-reset {
+            border: 1px solid var(--node-bg);
+            color: var(--text-muted);
+        }
+
+        .btn-reset:hover {
+            border-color: var(--text-muted);
+            color: var(--text-light);
+        }
+
+        .status-banner {
+            display: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 1rem;
+            text-align: center;
+            width: 100%;
+            max-width: 1200px;
+            box-sizing: border-box;
+        }
+
+        .status-banner.success {
+            background-color: var(--success-bg);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .status-banner.fail {
+            background-color: var(--error-bg);
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        .container {
+            display: flex;
+            gap: 25px;
+            max-width: 1200px;
+            width: 100%;
+            align-items: flex-start;
+        }
+
+        .hardware-stack {
+            flex: 1.5;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .layer-row {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            border: 1px solid var(--node-bg);
+            background-color: var(--panel-bg);
+            border-radius: 4px;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .layer-number {
+            background-color: var(--node-bg);
+            padding: 15px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border-right: 1px solid var(--node-bg);
+            display: flex;
+            align-items: center;
+            color: var(--text-muted);
+        }
+
+        .layer-dropzone {
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 45px;
+            background-color: var(--bg-dark);
+            margin: 5px;
+            border: 1px dashed var(--node-bg);
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .layer-dropzone.drag-over {
+            border-color: var(--accent-purple);
+            background-color: rgba(168, 85, 247, 0.05);
+        }
+
+        .draggable-pool {
+            flex: 1;
+            background-color: var(--panel-bg);
+            border: 1px solid var(--node-bg);
+            padding: 20px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: sticky;
+            top: 20px;
+        }
+
+        .draggable-pool h3 {
+            margin: 0;
+            border-bottom: 1px solid var(--node-bg);
+            padding-bottom: 10px;
+            color: var(--accent-purple);
+            font-size: 1.1rem;
+        }
+
+        .drag-item {
+            background-color: var(--node-bg);
+            border: 1px solid transparent;
+            color: var(--text-light);
+            padding: 12px 15px;
+            border-radius: 4px;
+            cursor: grab;
+            user-select: none;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            transition: all 0.2s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .drag-item:active {
+            cursor: grabbing;
+        }
+
+        .drag-item:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .layer-row.correct { border-color: var(--accent-green); }
+        .layer-row.correct .layer-number { color: var(--accent-green); border-right-color: var(--accent-green); }
+
+        .layer-row.incorrect { border-color: var(--accent-red); }
+        .layer-row.incorrect .layer-number { color: var(--accent-red); border-right-color: var(--accent-red); }
+
+        @media (max-width: 900px) {
+            .container { flex-direction: column; }
+            .draggable-pool { position: static; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Network Security & Protocols Lab</h1>
+        <p class="instructions" id="labInstructions">Select a challenge below to test network protection mechanics.</p>
+    </header>
+
+    <div class="task-selector">
+        <button class="tab-btn active" onclick="switchTask(1, this)">Task 1: Secure vs Insecure</button>
+        <button class="tab-btn" onclick="switchTask(2, this)">Task 2: Port Assignments</button>
+        <button class="tab-btn" onclick="switchTask(3, this)">Task 3: Firewall Zones</button>
+    </div>
+
+    <div class="controls">
+        <button class="action-btn btn-verify" onclick="verifyMatrix()">Verify Matches</button>
+        <button class="action-btn btn-reset" onclick="resetMatrix()">Clear Current Board</button>
+    </div>
+
+    <div class="status-banner" id="statusBanner"></div>
+
+    <div class="container">
+        <div class="hardware-stack">
+            <div class="layer-row" id="row-cat1" data-category="cat1">
+                <div class="layer-number" id="lbl-cat1">Target Slot 1</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+            <div class="layer-row" id="row-cat2" data-category="cat2">
+                <div class="layer-number" id="lbl-cat2">Target Slot 2</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+            <div class="layer-row" id="row-cat3" data-category="cat3">
+                <div class="layer-number" id="lbl-cat3">Target Slot 3</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+            <div class="layer-row" id="row-cat4" data-category="cat4">
+                <div class="layer-number" id="lbl-cat4">Target Slot 4</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+            <div class="layer-row" id="row-cat5" data-category="cat5">
+                <div class="layer-number" id="lbl-cat5">Target Slot 5</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+        </div>
+
+        <div class="draggable-pool">
+            <h3 id="poolTitle">Profile Options</h3>
+            <div id="itemPool"></div>
+        </div>
+    </div>
+
+    <script>
+        window.draggedItem = null;
+        let currentActiveTask = 1;
+
+        // Dynamic multi-task data mapping configuration
+        const taskData = {
+            1: {
+                instructions: "Align the cryptographic/management protocol descriptions with their secure configuration counterparts.",
+                title: "Protocol Defenses",
+                labels: ["SSH (vs Telnet)", "HTTPS (vs HTTP)", "SFTP (vs FTP)", "SNMPv3 (vs v1/v2)", "IPsec (vs Cleartext)"],
+                categories: ["cat1", "cat2", "cat3", "cat4", "cat5"],
+                profiles: [
+                    { id: "t1_c1", target: "cat1", text: "Encrypts terminal access sessions over TCP Port 22; prevents credential sniffing common in unencrypted cleartext Telnet streams." },
+                    { id: "t1_c2", target: "cat2", text: "Employs TLS wrappers over Port 443 to cryptographically sign web traffic, guaranteeing data integrity and host authenticity." },
+                    { id: "t1_c3", target: "cat3", text: "Leverages an SSH sub-channel tunnel to execute binary packet system file transfers securely, replacing basic plain-text FTP flows." },
+                    { id: "t1_c4", target: "cat4", text: "Introduces advanced user-based authentication and cryptographic packet encryption to monitor remote infrastructure nodes safely." },
+                    { id: "t1_c5", target: "cat5", text: "Encrypts end-to-end IP layer communications inside a secure cryptographic packet envelope, commonly backing site-to-site VPN tunnels." }
+                ]
+            },
+            2: {
+                instructions: "Match the core application layer transport protocols with their standard registered service ports.",
+                title: "Layer 4 Ports",
+                labels: ["Port 22", "Port 53", "Port 80", "Port 443", "Port 3389"],
+                categories: ["cat1", "cat2", "cat3", "cat4", "cat5"],
+                profiles: [
+                    { id: "t2_c1", target: "cat1", text: "Secure Shell (SSH) remote command console access and secure network file system management operations." },
+                    { id: "t2_c2", target: "cat2", text: "Domain Name System (DNS) namespace query resolution, typically leveraging lightweight UDP transmission transport." },
+                    { id: "t2_c3", target: "cat3", text: "Hypertext Transfer Protocol (HTTP) unencrypted plain-text corporate web services." },
+                    { id: "t2_c4", target: "cat4", text: "Hypertext Transfer Protocol Secure (HTTPS) authenticated, encrypted corporate transactional web traffic channels." },
+                    { id: "t2_c5", target: "cat5", text: "Remote Desktop Protocol (RDP) network graphical user interface virtualization sessions." }
+                ]
+            },
+            3: {
+                instructions: "Sort network segments and policy rules into the appropriate Next-Generation Firewall functional security zones.",
+                title: "Zone Architecture",
+                labels: ["Inside (LAN)", "Outside (WAN)", "DMZ", "Guest Isolation", "Management Plane"],
+                categories: ["cat1", "cat2", "cat3", "cat4", "cat5"],
+                profiles: [
+                    { id: "t3_c1", target: "cat1", text: "High-trust network segment containing administrative workstations, private asset directories, and primary internal domain controllers." },
+                    { id: "t3_c2", target: "cat2", text: "Zero-trust untrusted boundary corridor facing public transit paths, external service vectors, and ISP handoffs." },
+                    { id: "t3_c3", target: "cat3", text: "Semi-trusted buffer zone holding public-facing services (e.g., Web/Mail servers), structurally restricted from opening connections inside." },
+                    { id: "t3_c4", target: "cat4", text: "Untrusted wireless subnet bound by absolute client isolation rules, allowed to route directly out to the WAN but blocked from internal pools." },
+                    { id: "t3_c5", target: "cat5", text: "Dedicated out-of-band network channel restricted strictly to SSH/HTTPS administrative paths bound for core infrastructure switches." }
+                ]
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadTask(1);
+        });
+
+        function switchTask(taskId, btnEl) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btnEl.classList.add('active');
+            clearVisualFeedback();
+            document.querySelectorAll('.layer-dropzone').forEach(zone => zone.innerHTML = '');
+            currentActiveTask = taskId;
+            loadTask(taskId);
+        }
+
+        function loadTask(taskId) {
+            const current = taskData[taskId];
+            document.getElementById('labInstructions').innerText = current.instructions;
+            document.getElementById('poolTitle').innerText = current.title;
+
+            // Re-label left matrix anchors dynamically to fit task profile
+            for (let i = 0; i < 5; i++) {
+                document.getElementById(`lbl-cat${i+1}`).innerText = current.labels[i];
+            }
+
+            const pool = document.getElementById('itemPool');
+            pool.innerHTML = '';
+
+            const shuffled = [...current.profiles].sort(() => Math.random() - 0.5);
+            shuffled.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'drag-item';
+                div.draggable = true;
+                div.id = item.id;
+                div.setAttribute('data-target', item.target);
+                div.innerText = item.text;
+                
+                div.addEventListener('dragstart', (e) => {
+                    window.draggedItem = e.target;
+                    clearVisualFeedback();
+                });
+                pool.appendChild(div);
+            });
+        }
+
+        function allowDrop(e) {
+            e.preventDefault();
+            const dropzone = e.target.closest('.layer-dropzone');
+            if (dropzone && !dropzone.hasChildNodes()) {
+                dropzone.classList.add('drag-over');
+            }
+        }
+
+        function dragLeave(e) {
+            const dropzone = e.target.closest('.layer-dropzone');
+            if (dropzone) dropzone.classList.remove('drag-over');
+        }
+
+        function drop(e) {
+            e.preventDefault();
+            const dropzone = e.target.closest('.layer-dropzone');
+            if (!dropzone) return;
+            
+            dropzone.classList.remove('drag-over');
+            if (dropzone.hasChildNodes()) return;
+
+            if (window.draggedItem) {
+                dropzone.appendChild(window.draggedItem);
+                clearVisualFeedback();
+            }
+        }
+
+        function verifyMatrix() {
+            const rows = document.querySelectorAll('.layer-row');
+            let totalCorrect = 0;
+            let totalPlaced = 0;
+            const banner = document.getElementById('statusBanner');
+
+            rows.forEach(row => {
+                const targetCategory = row.getAttribute('data-category');
+                const dropzone = row.querySelector('.layer-dropzone');
+                const childItem = dropzone.querySelector('.drag-item');
+
+                row.classList.remove('correct', 'incorrect');
+
+                if (childItem) {
+                    totalPlaced++;
+                    if (childItem.getAttribute('data-target') === targetCategory) {
+                        row.classList.add('correct');
+                        totalCorrect++;
+                    } else {
+                        row.classList.add('incorrect');
+                    }
+                }
+            });
+
+            banner.style.display = 'block';
+
+            if (totalCorrect === rows.length) {
+                banner.className = "status-banner success";
+                banner.innerText = `✓ Verification Approved: Security Module ${currentActiveTask} complete. Protocol architectures and boundaries securely validated.`;
+                document.querySelectorAll('.drag-item').forEach(item => item.draggable = false);
+            } else {
+                banner.className = "status-banner fail";
+                if (totalPlaced < rows.length) {
+                    banner.innerText = "✗ Verification Failed: Infrastructure analysis suspended. Unassigned perimeter matrix fields remain.";
+                } else {
+                    banner.innerText = `✗ Verification Failed: Security posture errors detected. Remediate flagged red zones.`;
+                }
+            }
+        }
+
+        function clearVisualFeedback() {
+            document.querySelectorAll('.layer-row').forEach(row => {
+                row.classList.remove('correct', 'incorrect');
+            });
+            document.getElementById('statusBanner').style.display = 'none';
+        }
+
+        function resetMatrix() {
+            const dropzones = document.querySelectorAll('.layer-dropzone');
+            dropzones.forEach(zone => {
+                while (zone.firstChild) {
+                    zone.removeChild(zone.firstChild);
+                }
+            });
+            clearVisualFeedback();
+            loadTask(currentActiveTask);
+            window.draggedItem = null;
+        }
+
+        document.getElementById('itemPool').addEventListener('dragover', (e) => e.preventDefault());
+        document.getElementById('itemPool').addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (window.draggedItem) {
+                document.getElementById('itemPool').appendChild(window.draggedItem);
+                clearVisualFeedback();
+            }
+        });
+    </script>
+</body>
+</html>
