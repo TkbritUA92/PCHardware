@@ -346,4 +346,146 @@
                 profiles: [
                     { id: "t3_r", target: "router", text: "Scenario: A newly provisioned VLAN subnet group needs a path to forward its packets outwards to an cloud storage server mesh." },
                     { id: "t3_s", target: "switch", text: "Scenario: A local office floor experiences major network dropouts due to massive frame collisions occurring on legacy shared media lines." },
-                    { id: "t3_a", target: "ap", text: "Scenario:
+                    { id: "t3_a", target: "ap", text: "Scenario: Mobile staff units report loss of data connection when moving outward past corporate physical building corridors." },
+                    { id: "t3_f", target: "firewall", text: "Scenario: Security operations logs reveal a sudden brute-force pattern targeting exposed external interface service ports." },
+                    { id: "t3_h", target: "hub", text: "Scenario: An engineer needs a cheap, non-intelligent device to duplicate and capture raw electronic bits for analyzer testing." }
+                ]
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadTask(1);
+        });
+
+        function switchTask(taskId, btnEl) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btnEl.classList.add('active');
+            clearVisualFeedback();
+            // Evict placed items back before switching context
+            document.querySelectorAll('.layer-dropzone').forEach(zone => zone.innerHTML = '');
+            currentActiveTask = taskId;
+            loadTask(taskId);
+        }
+
+        function loadTask(taskId) {
+            const current = taskData[taskId];
+            document.getElementById('labInstructions').innerText = current.instructions;
+            document.getElementById('poolTitle').innerText = current.title;
+
+            const pool = document.getElementById('itemPool');
+            pool.innerHTML = '';
+
+            const shuffled = [...current.profiles].sort(() => Math.random() - 0.5);
+            shuffled.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'drag-item';
+                div.draggable = true;
+                div.id = item.id;
+                div.setAttribute('data-target', item.target);
+                div.innerText = item.text;
+                
+                div.addEventListener('dragstart', (e) => {
+                    window.draggedItem = e.target;
+                    clearVisualFeedback();
+                });
+                pool.appendChild(div);
+            });
+        }
+
+        function allowDrop(e) {
+            e.preventDefault();
+            const dropzone = e.target.closest('.layer-dropzone');
+            if (dropzone && !dropzone.hasChildNodes()) {
+                dropzone.classList.add('drag-over');
+            }
+        }
+
+        function dragLeave(e) {
+            const dropzone = e.target.closest('.layer-dropzone');
+            if (dropzone) dropzone.classList.remove('drag-over');
+        }
+
+        function drop(e) {
+            e.preventDefault();
+            const dropzone = e.target.closest('.layer-dropzone');
+            if (!dropzone) return;
+            
+            dropzone.classList.remove('drag-over');
+            if (dropzone.hasChildNodes()) return;
+
+            if (window.draggedItem) {
+                dropzone.appendChild(window.draggedItem);
+                clearVisualFeedback();
+            }
+        }
+
+        function verifyMatrix() {
+            const rows = document.querySelectorAll('.layer-row');
+            let totalCorrect = 0;
+            let totalPlaced = 0;
+            const banner = document.getElementById('statusBanner');
+
+            rows.forEach(row => {
+                const targetHardware = row.getAttribute('data-hardware');
+                const dropzone = row.querySelector('.layer-dropzone');
+                const childItem = dropzone.querySelector('.drag-item');
+
+                row.classList.remove('correct', 'incorrect');
+
+                if (childItem) {
+                    totalPlaced++;
+                    if (childItem.getAttribute('data-target') === targetHardware) {
+                        row.classList.add('correct');
+                        totalCorrect++;
+                    } else {
+                        row.classList.add('incorrect');
+                    }
+                }
+            });
+
+            banner.style.display = 'block';
+
+            if (totalCorrect === rows.length) {
+                banner.className = "status-banner success";
+                banner.innerText = `✓ Task ${currentActiveTask} Verified: All hardware concepts accurately aligned. Excellent tracking.`;
+                document.querySelectorAll('.drag-item').forEach(item => item.draggable = false);
+            } else {
+                banner.className = "status-banner fail";
+                if (totalPlaced < rows.length) {
+                    banner.innerText = "✗ Verification Failed: Ensure all hardware blocks contain an assigned profile card before analyzing.";
+                } else {
+                    banner.innerText = `✗ Verification Failed: Classification errors detected. Review highlighted red profiles.`;
+                }
+            }
+        }
+
+        function clearVisualFeedback() {
+            document.querySelectorAll('.layer-row').forEach(row => {
+                row.classList.remove('correct', 'incorrect');
+            });
+            document.getElementById('statusBanner').style.display = 'none';
+        }
+
+        function resetMatrix() {
+            const dropzones = document.querySelectorAll('.layer-dropzone');
+            dropzones.forEach(zone => {
+                while (zone.firstChild) {
+                    zone.removeChild(zone.firstChild);
+                }
+            });
+            clearVisualFeedback();
+            loadTask(currentActiveTask);
+            window.draggedItem = null;
+        }
+
+        document.getElementById('itemPool').addEventListener('dragover', (e) => e.preventDefault());
+        document.getElementById('itemPool').addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (window.draggedItem) {
+                document.getElementById('itemPool').appendChild(window.draggedItem);
+                clearVisualFeedback();
+            }
+        });
+    </script>
+</body>
+</html>
