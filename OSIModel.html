@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive OSI Model Matrix</title>
+    <title>OSI Traversal & Encapsulation Lab</title>
     <style>
         :root {
             --bg-dark: #0b0f19;
@@ -127,52 +127,56 @@
             align-items: flex-start;
         }
 
-        .osi-stack {
-            flex: 1.5;
+        /* Twin Bucket Columns */
+        .bucket-grid {
+            flex: 2;
+            display: flex;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .bucket-column {
+            flex: 1;
+            background-color: var(--panel-bg);
+            border: 1px solid var(--node-bg);
+            border-radius: 6px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 400px;
+            transition: all 0.3s ease;
+        }
+
+        .bucket-title {
+            font-weight: bold;
+            font-size: 1.05rem;
+            border-bottom: 1px solid var(--node-bg);
+            padding-bottom: 8px;
+            text-align: center;
+        }
+
+        .encap-title { color: var(--accent-orange); }
+        .decap-title { color: var(--accent-blue); }
+
+        .dropzone-area {
+            flex: 1;
+            border: 2px dashed rgba(100, 116, 139, 0.2);
+            border-radius: 4px;
+            padding: 10px;
             display: flex;
             flex-direction: column;
             gap: 8px;
+            background-color: rgba(11, 15, 25, 0.4);
+            min-height: 350px;
         }
 
-        .layer-row {
-            display: grid;
-            grid-template-columns: 160px 1fr;
-            border: 1px solid var(--node-bg);
-            background-color: var(--panel-bg);
-            border-radius: 4px;
-            overflow: hidden;
-            transition: all 0.2s ease;
+        .dropzone-area.drag-over {
+            border-color: var(--accent-purple);
+            background-color: rgba(168, 85, 247, 0.03);
         }
 
-        .layer-number {
-            background-color: var(--node-bg);
-            padding: 15px;
-            font-weight: bold;
-            font-size: 0.9rem;
-            border-right: 1px solid var(--node-bg);
-            display: flex;
-            align-items: center;
-            color: var(--text-muted);
-        }
-
-        .layer-dropzone {
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 45px;
-            background-color: var(--bg-dark);
-            margin: 5px;
-            border: 1px dashed var(--node-bg);
-            border-radius: 4px;
-            transition: all 0.2s ease;
-        }
-
-        .layer-dropzone.drag-over {
-            border-color: var(--accent-blue);
-            background-color: rgba(14, 165, 233, 0.05);
-        }
-
+        /* Sidebar Item Pool */
         .draggable-pool {
             flex: 1;
             background-color: var(--panel-bg);
@@ -190,7 +194,7 @@
             margin: 0;
             border-bottom: 1px solid var(--node-bg);
             padding-bottom: 10px;
-            color: var(--accent-purple);
+            color: var(--text-light);
             font-size: 1.1rem;
         }
 
@@ -214,27 +218,16 @@
         }
 
         .drag-item:hover {
-            border-color: var(--accent-blue);
+            border-color: var(--accent-purple);
         }
 
-        .layer-row.correct {
-            border-color: var(--accent-green);
-        }
-        .layer-row.correct .layer-number {
-            color: var(--accent-green);
-            border-right-color: var(--accent-green);
-        }
-
-        .layer-row.incorrect {
-            border-color: var(--accent-red);
-        }
-        .layer-row.incorrect .layer-number {
-            color: var(--accent-red);
-            border-right-color: var(--accent-red);
-        }
+        /* Dynamic Border States on Verification */
+        .bucket-column.correct-group { border-color: var(--accent-green); }
+        .bucket-column.error-group { border-color: var(--accent-red); }
 
         @media (max-width: 900px) {
             .container { flex-direction: column; }
+            .bucket-grid { flex-direction: column; width: 100%; }
             .draggable-pool { position: static; width: 100%; }
         }
     </style>
@@ -242,67 +235,46 @@
 <body>
 
     <header>
-        <h1>OSI Model Matrix Challenge</h1>
-        <p class="instructions">Drag each profile block to its correct OSI Layer, then click "Verify Matrix".</p>
+        <h1>OSI Data Traversal Challenge</h1>
+        <p class="instructions">Analyze the data behavior and drag the card into the correct traversal pipeline zone.</p>
     </header>
 
     <div class="controls">
-        <button class="btn-verify" onclick="verifyMatrix()">Verify Matrix</button>
-        <button class="btn-reset" onclick="resetMatrix()">Reset Task</button>
+        <button class="btn-verify" onclick="verifyTraversal()">Verify Traversal</button>
+        <button class="btn-reset" onclick="resetMatrix()">Reset Exercise</button>
     </div>
 
     <div class="status-banner" id="statusBanner"></div>
 
     <div class="container">
-        <div class="osi-stack">
-            <div class="layer-row" id="row-7" data-layer="7">
-                <div class="layer-number">Layer 7: Application</div>
-                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+        <div class="bucket-grid">
+            <div class="bucket-column" id="col-encap" data-pipeline="encap">
+                <div class="bucket-title encap-title">Encapsulation (Down the Stack)</div>
+                <div class="dropzone-area" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
             </div>
-            <div class="layer-row" id="row-6" data-layer="6">
-                <div class="layer-number">Layer 6: Presentation</div>
-                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
-            </div>
-            <div class="layer-row" id="row-5" data-layer="5">
-                <div class="layer-number">Layer 5: Session</div>
-                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
-            </div>
-            <div class="layer-row" id="row-4" data-layer="4">
-                <div class="layer-number">Layer 4: Transport</div>
-                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
-            </div>
-            <div class="layer-row" id="row-3" data-layer="3">
-                <div class="layer-number">Layer 3: Network</div>
-                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
-            </div>
-            <div class="layer-row" id="row-2" data-layer="2">
-                <div class="layer-number">Layer 2: Data Link</div>
-                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
-            </div>
-            <div class="layer-row" id="row-1" data-layer="1">
-                <div class="layer-number">Layer 1: Physical</div>
-                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+
+            <div class="bucket-column" id="col-decap" data-pipeline="decap">
+                <div class="bucket-title decap-title">Decapsulation (Up the Stack)</div>
+                <div class="dropzone-area" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
             </div>
         </div>
 
         <div class="draggable-pool">
-            <h3>Profile Options</h3>
+            <h3>Traversal Scenarios</h3>
             <div id="itemPool"></div>
         </div>
     </div>
 
     <script>
-        // Global drag reference pointer bypasses unstable browser dataTransfer APIs
         window.draggedItem = null;
 
         const initialProfiles = [
-            { id: "p7", target: "7", text: "Data | Network services to apps | HTTP, HTTPS, DNS, SMTP" },
-            { id: "p6", target: "6", text: "Data | Encryption, compression & formatting | SSL/TLS, JPEG" },
-            { id: "p5", target: "5", text: "Data | Managing & terminating sessions | NetBIOS, RPC, Sockets" },
-            { id: "p4", target: "4", text: "Segments/Datagrams | End-to-end flow control | TCP, UDP, Ports" },
-            { id: "p3", target: "3", text: "Packets | Path determination & logical addressing | IP, Routers" },
-            { id: "p2", target: "2", text: "Frames | Physical addressing & media access | MAC, Switches, NICs" },
-            { id: "p1", target: "1", text: "Bits | Bit stream transmission over physical medium | Cables, Hubs" }
+            { id: "t1", target: "encap", text: "An application creates an HTTP request payload and wraps it with a TCP segment header." },
+            { id: "t2", target: "decap", text: "A Layer 3 switch strips away the Ethernet Frame header to read the logical destination IP address." },
+            { id: "t3", target: "encap", text: "The network layer takes an IP packet and adds a MAC address header and a trailer (FCS) before transmission." },
+            { id: "t4", target: "decap", text: "A host receiving bits from an Ethernet cable parses them into a frame, checking the destination MAC before dropping the frame header." },
+            { id: "t5", target: "encap", text: "A router receives data, determines the path, and adds a brand-new Layer 2 frame wrap to match the outward-bound interface link." },
+            { id: "t6", target: "decap", text: "The Transport Layer verifies sequence numbers, trims the TCP header markers away, and hands the clean payload data stream up to the Session Layer." }
         ];
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -323,7 +295,6 @@
                 div.setAttribute('data-target', item.target);
                 div.innerText = item.text;
                 
-                // Native pointer assignments
                 div.addEventListener('dragstart', (e) => {
                     window.draggedItem = e.target;
                     clearVisualFeedback();
@@ -335,101 +306,65 @@
 
         function allowDrop(e) {
             e.preventDefault();
-            const dropzone = e.target.closest('.layer-dropzone');
-            if (dropzone && !dropzone.hasChildNodes()) {
-                dropzone.classList.add('drag-over');
-            }
+            const zone = e.target.closest('.dropzone-area');
+            if (zone) zone.classList.add('drag-over');
         }
 
         function dragLeave(e) {
-            const dropzone = e.target.closest('.layer-dropzone');
-            if (dropzone) {
-                dropzone.classList.remove('drag-over');
-            }
+            const zone = e.target.closest('.dropzone-area');
+            if (zone) zone.classList.remove('drag-over');
         }
 
         function drop(e) {
             e.preventDefault();
-            const dropzone = e.target.closest('.layer-dropzone');
-            if (!dropzone) return;
+            const zone = e.target.closest('.dropzone-area');
+            if (!zone) return;
             
-            dropzone.classList.remove('drag-over');
-            if (dropzone.hasChildNodes()) return;
+            zone.classList.remove('drag-over');
 
             if (window.draggedItem) {
-                dropzone.appendChild(window.draggedItem);
+                zone.appendChild(window.draggedItem);
                 clearVisualFeedback();
             }
         }
 
-        function verifyMatrix() {
-            const rows = document.querySelectorAll('.layer-row');
+        function verifyTraversal() {
+            const columns = document.querySelectorAll('.bucket-column');
             let totalCorrect = 0;
             let totalPlaced = 0;
             const banner = document.getElementById('statusBanner');
 
-            rows.forEach(row => {
-                const targetLayer = row.getAttribute('data-layer');
-                const dropzone = row.querySelector('.layer-dropzone');
-                const childItem = dropzone.querySelector('.drag-item');
+            columns.forEach(col => {
+                const pipelineType = col.getAttribute('data-pipeline');
+                const items = col.querySelectorAll('.drag-item');
+                let groupHasError = false;
 
-                row.classList.remove('correct', 'incorrect');
+                col.classList.remove('correct-group', 'error-group');
 
-                if (childItem) {
+                items.forEach(item => {
                     totalPlaced++;
-                    if (childItem.getAttribute('data-target') === targetLayer) {
-                        row.classList.add('correct');
+                    if (item.getAttribute('data-target') === pipelineType) {
                         totalCorrect++;
                     } else {
-                        row.classList.add('incorrect');
+                        groupHasError = true;
+                    }
+                });
+
+                if (items.length > 0) {
+                    if (groupHasError) {
+                        col.classList.add('error-group');
+                    } else {
+                        col.classList.add('correct-group');
                     }
                 }
             });
 
             banner.style.display = 'block';
 
-            if (totalCorrect === rows.length) {
+            if (totalCorrect === initialProfiles.length) {
                 banner.className = "status-banner success";
-                banner.innerText = "✓ Verification Complete: All layers are mapping out perfectly.";
+                banner.innerText = "✓ Verification Complete: All packet traversal behaviors are classified flawlessly.";
                 document.querySelectorAll('.drag-item').forEach(item => item.draggable = false);
             } else {
                 banner.className = "status-banner fail";
-                if (totalPlaced < rows.length) {
-                    banner.innerText = "✗ Verification Failed: Some spaces are still empty. Complete the matrix and try again.";
-                } else {
-                    banner.innerText = `✗ Verification Failed: ${rows.length - totalCorrect} alignment errors detected. Correct the red elements or clear to reset.`;
-                }
-            }
-        }
-
-        function clearVisualFeedback() {
-            document.querySelectorAll('.layer-row').forEach(row => {
-                row.classList.remove('correct', 'incorrect');
-            });
-            document.getElementById('statusBanner').style.display = 'none';
-        }
-
-        function resetMatrix() {
-            const dropzones = document.querySelectorAll('.layer-dropzone');
-            dropzones.forEach(zone => {
-                while (zone.firstChild) {
-                    zone.removeChild(zone.firstChild);
-                }
-            });
-            clearVisualFeedback();
-            initTask();
-            window.draggedItem = null;
-        }
-
-        // Return items back to options pool listener
-        document.getElementById('itemPool').addEventListener('dragover', (e) => e.preventDefault());
-        document.getElementById('itemPool').addEventListener('drop', (e) => {
-            e.preventDefault();
-            if (window.draggedItem) {
-                document.getElementById('itemPool').appendChild(window.draggedItem);
-                clearVisualFeedback();
-            }
-        });
-    </script>
-</body>
-</html>
+                if (totalPlaced < initialProfiles.
