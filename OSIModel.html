@@ -6,40 +6,59 @@
     <title>Interactive OSI Model Matrix</title>
     <style>
         :root {
-            --bg-color: #0b0f19;
-            --card-bg: #131c2e;
-            --border-color: #22314d;
-            --accent-color: #CCFF00;
-            --error-color: #FF3333;
-            --text-main: #FFFFFF;
-            --text-muted: #8fa0bc;
+            --bg-dark: #0b0f19;
+            --panel-bg: #131c2e;
+            --node-bg: #1e293b;
+            --accent-blue: #0ea5e9;
+            --accent-purple: #a855f7;
+            --accent-green: #22c55e;
+            --accent-orange: #f97316;
+            --accent-red: #ef4444;
+            --text-light: #f8fafc;
+            --text-muted: #64748b;
+            
+            --success-bg: rgba(34, 197, 94, 0.1);
+            --error-bg: rgba(239, 68, 68, 0.1);
+        }
+
+        html, body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            width: 100vw;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
             display: flex;
             flex-direction: column;
+            box-sizing: border-box;
+            padding: 20px;
             align-items: center;
         }
 
+        header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
         h1 {
-            color: var(--text-main);
-            margin-bottom: 5px;
+            color: var(--text-light);
+            margin: 0 0 5px 0;
             font-weight: 600;
+            font-size: 1.8rem;
         }
 
         p.instructions {
             color: var(--text-muted);
-            margin-bottom: 20px;
+            margin: 0;
             font-size: 0.95rem;
         }
 
         .controls {
-            margin-bottom: 30px;
+            margin: 15px 0;
             display: flex;
             gap: 15px;
         }
@@ -55,86 +74,109 @@
         }
 
         .btn-verify {
-            border: 1px solid var(--accent-color);
-            color: var(--accent-color);
+            border: 1px solid var(--accent-blue);
+            color: var(--accent-blue);
         }
 
         .btn-verify:hover {
-            background-color: var(--accent-color);
-            color: var(--bg-color);
-            box-shadow: 0 0 10px rgba(204, 255, 0, 0.3);
+            background-color: var(--accent-blue);
+            color: var(--bg-dark);
+            box-shadow: 0 0 10px rgba(14, 165, 233, 0.3);
         }
 
         .btn-reset {
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--node-bg);
             color: var(--text-muted);
         }
 
         .btn-reset:hover {
-            border-color: #3b5177;
-            color: var(--text-main);
+            border-color: var(--text-muted);
+            color: var(--text-light);
+        }
+
+        .status-banner {
+            display: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 1rem;
+            text-align: center;
+            width: 100%;
+            max-width: 1200px;
+            box-sizing: border-box;
+        }
+
+        .status-banner.success {
+            background-color: var(--success-bg);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .status-banner.fail {
+            background-color: var(--error-bg);
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
         }
 
         .container {
             display: flex;
-            gap: 30px;
+            gap: 25px;
             max-width: 1200px;
             width: 100%;
             align-items: flex-start;
         }
 
-        /* OSI Stack Styles */
         .osi-stack {
-            flex: 2;
+            flex: 1.5;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
         .layer-row {
             display: grid;
-            grid-template-columns: 140px 1fr;
-            border: 1px solid var(--border-color);
-            background-color: var(--card-bg);
+            grid-template-columns: 160px 1fr;
+            border: 1px solid var(--node-bg);
+            background-color: var(--panel-bg);
             border-radius: 4px;
             overflow: hidden;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
         .layer-number {
-            background-color: #0e1524;
-            padding: 20px;
+            background-color: var(--node-bg);
+            padding: 15px;
             font-weight: bold;
-            border-right: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            border-right: 1px solid var(--node-bg);
             display: flex;
             align-items: center;
             color: var(--text-muted);
-            transition: all 0.3s ease;
         }
 
         .layer-dropzone {
-            padding: 15px;
+            padding: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 50px;
-            background-color: var(--bg-color);
+            min-height: 45px;
+            background-color: var(--bg-dark);
             margin: 5px;
-            border: 1px dashed var(--border-color);
+            border: 1px dashed var(--node-bg);
             border-radius: 4px;
             transition: all 0.2s ease;
         }
 
         .layer-dropzone.drag-over {
-            border-color: var(--accent-color);
-            background-color: #1a261a;
+            border-color: var(--accent-blue);
+            background-color: rgba(14, 165, 233, 0.05);
         }
 
-        /* Draggable Item Styles */
         .draggable-pool {
             flex: 1;
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
+            background-color: var(--panel-bg);
+            border: 1px solid var(--node-bg);
             padding: 20px;
             border-radius: 4px;
             display: flex;
@@ -145,20 +187,23 @@
         }
 
         .draggable-pool h3 {
-            margin-top: 0;
-            border-bottom: 1px solid var(--border-color);
+            margin: 0;
+            border-bottom: 1px solid var(--node-bg);
             padding-bottom: 10px;
-            color: var(--text-main);
+            color: var(--accent-purple);
+            font-size: 1.1rem;
         }
 
         .drag-item {
-            background-color: #0e1524;
-            border: 1px solid var(--border-color);
+            background-color: var(--node-bg);
+            border: 1px solid transparent;
+            color: var(--text-light);
             padding: 12px 15px;
             border-radius: 4px;
             cursor: grab;
             user-select: none;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            line-height: 1.4;
             transition: all 0.2s ease;
             width: 100%;
             box-sizing: border-box;
@@ -168,55 +213,38 @@
             cursor: grabbing;
         }
 
-        /* Row Feedback Validation States */
+        .drag-item:hover {
+            border-color: var(--accent-blue);
+        }
+
         .layer-row.correct {
-            border-color: var(--accent-color);
-            box-shadow: 0 0 8px rgba(204, 255, 0, 0.15);
+            border-color: var(--accent-green);
         }
         .layer-row.correct .layer-number {
-            color: var(--accent-color);
-            border-right-color: var(--accent-color);
+            color: var(--accent-green);
+            border-right-color: var(--accent-green);
         }
 
         .layer-row.incorrect {
-            border-color: var(--error-color);
-            box-shadow: 0 0 8px rgba(255, 51, 51, 0.15);
+            border-color: var(--accent-red);
         }
         .layer-row.incorrect .layer-number {
-            color: var(--error-color);
-            border-right-color: var(--error-color);
+            color: var(--accent-red);
+            border-right-color: var(--accent-red);
         }
 
-        .status-banner {
-            display: none;
-            padding: 15px 30px;
-            border-radius: 4px;
-            margin-bottom: 25px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            text-align: center;
-            width: 100%;
-            max-width: 1200px;
-            box-sizing: border-box;
-        }
-
-        .status-banner.success {
-            background-color: #111e16;
-            border: 1px solid var(--accent-color);
-            color: var(--accent-color);
-        }
-
-        .status-banner.fail {
-            background-color: #241212;
-            border: 1px solid var(--error-color);
-            color: var(--error-color);
+        @media (max-width: 900px) {
+            .container { flex-direction: column; }
+            .draggable-pool { position: static; width: 100%; }
         }
     </style>
 </head>
 <body>
 
-    <h1>OSI Model Matrix Challenge</h1>
-    <p class="instructions">Drag each profile block to its correct OSI Layer, then click "Verify Matrix" to check your alignment.</p>
+    <header>
+        <h1>OSI Model Matrix Challenge</h1>
+        <p class="instructions">Drag each profile block to its correct OSI Layer, then click "Verify Matrix".</p>
+    </header>
 
     <div class="controls">
         <button class="btn-verify" onclick="verifyMatrix()">Verify Matrix</button>
@@ -237,4 +265,171 @@
             </div>
             <div class="layer-row" id="row-5" data-layer="5">
                 <div class="layer-number">Layer 5: Session</div>
-                <div class="layer-dropzone" ondragover="allowDrop(event
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+            <div class="layer-row" id="row-4" data-layer="4">
+                <div class="layer-number">Layer 4: Transport</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+            <div class="layer-row" id="row-3" data-layer="3">
+                <div class="layer-number">Layer 3: Network</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+            <div class="layer-row" id="row-2" data-layer="2">
+                <div class="layer-number">Layer 2: Data Link</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+            <div class="layer-row" id="row-1" data-layer="1">
+                <div class="layer-number">Layer 1: Physical</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+        </div>
+
+        <div class="draggable-pool">
+            <h3>Profile Options</h3>
+            <div id="itemPool"></div>
+        </div>
+    </div>
+
+    <script>
+        // Global drag reference pointer bypasses unstable browser dataTransfer APIs
+        window.draggedItem = null;
+
+        const initialProfiles = [
+            { id: "p7", target: "7", text: "Data | Network services to apps | HTTP, HTTPS, DNS, SMTP" },
+            { id: "p6", target: "6", text: "Data | Encryption, compression & formatting | SSL/TLS, JPEG" },
+            { id: "p5", target: "5", text: "Data | Managing & terminating sessions | NetBIOS, RPC, Sockets" },
+            { id: "p4", target: "4", text: "Segments/Datagrams | End-to-end flow control | TCP, UDP, Ports" },
+            { id: "p3", target: "3", text: "Packets | Path determination & logical addressing | IP, Routers" },
+            { id: "p2", target: "2", text: "Frames | Physical addressing & media access | MAC, Switches, NICs" },
+            { id: "p1", target: "1", text: "Bits | Bit stream transmission over physical medium | Cables, Hubs" }
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initTask();
+        });
+
+        function initTask() {
+            const pool = document.getElementById('itemPool');
+            pool.innerHTML = '';
+            
+            const shuffled = [...initialProfiles].sort(() => Math.random() - 0.5);
+            
+            shuffled.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'drag-item';
+                div.draggable = true;
+                div.id = item.id;
+                div.setAttribute('data-target', item.target);
+                div.innerText = item.text;
+                
+                // Native pointer assignments
+                div.addEventListener('dragstart', (e) => {
+                    window.draggedItem = e.target;
+                    clearVisualFeedback();
+                });
+                
+                pool.appendChild(div);
+            });
+        }
+
+        function allowDrop(e) {
+            e.preventDefault();
+            const dropzone = e.target.closest('.layer-dropzone');
+            if (dropzone && !dropzone.hasChildNodes()) {
+                dropzone.classList.add('drag-over');
+            }
+        }
+
+        function dragLeave(e) {
+            const dropzone = e.target.closest('.layer-dropzone');
+            if (dropzone) {
+                dropzone.classList.remove('drag-over');
+            }
+        }
+
+        function drop(e) {
+            e.preventDefault();
+            const dropzone = e.target.closest('.layer-dropzone');
+            if (!dropzone) return;
+            
+            dropzone.classList.remove('drag-over');
+            if (dropzone.hasChildNodes()) return;
+
+            if (window.draggedItem) {
+                dropzone.appendChild(window.draggedItem);
+                clearVisualFeedback();
+            }
+        }
+
+        function verifyMatrix() {
+            const rows = document.querySelectorAll('.layer-row');
+            let totalCorrect = 0;
+            let totalPlaced = 0;
+            const banner = document.getElementById('statusBanner');
+
+            rows.forEach(row => {
+                const targetLayer = row.getAttribute('data-layer');
+                const dropzone = row.querySelector('.layer-dropzone');
+                const childItem = dropzone.querySelector('.drag-item');
+
+                row.classList.remove('correct', 'incorrect');
+
+                if (childItem) {
+                    totalPlaced++;
+                    if (childItem.getAttribute('data-target') === targetLayer) {
+                        row.classList.add('correct');
+                        totalCorrect++;
+                    } else {
+                        row.classList.add('incorrect');
+                    }
+                }
+            });
+
+            banner.style.display = 'block';
+
+            if (totalCorrect === rows.length) {
+                banner.className = "status-banner success";
+                banner.innerText = "✓ Verification Complete: All layers are mapping out perfectly.";
+                document.querySelectorAll('.drag-item').forEach(item => item.draggable = false);
+            } else {
+                banner.className = "status-banner fail";
+                if (totalPlaced < rows.length) {
+                    banner.innerText = "✗ Verification Failed: Some spaces are still empty. Complete the matrix and try again.";
+                } else {
+                    banner.innerText = `✗ Verification Failed: ${rows.length - totalCorrect} alignment errors detected. Correct the red elements or clear to reset.`;
+                }
+            }
+        }
+
+        function clearVisualFeedback() {
+            document.querySelectorAll('.layer-row').forEach(row => {
+                row.classList.remove('correct', 'incorrect');
+            });
+            document.getElementById('statusBanner').style.display = 'none';
+        }
+
+        function resetMatrix() {
+            const dropzones = document.querySelectorAll('.layer-dropzone');
+            dropzones.forEach(zone => {
+                while (zone.firstChild) {
+                    zone.removeChild(zone.firstChild);
+                }
+            });
+            clearVisualFeedback();
+            initTask();
+            window.draggedItem = null;
+        }
+
+        // Return items back to options pool listener
+        document.getElementById('itemPool').addEventListener('dragover', (e) => e.preventDefault());
+        document.getElementById('itemPool').addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (window.draggedItem) {
+                document.getElementById('itemPool').appendChild(window.draggedItem);
+                clearVisualFeedback();
+            }
+        });
+    </script>
+</body>
+</html>
