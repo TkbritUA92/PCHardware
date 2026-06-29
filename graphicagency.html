@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graphic Design Agency Network Sandbox</title>
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --panel-bg: #131c2e;
+            --node-bg: #1e293b;
+            --accent-blue: #0ea5e9;
+            --accent-purple: #a855f7;
+            --accent-green: #22c55e;
+            --accent-orange: #f97316;
+            --accent-red: #ef4444;
+            --text-light: #f8fafc;
+            --text-muted: #64748b;
+            
+            --success-bg: rgba(34, 197, 94, 0.1);
+            --error-bg: rgba(239, 68, 68, 0.1);
+        }
+
+        html, body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            padding: 15px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 10px;
+            flex-shrink: 0;
+        }
+
+        h1 {
+            color: var(--text-light);
+            margin: 0 0 5px 0;
+            font-weight: 600;
+            font-size: 1.6rem;
+        }
+
+        p.instructions {
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .controls {
+            margin: 5px 0 15px 0;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        button {
+            background-color: transparent;
+            font-weight: bold;
+            font-size: 0.9rem;
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-verify { border: 1px solid var(--accent-blue); color: var(--accent-blue); }
+        .btn-verify:hover { background-color: var(--accent-blue); color: var(--bg-dark); }
+        .btn-reset { border: 1px solid var(--node-bg); color: var(--text-muted); }
+        .btn-reset:hover { border-color: var(--text-muted); color: var(--text-light); }
+
+        .status-banner {
+            display: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            text-align: center;
+            width: 100%;
+            max-width: 1200px;
+            align-self: center;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+        .status-banner.success { background-color: var(--success-bg); border: 1px solid var(--accent-green); color: var(--accent-green); }
+        .status-banner.fail { background-color: var(--error-bg); border: 1px solid var(--accent-red); color: var(--accent-red); }
+
+        .workspace-layout {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 1400px;
+            align-self: center;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* Procurement Inventory Sidebar */
+        .toolkit {
+            flex: 0 0 260px;
+            background-color: var(--panel-bg);
+            border: 1px solid var(--node-bg);
+            border-radius: 6px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toolkit h3 {
+            margin: 0;
+            font-size: 1rem;
+            color: var(--accent-purple);
+            border-bottom: 1px solid var(--node-bg);
+            padding-bottom: 8px;
+        }
+
+        .tool-node {
+            background-color: var(--node-bg);
+            border: 1px solid transparent;
+            padding: 12px;
+            border-radius: 4px;
+            cursor: grab;
+            user-select: none;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+        .tool-node:hover { border-color: var(--accent-blue); }
+        .tool-node span { display: block; font-weight: bold; margin-bottom: 3px; }
+        .tool-node small { color: var(--text-muted); }
+
+        /* Topology Grid Sandbox */
+        .grid-arena {
+            flex: 1;
+            background-color: #060a12;
+            border: 2px dashed var(--node-bg);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+            background-image: radial-gradient(#1e293b 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .deployed-node {
+            position: absolute;
+            background-color: var(--panel-bg);
+            border: 1px solid var(--accent-blue);
+            padding: 10px;
+            border-radius: 4px;
+            width: 150px;
+            box-sizing: border-box;
+            cursor: move;
+            z-index: 10;
+            text-align: center;
+            font-size: 0.8rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .deployed-node b { display: block; color: var(--text-light); }
+        .deployed-node small { color: var(--accent-orange); display: block; margin-top: 2px; }
+
+        .node-delete {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--accent-red);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .port-dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--text-muted);
+            border-radius: 50%;
+            position: absolute;
+            bottom: -5px;
+            left: calc(50% - 5px);
+            cursor: crosshair;
+            z-index: 20;
+            border: 1px solid var(--bg-dark);
+        }
+        .port-dot:hover { background-color: var(--accent-green); transform: scale(1.3); }
+
+        .wire-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Design Agency Infrastructure Upgrade Lab</h1>
+        <p class="instructions">Deploy the 4 core hardware items to fulfill agency needs. Connect interface ports to form the physical pipeline topology.</p>
+    </header>
+
+    <div class="controls">
+        <button class="btn-verify" onclick="verifyTopology()">Verify Agency Topology</button>
+        <button class="btn-reset" onclick="resetCanvas()">Clear Workspace</button>
+    </div>
+
+    <div class="status-banner" id="statusBanner"></div>
+
+    <div class="workspace-layout">
+        <div class="toolkit">
+            <h3>Procurement Catalog</h3>
+            
+            <div class="tool-node" draggable="true" data-type="wan" data-label="ISP Connection">
+                <span>ISP Internet Line</span><small>Public Internet Access</small>
+            </div>
+            
+            <div class="tool-node" draggable="true" data-type="firewall" data-label="Next-Gen Firewall">
+                <span>Next-Gen Firewall</span><small>Blocks Gambling / NAT</small>
+            </div>
+            
+            <div class="tool-node" draggable="true" data-type="switch" data-label="24-Port GbE Switch">
+                <span>Gigabit Switch</span><small>High-Speed LAN for 20 PCs</small>
+            </div>
+            
+            <div class="tool-node" draggable="true" data-type="ap" data-label="Client Wireless AP">
+                <span>Wireless Access Point</span><small>Meeting Room Wi-Fi</small>
+            </div>
+            
+            <div class="tool-node" draggable="true" data-type="host" data-label="Wired Designer PCs">
+                <span>Design Workstations</span><small>20x Wired PCs Pool</small>
+            </div>
+        </div>
+
+        <div class="grid-arena" id="gridArena" ondragover="allowArenaDrop(event)" ondrop="handleArenaDrop(event)">
+            <svg class="wire-canvas" id="wireCanvas"></svg>
+        </div>
+    </div>
+
+    <script>
+        let nodeCounter = 0;
+        let activeConnections = [];
+        let linkSourceNodeId = null;
+        let movingNodeElement = null;
+        let offsetX, offsetY;
+
+        function allowArenaDrop(e) { e.preventDefault(); }
+
+        function handleArenaDrop(e) {
+            e.preventDefault();
+            const type = e.dataTransfer.getData('text/type');
+            const label = e.dataTransfer.getData('text/label');
+            if (!type) return;
+
+            const rect = document.getElementById('gridArena').getBoundingClientRect();
+            const x = e.clientX - rect.left - 75;
+            const y = e.clientY - rect.top - 25;
+
+            createNode(type, label, x, y);
+        }
+
+        document.querySelectorAll('.tool-node').forEach(node => {
+            node.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/type', e.currentTarget.getAttribute('data-type'));
+                e.dataTransfer.setData('text/label', e.currentTarget.getAttribute('data-label'));
+            });
+        });
+
+        function createNode(type, label, x, y) {
+            nodeCounter++;
+            const id = `node_${nodeCounter}`;
+
+            const node = document.createElement('div');
+            node.className = 'deployed-node';
+            node.id = id;
+            node.style.left = `${x}px`;
+            node.style.top = `${y}px`;
+            node.setAttribute('data-type', type);
+            node.setAttribute('data-label', label);
+
+            node.innerHTML = `
+                <button class="node-delete" onclick="deleteNode('${id}')">X</button>
+                <b>${label}</b>
+                <small>${getLayerSpec(type)}</small>
+                <div class="port-dot" onclick="handlePortClick('${id}', event)"></div>
+            `;
+
+            node.addEventListener('mousedown', startNodeMove);
+            document.getElementById('gridArena').appendChild(node);
+            document.getElementById('statusBanner').style.display = 'none';
+        }
+
+        function getLayerSpec(type) {
+            if (type === 'wan') return 'WAN Border';
+            if (type === 'firewall') return 'Layer 3-7 Security';
+            if (type === 'switch') return 'Layer 2 Switching';
+            if (type === 'ap') return 'Layer 2 Access';
+            return 'Layer 7 Host';
+        }
+
+        function startNodeMove(e) {
+            if (e.target.classList.contains('port-dot') || e.target.classList.contains('node-delete')) return;
+            movingNodeElement = e.currentTarget;
+            const rect = movingNodeElement.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+            
+            document.addEventListener('mousemove', executeNodeMove);
+            document.addEventListener('mouseup', stopNodeMove);
+        }
+
+        function executeNodeMove(e) {
+            if (!movingNodeElement) return;
+            const arenaRect = document.getElementById('gridArena').getBoundingClientRect();
+            let x = e.clientX - arenaRect.left - offsetX;
+            let y = e.clientY - arenaRect.top - offsetY;
+
+            x = Math.max(0, Math.min(x, arenaRect.width - 150));
+            y = Math.max(0, Math.min(y, arenaRect.height - 60));
+
+            movingNodeElement.style.left = `${x}px`;
+            movingNodeElement.style.top = `${y}px`;
+            redrawWires();
+        }
+
+        function stopNodeMove() {
+            movingNodeElement = null;
+            document.removeEventListener('mousemove', executeNodeMove);
+            document.removeEventListener('mouseup', stopNodeMove);
+        }
+
+        function handlePortClick(id, event) {
+            event.stopPropagation();
+            if (linkSourceNodeId === null) {
+                linkSourceNodeId = id;
+                document.getElementById(id).style.borderColor = 'var(--accent-purple)';
+            } else {
+                if (linkSourceNodeId !== id) {
+                    const linkExists = activeConnections.some(c => 
+                        (c.from === linkSourceNodeId && c.to === id) || (c.from === id && c.to === linkSourceNodeId)
+                    );
+                    if (!linkExists) {
+                        activeConnections.push({ from: linkSourceNodeId, to: id });
+                        redrawWires();
+                    }
+                }
+                document.getElementById(linkSourceNodeId).style.borderColor = 'var(--accent-blue)';
+                linkSourceNodeId = null;
+            }
+        }
+
+        function redrawWires() {
+            const svg = document.getElementById('wireCanvas');
+            svg.innerHTML = '';
+
+            activeConnections.forEach(conn => {
+                const elA = document.getElementById(conn.from);
+                const elB = document.getElementById(conn.to);
+                if (!elA || !elB) return;
+
+                const xA = parseInt(elA.style.left) + 75;
+                const yA = parseInt(elA.style.top) + 50;
+                const xB = parseInt(elB.style.left) + 75;
+                const yB = parseInt(elB.style.top) + 50;
+
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', xA);
+                line.setAttribute('y1', yA);
+                line.setAttribute('x2', xB);
+                line.setAttribute('y2', yB);
+                line.setAttribute('stroke', '#0ea5e9');
+                line.setAttribute('stroke-width', '2');
+                svg.appendChild(line);
+            });
+        }
+
+        function deleteNode(id) {
+            activeConnections = activeConnections.filter(c => c.from !== id && c.to !== id);
+            const el = document.getElementById(id);
+            if (el) el.remove();
+            redrawWires();
+            if (linkSourceNodeId === id) linkSourceNodeId = null;
+        }
+
+        function verifyTopology() {
+            const nodes = Array.from(document.querySelectorAll('.deployed-node'));
+            const banner = document.getElementById('statusBanner');
+            banner.style.display = 'block';
+
+            const nodeMap = {};
+            nodes.forEach(n => {
+                nodeMap[n.id] = { type: n.getAttribute('data-type'), links: [] };
+            });
+
+            activeConnections.forEach(c => {
+                if(nodeMap[c.from] && nodeMap[c.to]) {
+                    nodeMap[c.from].links.push(nodeMap[c.to].type);
+                    nodeMap[c.to].links.push(nodeMap[c.from].type);
+                }
+            });
+
+            const typesOnBoard = nodes.map(n => n.getAttribute('data-type'));
+            const counts = typesOnBoard.reduce((acc, t) => { acc[t] = (acc[t] || 0) + 1; return acc; }, {});
+
+            // Hardware Bill of Materials Requirement Check
+            if (!counts.wan || !counts.firewall || !counts.switch || !counts.ap || !counts.host) {
+                banner.className = "status-banner fail";
+                banner.innerText = "✗ Verification Failed: Missing crucial hardware required to meet procurement upgrades.";
+                return;
+            }
+
+            // Topology Logic Checks
+            let firewallConnectedToWan = false;
+            let firewallConnectedToSwitch = false;
+            let apConnectedToSwitch = false;
+            let hostsConnectedToSwitch = false;
+
+            Object.values(nodeMap).forEach(node => {
+                if (node.type === 'firewall') {
+                    if (node.links.includes('wan')) firewallConnectedToWan = true;
+                    if (node.links.includes('switch')) firewallConnectedToSwitch = true;
+                }
+                if (node.type === 'ap' && node.links.includes('switch')) apConnectedToSwitch = true;
+                if (node.type === 'host' && node.links.includes('switch')) hostsConnectedToSwitch = true;
+            });
+
+            if (firewallConnectedToWan && firewallConnectedToSwitch && apConnectedToSwitch && hostsConnectedToSwitch) {
+                banner.className = "status-banner success";
+                banner.innerText = "✓ Upgrade Layout Approved: High-speed Gigabit backbone established. Next-Gen Firewall handles URL filtering and routing to the ISP, while the Access Point extends client coverage.";
+            } else {
+                banner.className = "status-banner fail";
+                banner.innerText = "✗ Verification Failed: Flow architecture alignment error. The Switch must aggregate internal nodes (PCs/APs) and route through the Firewall to reach the ISP link.";
+            }
+        }
+
+        function resetCanvas() {
+            document.getElementById('gridArena').querySelectorAll('.deployed-node').forEach(n => n.remove());
+            activeConnections = [];
+            linkSourceNodeId = null;
+            redrawWires();
+            document.getElementById('statusBanner').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
