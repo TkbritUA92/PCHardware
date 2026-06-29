@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hardware Subsystems Lab - Part 2</title>
+    <title>Interactive OSI Model Matrix</title>
     <style>
         :root {
             --bg-dark: #0b0f19;
@@ -22,11 +22,11 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-dark);
             color: var(--text-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 40px 20px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -34,318 +34,400 @@
             box-sizing: border-box;
         }
 
-        .lab-container {
-            width: 100%;
-            max-width: 1200px;
-            background-color: var(--panel-bg);
-            padding: 35px;
-            border-radius: 12px;
-            border: 1px solid var(--node-bg);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        h1 {
+            color: var(--text-light);
+            margin: 0 0 5px 0;
+            font-weight: 600;
+            font-size: 1.8rem;
         }
 
-        header {
-            border-bottom: 1px solid var(--node-bg);
-            padding-bottom: 20px;
-            margin-bottom: 25px;
+        p.instructions {
+            color: var(--text-muted);
+            margin: 0 0 15px 0;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+
+        .controls {
+            margin-bottom: 20px;
             display: flex;
-            justify-content: space-between;
+            gap: 15px;
+        }
+
+        button {
+            background-color: transparent;
+            font-weight: bold;
+            font-size: 0.95rem;
+            padding: 10px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-verify {
+            border: 1px solid var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .btn-verify:hover {
+            background-color: var(--accent-blue);
+            color: var(--bg-dark);
+            box-shadow: 0 0 10px rgba(14, 165, 233, 0.3);
+        }
+
+        .btn-reset {
+            border: 1px solid var(--node-bg);
+            color: var(--text-muted);
+        }
+
+        .btn-reset:hover {
+            border-color: var(--text-muted);
+            color: var(--text-light);
+        }
+
+        .status-banner {
+            display: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 1rem;
+            text-align: center;
+            width: 100%;
+            max-width: 1200px;
+            box-sizing: border-box;
+        }
+
+        .status-banner.success {
+            background-color: var(--success-bg);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .status-banner.fail {
+            background-color: var(--error-bg);
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        /* Responsive Main Container */
+        .container {
+            display: flex;
+            gap: 25px;
+            max-width: 1200px;
+            width: 100%;
             align-items: flex-start;
         }
 
-        .header-info h1 {
-            margin: 0 0 8px 0;
-            font-size: 1.8rem;
-            color: var(--accent-orange);
-        }
-
-        .header-info p {
-            margin: 0;
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
-
-        .task-bar {
+        /* OSI Stack */
+        .osi-stack {
+            flex: 1.5;
             display: flex;
-            gap: 10px;
-            background-color: var(--bg-dark);
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid var(--node-bg);
-            align-items: center;
-            flex-wrap: wrap;
-            margin-bottom: 25px;
+            flex-direction: column;
+            gap: 8px;
         }
 
-        .task-btn {
+        .layer-row {
+            display: grid;
+            grid-template-columns: 160px 1fr;
+            border: 1px solid var(--node-bg);
+            background-color: var(--panel-bg);
+            border-radius: 4px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .layer-number {
             background-color: var(--node-bg);
-            color: var(--accent-orange);
-            border: 1px solid #334155;
-            padding: 8px 14px;
-            border-radius: 6px;
-            cursor: pointer;
+            padding: 15px;
             font-weight: bold;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
+            border-right: 1px solid var(--node-bg);
+            display: flex;
+            align-items: center;
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+        }
+
+        .layer-dropzone {
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 45px;
+            background-color: var(--bg-dark);
+            margin: 5px;
+            border: 1px dashed var(--node-bg);
+            border-radius: 4px;
             transition: all 0.2s ease;
         }
 
-        .task-btn:hover {
-            background-color: #334155;
-            color: white;
-            border-color: var(--accent-orange);
+        .layer-dropzone.drag-over {
+            border-color: var(--accent-blue);
+            background-color: rgba(14, 165, 233, 0.05);
         }
 
-        .evidence-btn {
-            background-color: rgba(14, 165, 233, 0.1);
-            color: var(--accent-blue);
-            border: 1px solid rgba(14, 165, 233, 0.4);
+        /* Draggable Options Pool */
+        .draggable-pool {
+            flex: 1;
+            background-color: var(--panel-bg);
+            border: 1px solid var(--node-bg);
+            padding: 20px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: sticky;
+            top: 20px;
         }
 
-        .evidence-btn:hover {
-            background-color: var(--accent-blue);
-            color: var(--bg-dark);
+        .draggable-pool h3 {
+            margin: 0;
+            border-bottom: 1px solid var(--node-bg);
+            padding-bottom: 10px;
+            color: var(--accent-purple);
+            font-size: 1.1rem;
+        }
+
+        .drag-item {
+            background-color: var(--node-bg);
+            border: 1px solid transparent;
+            color: var(--text-light);
+            padding: 12px 15px;
+            border-radius: 4px;
+            cursor: grab;
+            user-select: none;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            transition: all 0.2s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .drag-item:active {
+            cursor: grabbing;
+        }
+
+        .drag-item:hover {
             border-color: var(--accent-blue);
         }
 
-        .matrix-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
+        /* Verification States */
+        .layer-row.correct {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 8px rgba(34, 197, 150, 0.1);
+        }
+        .layer-row.correct .layer-number {
+            color: var(--accent-green);
+            border-right-color: var(--accent-green);
         }
 
-        .matrix-table th {
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            text-align: left;
-            padding: 14px;
-            font-weight: 700;
-            border-bottom: 2px solid var(--node-bg);
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.05em;
+        .layer-row.incorrect {
+            border-color: var(--accent-red);
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.1);
+        }
+        .layer-row.incorrect .layer-number {
+            color: var(--accent-red);
+            border-right-color: var(--accent-red);
         }
 
-        .matrix-table td {
-            padding: 16px 14px;
-            border-bottom: 1px solid var(--node-bg);
-            vertical-align: middle;
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+            }
+            .draggable-pool {
+                position: static;
+                width: 100%;
+                box-sizing: border-box;
+            }
         }
-
-        .hardware-name {
-            font-weight: bold;
-            color: var(--text-light);
-            font-size: 15px;
-            display: block;
-        }
-
-        .hardware-desc {
-            display: block;
-            font-size: 12px;
-            color: var(--text-muted);
-            font-weight: normal;
-            margin-top: 4px;
-            line-height: 1.4;
-        }
-
-        select {
-            width: 100%;
-            background-color: var(--bg-dark);
-            border: 1px solid #334155;
-            color: var(--text-light);
-            padding: 10px;
-            border-radius: 6px;
-            outline: none;
-            box-sizing: border-box;
-            font-size: 0.85rem;
-            transition: all 0.2s ease;
-        }
-
-        select:focus { border-color: var(--accent-orange); }
-        select option { background-color: var(--panel-bg); color: var(--text-light); }
-
-        .controls {
-            margin-top: 35px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px;
-        }
-
-        button.action-btn {
-            padding: 10px 20px;
-            font-size: 0.85rem;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .btn-submit { background-color: var(--accent-orange); color: var(--bg-dark); border: none; }
-        .btn-submit:hover { opacity: 0.9; }
-        .btn-reset { background-color: var(--node-bg); color: var(--text-light); border: 1px solid #334155; }
-        .btn-reset:hover { background-color: #334155; border-color: var(--text-muted); }
-
-        .score-display {
-            font-size: 0.95rem;
-            font-weight: bold;
-            display: none;
-            padding: 12px;
-            border-radius: 6px;
-            text-align: center;
-            flex-grow: 1;
-            border: 1px solid transparent;
-        }
-
-        .input-correct { border-color: var(--accent-green) !important; background-color: var(--success-bg) !important; }
-        .input-error { border-color: var(--accent-red) !important; background-color: var(--error-bg) !important; }
-
-        /* Modal Overlay Styling */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(7, 10, 19, 0.85);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-card {
-            background-color: var(--panel-bg);
-            border: 2px solid #334155;
-            border-radius: 12px;
-            max-width: 650px;
-            width: 90%;
-            padding: 30px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-        }
-
-        .modal-header { font-size: 1.3rem; font-weight: bold; margin-bottom: 15px; }
-        .modal-body { font-size: 0.95rem; line-height: 1.6; color: #cbd5e1; margin-bottom: 20px; }
-        .modal-close { background-color: var(--accent-orange); color: var(--bg-dark); border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-<div class="lab-container">
-    <header>
-        <div class="header-info">
-            <h1>Hardware Matrix Alignment Module — Part 2</h1>
-            <p>Advanced Diagnostics: Signal Degradation, Protocol Constraints, and Host Communication Modes</p>
-        </div>
-        <div>
-            <span style="background-color: var(--node-bg); color: var(--accent-orange); padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; font-weight: bold; border: 1px solid #334155;">Module 2: Advanced</span>
-        </div>
-    </header>
-
-    <div class="task-bar">
-        <span style="font-weight:bold; font-size:0.85rem; color:var(--text-muted); margin-right:10px; uppercase; letter-spacing: 0.05em;">Assign Diagnostic Dispatch:</span>
-        <button class="task-btn" onclick="showTask(1)">Task 1: Signal Integrity Errors</button>
-        <button class="task-btn" onclick="showTask(2)">Task 2: Driver & Protocol Collisions</button>
-        <button class="task-btn evidence-btn" onclick="showTask(3)">📸 Submission Sign-Off</button>
-    </div>
-
-    <table class="matrix-table">
-        <thead>
-            <tr>
-                <th style="width: 34%;">System Architecture Scenario</th>
-                <th style="width: 22%;">1. Primary Engineering Failure Mode</th>
-                <th style="width: 22%;">2. Core Protocol/Physical Limit</th>
-                <th style="width: 22%;">3. Resolution Strategy</th>
-            </tr>
-        </thead>
-        <tbody id="matrix-body"></tbody>
-    </table>
+    <h1>OSI Model Matrix Challenge</h1>
+    <p class="instructions">Drag each profile block to its correct OSI Layer, then click "Verify Matrix" to check your alignment.</p>
 
     <div class="controls">
-        <button class="btn-reset action-btn" onclick="resetForm()">Strip Hardware Matrix</button>
-        <div id="scoreBox" class="score-display"></div>
-        <button class="btn-submit action-btn" onclick="evaluateMatrix()">Verify System Configuration</button>
+        <button class="btn-verify" onclick="verifyMatrix()">Verify Matrix</button>
+        <button class="btn-reset" onclick="resetMatrix()">Reset Task</button>
     </div>
-</div>
 
-<div class="modal-overlay" id="task-modal">
-    <div class="modal-card">
-        <div class="modal-header" id="m-header">Task Setup</div>
-        <div class="modal-body" id="m-body">Task Content</div>
-        <div style="text-align: right;">
-            <button class="modal-close" onclick="closeModal()">Close Guide</button>
+    <div class="status-banner" id="statusBanner"></div>
+
+    <div class="container">
+        <div class="osi-stack">
+            <div class="layer-row" id="row-7" data-layer="7">
+                <div class="layer-number">Layer 7: Application</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+            <div class="layer-row" id="row-6" data-layer="6">
+                <div class="layer-number">Layer 6: Presentation</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+            <div class="layer-row" id="row-5" data-layer="5">
+                <div class="layer-number">Layer 5: Session</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+            <div class="layer-row" id="row-4" data-layer="4">
+                <div class="layer-number">Layer 4: Transport</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+            <div class="layer-row" id="row-3" data-layer="3">
+                <div class="layer-number">Layer 3: Network</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+            <div class="layer-row" id="row-2" data-layer="2">
+                <div class="layer-number">Layer 2: Data Link</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+            <div class="layer-row" id="row-1" data-layer="1">
+                <div class="layer-number">Layer 1: Physical</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+        </div>
+
+        <div class="draggable-pool" id="itemPool">
+            <h3>Profile Options</h3>
         </div>
     </div>
-</div>
 
-<script>
-    const dataset = [
-        { id: "vr_latency", name: "High-Refresh Mixed Reality Headset", desc: "A user connects a VR array to a passive hub link. Sensors drop sync whenever video frames peak.", ans1: "bandwidth", ans2: "usb_limit", ans3: "discrete" },
-        { id: "omr_driver", name: "Legacy OMR Terminal Deployment", desc: "An industrial optical scanner times out on a modern OS during raw batch ingestion routines.", ans1: "driver", ans2: "polling", ans3: "kernel" },
-        { id: "osc_noise", name: "High-Frequency USB Oscilloscope", desc: "Waveform readings display severe harmonic interference patterns when deployed next to high-current power switch rails.", ans1: "emi", ans2: "attenuation", ans3: "shield" },
-        { id: "audio_drop", name: "Multi-Channel XLR Production Rig", desc: "Audio interface streams show intermittent crackling and dropouts during multi-track mic tracking sessions.", ans1: "latency", ans2: "buffer", ans3: "asio" },
-        { id: "display_color", name: "4K Color-Grading Mastering Display", desc: "A display running over a long passive alternative display link drops its output depth back down to standard 8-bit color spaces.", ans1: "bandwidth", ans2: "attenuation", ans3: "active" }
-    ];
+    <script>
+        const initialProfiles = [
+            { id: "p7", target: "7", text: "Data | Network services to apps | HTTP, HTTPS, DNS, SMTP" },
+            { id: "p6", target: "6", text: "Data | Encryption, compression & formatting | SSL/TLS, JPEG" },
+            { id: "p5", target: "5", text: "Data | Managing & terminating sessions | NetBIOS, RPC, Sockets" },
+            { id: "p4", target: "4", text: "Segments/Datagrams | End-to-end flow control | TCP, UDP, Ports" },
+            { id: "p3", target: "3", text: "Packets | Path determination & logical addressing | IP, Routers" },
+            { id: "p2", target: "2", text: "Frames | Physical addressing & media access | MAC, Switches, NICs" },
+            { id: "p1", target: "1", text: "Bits | Bit stream transmission over physical medium | Cables, Hubs" }
+        ];
 
-    const tasks = {
-        1: {
-            title: "Task 1: Physical Layer & Signal Integrity Diagnostics",
-            color: "var(--accent-orange)",
-            body: "<strong>Objective:</strong> Isolate anomalies caused by physics constraints and hardware environments.<br><br><strong>Instructions:</strong> Review the troubleshooting rows for the <em>High-Frequency USB Oscilloscope</em> (EMI interference) and the <em>4K Color-Grading Mastering Display</em> (cable length attenuation limitations). Align their structural failure modes to the underlying physical limit and apply the proper hardware resolution strategy."
-        },
-        2: {
-            title: "Task 2: Driver Incompatibilities & Buffer Underflows",
-            color: "var(--accent-purple)",
-            body: "<strong>Objective:</strong> Resolve kernel-space conflicts and shared bus bandwidth saturation blocks.<br><br><strong>Instructions:</strong> Diagnose the <em>Mixed Reality Headset</em>, <em>Legacy OMR Terminal</em>, and <em>Multi-Channel XLR Rig</em>. Identify how OS polling loops, shared hub bandwidth choke-points, and host CPU thread scheduling interrupts cause hardware system dropouts. Choose the exact subsystem adjustments required to stabilize the data pipeline."
-        },
-        3: {
-            title: "📸 Part 2 Engineering Sign-Off Deliverables",
-            color: "var(--accent-blue)",
-            body: "<strong>Evidence Requirements:</strong><br>This advanced diagnostic sequence tests high-level infrastructure design capabilities. Apprentices must cleanly isolate all 5 structural hardware system failures without creating parallel bottlenecks.<br><br>Once the verification engine prints out a successful configuration report, capture a screen snippet of your solved lab window layout and attach it directly to your e-portfolio under the infrastructure maintenance criteria."
+        window.addEventListener('DOMContentLoaded', initTask);
+
+        function initTask() {
+            const pool = document.getElementById('itemPool');
+            pool.querySelectorAll('.drag-item').forEach(el => el.remove());
+            
+            const shuffled = [...initialProfiles].sort(() => Math.random() - 0.5);
+            
+            shuffled.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'drag-item';
+                div.draggable = true;
+                div.id = item.id;
+                div.setAttribute('data-target', item.target);
+                div.innerText = item.text;
+                div.addEventListener('dragstart', dragStart);
+                pool.appendChild(div);
+            });
         }
-    };
 
-    function showTask(id) {
-        const modal = document.getElementById('task-modal');
-        const header = document.getElementById('m-header');
-        const body = document.getElementById('m-body');
-        header.innerText = tasks[id].title;
-        header.style.color = tasks[id].color;
-        body.innerHTML = tasks[id].body;
-        modal.style.display = 'flex';
-    }
+        function dragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.id);
+            clearVisualFeedback();
+        }
 
-    function closeModal() { document.getElementById('task-modal').style.display = 'none'; }
+        function allowDrop(e) {
+            e.preventDefault();
+            const dropzone = e.target.closest('.layer-dropzone');
+            if (dropzone && !dropzone.hasChildNodes()) {
+                dropzone.classList.add('drag-over');
+            }
+        }
 
-    function renderMatrix() {
-        document.getElementById('matrix-body').innerHTML = dataset.map(row => `
-            <tr>
-                <td><span class="hardware-name">${row.name}</span><span class="hardware-desc">${row.desc}</span></td>
-                <td><select class="col1" data-correct="${row.ans1}"><option value="">-- Diagnose Failure --</option><option value="bandwidth">Bus Bandwidth Saturation</option><option value="emi">EMI / Cross-Talk Injection</option><option value="driver">Driver Hook Abstraction Failure</option><option value="latency">Host CPU Interrupt Latency</option></select></td>
-                <td><select class="col2" data-correct="${row.ans2}"><option value="">-- Protocol Constraint --</option><option value="usb_limit">USB 2.0 Max Pipeline (480 Mbps)</option><option value="polling">Synchronous Input Polling Loops</option><option value="attenuation">High-Frequency Signal Attenuation</option><option value="buffer">Ring-Buffer Latency Exhaustion</option></select></td>
-                <td><select class="col3" data-correct="${row.ans3}"><option value="">-- Apply Resolution --</option><option value="discrete">Deploy Root Discrete Controller</option><option value="kernel">Compile Custom Kernel Extensions</option><option value="shield">Isolate Cable Core Shielding</option><option value="asio">Implement Direct ASIO Hardware Paths</option><option value="active">Integrate Active Booster Signal Chips</option></select></td>
-            </tr>
-        `).join('');
-    }
+        function dragLeave(e) {
+            const dropzone = e.target.closest('.layer-dropzone');
+            if (dropzone) {
+                dropzone.classList.remove('drag-over');
+            }
+        }
 
-    function evaluateMatrix() {
-        let correctPoints = 0;
-        const dropdowns = document.querySelectorAll('#matrix-body select');
-        dropdowns.forEach(select => {
-            if (select.value === select.getAttribute('data-correct')) {
-                select.className = "input-correct"; correctPoints++;
-            } else { select.className = "input-error"; }
+        function drop(e) {
+            e.preventDefault();
+            const dropzone = e.target.closest('.layer-dropzone');
+            if (!dropzone) return;
+            
+            dropzone.classList.remove('drag-over');
+            if (dropzone.hasChildNodes()) return;
+
+            const id = e.dataTransfer.getData('text/plain');
+            const draggedElement = document.getElementById(id);
+            
+            if (draggedElement) {
+                dropzone.appendChild(draggedElement);
+                clearVisualFeedback();
+            }
+        }
+
+        function verifyMatrix() {
+            const rows = document.querySelectorAll('.layer-row');
+            let totalCorrect = 0;
+            let totalPlaced = 0;
+            const banner = document.getElementById('statusBanner');
+
+            rows.forEach(row => {
+                const targetLayer = row.getAttribute('data-layer');
+                const dropzone = row.querySelector('.layer-dropzone');
+                const childItem = dropzone.querySelector('.drag-item');
+
+                row.classList.remove('correct', 'incorrect');
+
+                if (childItem) {
+                    totalPlaced++;
+                    if (childItem.getAttribute('data-target') === targetLayer) {
+                        row.classList.add('correct');
+                        totalCorrect++;
+                    } else {
+                        row.classList.add('incorrect');
+                    }
+                }
+            });
+
+            banner.style.display = 'block';
+
+            if (totalCorrect === rows.length) {
+                banner.className = "status-banner success";
+                banner.innerText = "✓ Verification Complete: All layers are mapping out perfectly.";
+                document.querySelectorAll('.drag-item').forEach(item => item.draggable = false);
+            } else {
+                banner.className = "status-banner fail";
+                if (totalPlaced < rows.length) {
+                    banner.innerText = "✗ Verification Failed: Some spaces are still empty. Complete the matrix and try again.";
+                } else {
+                    banner.innerText = `✗ Verification Failed: ${rows.length - totalCorrect} alignment errors detected. Correct the red elements or clear to reset.`;
+                }
+            }
+        }
+
+        function clearVisualFeedback() {
+            document.querySelectorAll('.layer-row').forEach(row => {
+                row.classList.remove('correct', 'incorrect');
+            });
+            document.getElementById('statusBanner').style.display = 'none';
+        }
+
+        function resetMatrix() {
+            const dropzones = document.querySelectorAll('.layer-dropzone');
+            dropzones.forEach(zone => {
+                while (zone.firstChild) {
+                    zone.removeChild(zone.firstChild);
+                }
+            });
+            clearVisualFeedback();
+            initTask();
+        }
+
+        document.getElementById('itemPool').addEventListener('dragover', (e) => e.preventDefault());
+        document.getElementById('itemPool').addEventListener('drop', (e) => {
+            e.preventDefault();
+            const id = e.dataTransfer.getData('text/plain');
+            const draggedElement = document.getElementById(id);
+            if (draggedElement) {
+                document.getElementById('itemPool').appendChild(draggedElement);
+                clearVisualFeedback();
+            }
         });
-        const scoreBox = document.getElementById('scoreBox');
-        scoreBox.style.display = 'block';
-        scoreBox.innerText = `Advanced Diagnostics Verified: Aligned ${correctPoints} / ${dropdowns.length} parameters.`;
-        if (correctPoints === dropdowns.length) {
-            scoreBox.style.backgroundColor = 'var(--success-bg)'; scoreBox.style.borderColor = 'var(--accent-green)'; scoreBox.style.color = 'var(--accent-green)';
-        } else {
-            scoreBox.style.backgroundColor = 'var(--error-bg)'; scoreBox.style.borderColor = 'var(--accent-red)'; scoreBox.style.color = 'var(--accent-red)';
-        }
-    }
-
-    function resetForm() { renderMatrix(); document.getElementById('scoreBox').style.display = 'none'; }
-    window.onload = renderMatrix;
-</script>
+    </script>
 </body>
 </html>
