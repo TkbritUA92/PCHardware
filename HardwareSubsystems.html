@@ -27,50 +27,47 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            height: 100vh;
+            min-height: 100vh;
             width: 100vw;
-            overflow-x: hidden;
         }
 
         body {
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
-            padding: 15px;
+            padding: 20px;
+            align-items: center;
         }
 
         header {
             text-align: center;
-            flex-shrink: 0;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         h1 {
             color: var(--text-light);
-            margin: 0 0 4px 0;
+            margin: 0 0 5px 0;
             font-weight: 600;
-            font-size: 1.6rem;
+            font-size: 1.8rem;
         }
 
         p.instructions {
             color: var(--text-muted);
             margin: 0;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
 
         .controls {
-            margin: 10px 0;
+            margin: 15px 0;
             display: flex;
             gap: 15px;
-            justify-content: center;
-            flex-shrink: 0;
         }
 
         button {
             background-color: transparent;
             font-weight: bold;
-            font-size: 0.9rem;
-            padding: 8px 20px;
+            font-size: 0.95rem;
+            padding: 10px 24px;
             border-radius: 4px;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -99,17 +96,15 @@
 
         .status-banner {
             display: none;
-            padding: 10px 15px;
+            padding: 12px 20px;
             border-radius: 4px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             font-weight: bold;
-            font-size: 0.95rem;
+            font-size: 1rem;
             text-align: center;
             width: 100%;
-            max-width: 1300px;
-            align-self: center;
+            max-width: 1200px;
             box-sizing: border-box;
-            flex-shrink: 0;
         }
 
         .status-banner.success {
@@ -124,46 +119,36 @@
             color: var(--accent-red);
         }
 
-        /* Fixed Work Area viewport constraint */
         .container {
             display: flex;
-            gap: 20px;
-            max-width: 1300px;
+            gap: 25px;
+            max-width: 1200px;
             width: 100%;
-            align-self: center;
-            flex: 1;
-            min-height: 0; /* Essential fix for internal flex container scrolling */
-            box-sizing: border-box;
-            padding-bottom: 10px;
+            align-items: flex-start;
         }
 
-        /* Left Side: OSI Stack - Fluid but scales to view */
         .osi-stack {
-            flex: 1.4;
+            flex: 1.5;
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            height: 100%;
-            justify-content: space-between;
+            gap: 8px;
         }
 
         .layer-row {
             display: grid;
-            grid-template-columns: 150px 1fr;
+            grid-template-columns: 160px 1fr;
             border: 1px solid var(--node-bg);
             background-color: var(--panel-bg);
             border-radius: 4px;
             overflow: hidden;
-            flex: 1;
-            min-height: 45px;
             transition: all 0.2s ease;
         }
 
         .layer-number {
             background-color: var(--node-bg);
-            padding: 0 15px;
+            padding: 15px;
             font-weight: bold;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             border-right: 1px solid var(--node-bg);
             display: flex;
             align-items: center;
@@ -171,16 +156,15 @@
         }
 
         .layer-dropzone {
+            padding: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
+            min-height: 45px;
             background-color: var(--bg-dark);
-            margin: 4px;
-            padding: 4px;
+            margin: 5px;
             border: 1px dashed var(--node-bg);
             border-radius: 4px;
-            height: calc(100% - 10px);
-            box-sizing: border-box;
             transition: all 0.2s ease;
         }
 
@@ -189,67 +173,40 @@
             background-color: rgba(14, 165, 233, 0.05);
         }
 
-        /* Right Side: Scrollable Option Pool */
         .draggable-pool {
             flex: 1;
             background-color: var(--panel-bg);
             border: 1px solid var(--node-bg);
-            padding: 15px;
+            padding: 20px;
             border-radius: 4px;
             display: flex;
             flex-direction: column;
-            height: 100%;
-            box-sizing: border-box;
+            gap: 10px;
+            position: sticky;
+            top: 20px;
         }
 
         .draggable-pool h3 {
-            margin: 0 0 10px 0;
+            margin: 0;
             border-bottom: 1px solid var(--node-bg);
-            padding-bottom: 8px;
+            padding-bottom: 10px;
             color: var(--accent-purple);
-            font-size: 1rem;
-            flex-shrink: 0;
-        }
-
-        .pool-scroll-area {
-            flex: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding-right: 5px;
-        }
-
-        /* Scrollbar aesthetics */
-        .pool-scroll-area::-webkit-scrollbar {
-            width: 6px;
-        }
-        .pool-scroll-area::-webkit-scrollbar-track {
-            background: var(--bg-dark);
-            border-radius: 3px;
-        }
-        .pool-scroll-area::-webkit-scrollbar-thumb {
-            background: var(--node-bg);
-            border-radius: 3px;
-        }
-        .pool-scroll-area::-webkit-scrollbar-thumb:hover {
-            background: var(--text-muted);
+            font-size: 1.1rem;
         }
 
         .drag-item {
             background-color: var(--node-bg);
             border: 1px solid transparent;
             color: var(--text-light);
-            padding: 10px 12px;
+            padding: 12px 15px;
             border-radius: 4px;
             cursor: grab;
             user-select: none;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             line-height: 1.4;
             transition: all 0.2s ease;
             width: 100%;
             box-sizing: border-box;
-            flex-shrink: 0;
         }
 
         .drag-item:active {
@@ -260,12 +217,6 @@
             border-color: var(--accent-blue);
         }
 
-        .layer-dropzone .drag-item {
-            padding: 6px 12px;
-            background-color: var(--panel-bg);
-        }
-
-        /* Verification Visual Enhancements */
         .layer-row.correct {
             border-color: var(--accent-green);
         }
@@ -282,13 +233,9 @@
             border-right-color: var(--accent-red);
         }
 
-        @media (max-width: 800px) {
-            body { height: auto; overflow-y: auto; }
-            .container { flex-direction: column; height: auto; }
-            .osi-stack { height: auto; gap: 8px; }
-            .layer-row { min-height: 60px; }
-            .draggable-pool { height: auto; }
-            .pool-scroll-area { overflow-y: visible; }
+        @media (max-width: 900px) {
+            .container { flex-direction: column; }
+            .draggable-pool { position: static; width: 100%; }
         }
     </style>
 </head>
@@ -296,7 +243,7 @@
 
     <header>
         <h1>OSI Model Matrix Challenge</h1>
-        <p class="instructions">Drag profile blocks to their target OSI layers, then use "Verify Matrix" to check tracking.</p>
+        <p class="instructions">Drag each profile block to its correct OSI Layer, then click "Verify Matrix".</p>
     </header>
 
     <div class="controls">
@@ -340,11 +287,14 @@
 
         <div class="draggable-pool">
             <h3>Profile Options</h3>
-            <div class="pool-scroll-area" id="itemPool"></div>
+            <div id="itemPool"></div>
         </div>
     </div>
 
     <script>
+        // Global drag reference pointer bypasses unstable browser dataTransfer APIs
+        window.draggedItem = null;
+
         const initialProfiles = [
             { id: "p7", target: "7", text: "Data | Network services to apps | HTTP, HTTPS, DNS, SMTP" },
             { id: "p6", target: "6", text: "Data | Encryption, compression & formatting | SSL/TLS, JPEG" },
@@ -355,11 +305,13 @@
             { id: "p1", target: "1", text: "Bits | Bit stream transmission over physical medium | Cables, Hubs" }
         ];
 
-        window.addEventListener('DOMContentLoaded', initTask);
+        window.addEventListener('DOMContentLoaded', () => {
+            initTask();
+        });
 
         function initTask() {
             const pool = document.getElementById('itemPool');
-            pool.innerHTML = ''; 
+            pool.innerHTML = '';
             
             const shuffled = [...initialProfiles].sort(() => Math.random() - 0.5);
             
@@ -370,117 +322,19 @@
                 div.id = item.id;
                 div.setAttribute('data-target', item.target);
                 div.innerText = item.text;
-                div.addEventListener('dragstart', dragStart);
+                
+                // Native pointer assignments
+                div.addEventListener('dragstart', (e) => {
+                    window.draggedItem = e.target;
+                    clearVisualFeedback();
+                });
+                
                 pool.appendChild(div);
             });
-        }
-
-        function dragStart(e) {
-            e.dataTransfer.setData('text/plain', e.target.id);
-            clearVisualFeedback();
         }
 
         function allowDrop(e) {
             e.preventDefault();
             const dropzone = e.target.closest('.layer-dropzone');
             if (dropzone && !dropzone.hasChildNodes()) {
-                dropzone.classList.add('drag-over');
-            }
-        }
-
-        function dragLeave(e) {
-            const dropzone = e.target.closest('.layer-dropzone');
-            if (dropzone) {
-                dropzone.classList.remove('drag-over');
-            }
-        }
-
-        // Drop logic allowing clean re-sorting without node losses
-        function drop(e) {
-            e.preventDefault();
-            const dropzone = e.target.closest('.layer-dropzone');
-            if (!dropzone) return;
-            
-            dropzone.classList.remove('drag-over');
-            if (dropzone.hasChildNodes()) return;
-
-            const id = e.dataTransfer.getData('text/plain');
-            const draggedElement = document.getElementById(id);
-            
-            if (draggedElement) {
-                dropzone.appendChild(draggedElement);
-                clearVisualFeedback();
-            }
-        }
-
-        function verifyMatrix() {
-            const rows = document.querySelectorAll('.layer-row');
-            let totalCorrect = 0;
-            let totalPlaced = 0;
-            const banner = document.getElementById('statusBanner');
-
-            rows.forEach(row => {
-                const targetLayer = row.getAttribute('data-layer');
-                const dropzone = row.querySelector('.layer-dropzone');
-                const childItem = dropzone.querySelector('.drag-item');
-
-                row.classList.remove('correct', 'incorrect');
-
-                if (childItem) {
-                    totalPlaced++;
-                    if (childItem.getAttribute('data-target') === targetLayer) {
-                        row.classList.add('correct');
-                        totalCorrect++;
-                    } else {
-                        row.classList.add('incorrect');
-                    }
-                }
-            });
-
-            banner.style.display = 'block';
-
-            if (totalCorrect === rows.length) {
-                banner.className = "status-banner success";
-                banner.innerText = "✓ Verification Complete: All layers are mapping out perfectly.";
-                document.querySelectorAll('.drag-item').forEach(item => item.draggable = false);
-            } else {
-                banner.className = "status-banner fail";
-                if (totalPlaced < rows.length) {
-                    banner.innerText = "✗ Verification Failed: Some spaces are still empty. Complete the matrix and try again.";
-                } else {
-                    banner.innerText = `✗ Verification Failed: ${rows.length - totalCorrect} alignment errors detected. Correct the red elements or clear to reset.`;
-                }
-            }
-        }
-
-        function clearVisualFeedback() {
-            document.querySelectorAll('.layer-row').forEach(row => {
-                row.classList.remove('correct', 'incorrect');
-            });
-            document.getElementById('statusBanner').style.display = 'none';
-        }
-
-        function resetMatrix() {
-            const dropzones = document.querySelectorAll('.layer-dropzone');
-            dropzones.forEach(zone => {
-                while (zone.firstChild) {
-                    zone.removeChild(zone.firstChild);
-                }
-            });
-            clearVisualFeedback();
-            initTask();
-        }
-
-        document.getElementById('itemPool').addEventListener('dragover', (e) => e.preventDefault());
-        document.getElementById('itemPool').addEventListener('drop', (e) => {
-            e.preventDefault();
-            const id = e.dataTransfer.getData('text/plain');
-            const draggedElement = document.getElementById(id);
-            if (draggedElement) {
-                document.getElementById('itemPool').appendChild(draggedElement);
-                clearVisualFeedback();
-            }
-        });
-    </script>
-</body>
-</html>
+                dropzone.
