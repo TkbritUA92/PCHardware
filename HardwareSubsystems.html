@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive OSI Model Matrix</title>
+    <title>Hardware Subsystems Matrix Architecture Lab</title>
     <style>
         :root {
             --bg-dark: #0b0f19;
@@ -127,7 +127,7 @@
             align-items: flex-start;
         }
 
-        .osi-stack {
+        .hardware-stack {
             flex: 1.5;
             display: flex;
             flex-direction: column;
@@ -136,7 +136,7 @@
 
         .layer-row {
             display: grid;
-            grid-template-columns: 160px 1fr;
+            grid-template-columns: 200px 1fr;
             border: 1px solid var(--node-bg);
             background-color: var(--panel-bg);
             border-radius: 4px;
@@ -201,140 +201,4 @@
             padding: 12px 15px;
             border-radius: 4px;
             cursor: grab;
-            user-select: none;
-            font-size: 0.85rem;
-            line-height: 1.4;
-            transition: all 0.2s ease;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .drag-item:active {
-            cursor: grabbing;
-        }
-
-        .drag-item:hover {
-            border-color: var(--accent-blue);
-        }
-
-        .layer-row.correct {
-            border-color: var(--accent-green);
-        }
-        .layer-row.correct .layer-number {
-            color: var(--accent-green);
-            border-right-color: var(--accent-green);
-        }
-
-        .layer-row.incorrect {
-            border-color: var(--accent-red);
-        }
-        .layer-row.incorrect .layer-number {
-            color: var(--accent-red);
-            border-right-color: var(--accent-red);
-        }
-
-        @media (max-width: 900px) {
-            .container { flex-direction: column; }
-            .draggable-pool { position: static; width: 100%; }
-        }
-    </style>
-</head>
-<body>
-
-    <header>
-        <h1>OSI Model Matrix Challenge</h1>
-        <p class="instructions">Drag each profile block to its correct OSI Layer, then click "Verify Matrix".</p>
-    </header>
-
-    <div class="controls">
-        <button class="btn-verify" onclick="verifyMatrix()">Verify Matrix</button>
-        <button class="btn-reset" onclick="resetMatrix()">Reset Task</button>
-    </div>
-
-    <div class="status-banner" id="statusBanner"></div>
-
-    <div class="container">
-        <div class="osi-stack">
-            <div class="layer-row" id="row-7" data-layer="7">
-                <div class="layer-number">Layer 7: Application</div>
-                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
-            </div>
-            <div class="layer-row" id="row-6" data-layer="6">
-                <div class="layer-number">Layer 6: Presentation</div>
-                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
-            </div>
-            <div class="layer-row" id="row-5" data-layer="5">
-                <div class="layer-number">Layer 5: Session</div>
-                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
-            </div>
-            <div class="layer-row" id="row-4" data-layer="4">
-                <div class="layer-number">Layer 4: Transport</div>
-                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
-            </div>
-            <div class="layer-row" id="row-3" data-layer="3">
-                <div class="layer-number">Layer 3: Network</div>
-                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
-            </div>
-            <div class="layer-row" id="row-2" data-layer="2">
-                <div class="layer-number">Layer 2: Data Link</div>
-                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
-            </div>
-            <div class="layer-row" id="row-1" data-layer="1">
-                <div class="layer-number">Layer 1: Physical</div>
-                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
-            </div>
-        </div>
-
-        <div class="draggable-pool">
-            <h3>Profile Options</h3>
-            <div id="itemPool"></div>
-        </div>
-    </div>
-
-    <script>
-        // Global drag reference pointer bypasses unstable browser dataTransfer APIs
-        window.draggedItem = null;
-
-        const initialProfiles = [
-            { id: "p7", target: "7", text: "Data | Network services to apps | HTTP, HTTPS, DNS, SMTP" },
-            { id: "p6", target: "6", text: "Data | Encryption, compression & formatting | SSL/TLS, JPEG" },
-            { id: "p5", target: "5", text: "Data | Managing & terminating sessions | NetBIOS, RPC, Sockets" },
-            { id: "p4", target: "4", text: "Segments/Datagrams | End-to-end flow control | TCP, UDP, Ports" },
-            { id: "p3", target: "3", text: "Packets | Path determination & logical addressing | IP, Routers" },
-            { id: "p2", target: "2", text: "Frames | Physical addressing & media access | MAC, Switches, NICs" },
-            { id: "p1", target: "1", text: "Bits | Bit stream transmission over physical medium | Cables, Hubs" }
-        ];
-
-        window.addEventListener('DOMContentLoaded', () => {
-            initTask();
-        });
-
-        function initTask() {
-            const pool = document.getElementById('itemPool');
-            pool.innerHTML = '';
-            
-            const shuffled = [...initialProfiles].sort(() => Math.random() - 0.5);
-            
-            shuffled.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'drag-item';
-                div.draggable = true;
-                div.id = item.id;
-                div.setAttribute('data-target', item.target);
-                div.innerText = item.text;
-                
-                // Native pointer assignments
-                div.addEventListener('dragstart', (e) => {
-                    window.draggedItem = e.target;
-                    clearVisualFeedback();
-                });
-                
-                pool.appendChild(div);
-            });
-        }
-
-        function allowDrop(e) {
-            e.preventDefault();
-            const dropzone = e.target.closest('.layer-dropzone');
-            if (dropzone && !dropzone.hasChildNodes()) {
-                dropzone.
+            user
