@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Hardware Matrix Labs</title>
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --panel-bg: #131c2e;
+            --node-bg: #1e293b;
+            --accent-blue: #0ea5e9;
+            --accent-purple: #a855f7;
+            --accent-green: #22c55e;
+            --accent-orange: #f97316;
+            --accent-red: #ef4444;
+            --text-light: #f8fafc;
+            --text-muted: #64748b;
+            
+            --success-bg: rgba(34, 197, 94, 0.1);
+            --error-bg: rgba(239, 68, 68, 0.1);
+        }
+
+        html, body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            width: 100vw;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            padding: 20px;
+            align-items: center;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            color: var(--text-light);
+            margin: 0 0 5px 0;
+            font-weight: 600;
+            font-size: 1.8rem;
+        }
+
+        p.instructions {
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        /* Task Selector Tab Controls */
+        .task-selector {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            background-color: var(--panel-bg);
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid var(--node-bg);
+        }
+
+        .tab-btn {
+            background-color: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-light);
+        }
+
+        .tab-btn.active {
+            background-color: var(--node-bg);
+            color: var(--accent-blue);
+            border-color: rgba(14, 165, 233, 0.2);
+        }
+
+        .controls {
+            margin: 5px 0 15px 0;
+            display: flex;
+            gap: 15px;
+        }
+
+        .action-btn {
+            background-color: transparent;
+            font-weight: bold;
+            font-size: 0.95rem;
+            padding: 10px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-verify {
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .btn-verify:hover {
+            background-color: var(--accent-green);
+            color: var(--bg-dark);
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-reset {
+            border: 1px solid var(--node-bg);
+            color: var(--text-muted);
+        }
+
+        .btn-reset:hover {
+            border-color: var(--text-muted);
+            color: var(--text-light);
+        }
+
+        .status-banner {
+            display: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 1rem;
+            text-align: center;
+            width: 100%;
+            max-width: 1200px;
+            box-sizing: border-box;
+        }
+
+        .status-banner.success {
+            background-color: var(--success-bg);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .status-banner.fail {
+            background-color: var(--error-bg);
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        .container {
+            display: flex;
+            gap: 25px;
+            max-width: 1200px;
+            width: 100%;
+            align-items: flex-start;
+        }
+
+        .hardware-stack {
+            flex: 1.5;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .layer-row {
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            border: 1px solid var(--node-bg);
+            background-color: var(--panel-bg);
+            border-radius: 4px;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .layer-number {
+            background-color: var(--node-bg);
+            padding: 15px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border-right: 1px solid var(--node-bg);
+            display: flex;
+            align-items: center;
+            color: var(--text-muted);
+        }
+
+        .layer-dropzone {
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 45px;
+            background-color: var(--bg-dark);
+            margin: 5px;
+            border: 1px dashed var(--node-bg);
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .layer-dropzone.drag-over {
+            border-color: var(--accent-purple);
+            background-color: rgba(168, 85, 247, 0.05);
+        }
+
+        .draggable-pool {
+            flex: 1;
+            background-color: var(--panel-bg);
+            border: 1px solid var(--node-bg);
+            padding: 20px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: sticky;
+            top: 20px;
+        }
+
+        .draggable-pool h3 {
+            margin: 0;
+            border-bottom: 1px solid var(--node-bg);
+            padding-bottom: 10px;
+            color: var(--accent-purple);
+            font-size: 1.1rem;
+        }
+
+        .drag-item {
+            background-color: var(--node-bg);
+            border: 1px solid transparent;
+            color: var(--text-light);
+            padding: 12px 15px;
+            border-radius: 4px;
+            cursor: grab;
+            user-select: none;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            transition: all 0.2s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .drag-item:active {
+            cursor: grabbing;
+        }
+
+        .drag-item:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .layer-row.correct { border-color: var(--accent-green); }
+        .layer-row.correct .layer-number { color: var(--accent-green); border-right-color: var(--accent-green); }
+
+        .layer-row.incorrect { border-color: var(--accent-red); }
+        .layer-row.incorrect .layer-number { color: var(--accent-red); border-right-color: var(--accent-red); }
+
+        @media (max-width: 900px) {
+            .container { flex-direction: column; }
+            .draggable-pool { position: static; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Network Hardware Taxonomy</h1>
+        <p class="instructions" id="labInstructions">Select a module below to start testing domain infrastructure knowledge.</p>
+    </header>
+
+    <div class="task-selector">
+        <button class="tab-btn active" onclick="switchTask(1, this)">Task 1: Core Functions</button>
+        <button class="tab-btn" onclick="switchTask(2, this)">Task 2: OSI Mapping</button>
+        <button class="tab-btn" onclick="switchTask(3, this)">Task 3: Scenario Match</button>
+    </div>
+
+    <div class="controls">
+        <button class="action-btn btn-verify" onclick="verifyMatrix()">Verify Matches</button>
+        <button class="action-btn btn-reset" onclick="resetMatrix()">Clear Current Board</button>
+    </div>
+
+    <div class="status-banner" id="statusBanner"></div>
+
+    <div class="container">
+        <div class="hardware-stack">
+            <div class="layer-row" id="row-router" data-hardware="router">
+                <div class="layer-number">Router</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+            <div class="layer-row" id="row-switch" data-hardware="switch">
+                <div class="layer-number">Layer 2 Switch</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+            <div class="layer-row" id="row-ap" data-hardware="ap">
+                <div class="layer-number">Wireless AP</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+            <div class="layer-row" id="row-firewall" data-hardware="firewall">
+                <div class="layer-number">Next-Gen Firewall</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+            <div class="layer-row" id="row-hub" data-hardware="hub">
+                <div class="layer-number">Legacy Hub</div>
+                <div class="layer-dropzone" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+        </div>
+
+        <div class="draggable-pool">
+            <h3 id="poolTitle">Profile Options</h3>
+            <div id="itemPool"></div>
+        </div>
+    </div>
+
+    <script>
+        window.draggedItem = null;
+        let currentActiveTask = 1;
+
+        // Structured multi-task question datasets
+        const taskData = {
+            1: {
+                instructions: "Drag the technical definitions on the right to match the corresponding network infrastructure hardware on the left.",
+                title: "Functional Profiles",
+                profiles: [
+                    { id: "t1_r", target: "router", text: "Connects separate distinct network subnets; reads logical Layer 3 header addresses to calculate optimal inter-network routing paths." },
+                    { id: "t1_s", target: "switch", text: "Maintains local MAC address mapping tables; dynamically inspects and switches point-to-point frames across dedicated internal ports." },
+                    { id: "t1_a", target: "ap", text: "Acts as a structural base station bridge; transceiver converts infrastructure data into high-frequency RF over airspaces." },
+                    { id: "t1_f", target: "firewall", text: "Performs inline packet-inspection filters against stateful access-control tables; drops unauthorized data flows at perimeter thresholds." },
+                    { id: "t1_h", target: "hub", text: "Multi-port repeater that operates with zero logical switching intelligence; dumbly copies incoming bits out across all alternative ports." }
+                ]
+            },
+            2: {
+                instructions: "Map each hardware unit to its respective core operating layer within the standard networking models.",
+                title: "OSI Architecture Layers",
+                profiles: [
+                    { id: "t2_r", target: "router", text: "Operates primarily at Layer 3 (Network Layer) processing packets and tracking IP addresses." },
+                    { id: "t2_s", target: "switch", text: "Operates cleanly at Layer 2 (Data Link Layer) parsing frames, tracking source/destination MAC addresses." },
+                    { id: "t2_a", target: "ap", text: "Functions across Layer 2 and Layer 1, handling wireless frame standard coordination and radio frequency delivery." },
+                    { id: "t2_f", target: "firewall", text: "Spans across Layers 3, 4, up to Layer 7 (Application) to parse protocol signatures and track socket session state machines." },
+                    { id: "t2_h", target: "hub", text: "Confined strictly to Layer 1 (Physical Layer), treating all inputs as a continuous electrical bit stream." }
+                ]
+            },
+            3: {
+                instructions: "Analyze the real-world business infrastructure scenarios and align the hardware piece that handles the issue.",
+                title: "Operational Troubleshooting",
+                profiles: [
+                    { id: "t3_r", target: "router", text: "Scenario: A newly provisioned VLAN subnet group needs a path to forward its packets outwards to an cloud storage server mesh." },
+                    { id: "t3_s", target: "switch", text: "Scenario: A local office floor experiences major network dropouts due to massive frame collisions occurring on legacy shared media lines." },
+                    { id: "t3_a", target: "ap", text: "Scenario:
