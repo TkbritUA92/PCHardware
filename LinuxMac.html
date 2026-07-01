@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cross-Platform Storage Mount Matrix Sandbox</title>
+    <style>
+        :root {
+            --bg: #090d16;
+            --panel: #111827;
+            --accent: #a855f7; /* Purple accents for cross-platform theme */
+            --text: #e5e7eb;
+            --text-muted: #6b7280;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #1f2937;
+            padding-bottom: 20px;
+        }
+
+        header h1 { font-size: 2.2rem; }
+        header h1 span { color: var(--accent); }
+        header p { color: var(--text-muted); margin-top: 5px; }
+
+        /* Lab Assignments Selectors */
+        .assignment-selectors {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .assignment-btn {
+            flex: 1;
+            background: #1f2937;
+            border: 1px solid #374151;
+            color: var(--text-muted);
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .assignment-btn.active {
+            background: var(--panel);
+            color: #fff;
+            border-color: var(--accent);
+            box-shadow: inset 4px 0 0 var(--accent);
+        }
+
+        .assignment-btn span {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        /* Briefing Section */
+        .briefing-box {
+            background: #020617;
+            border: 1px solid #1f2937;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-left: 4px solid var(--accent);
+        }
+        .briefing-box h3 { font-size: 1.1rem; color: #fff; margin-bottom: 6px; }
+        .briefing-box p { font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; }
+
+        /* OS Switcher Toolbar */
+        .os-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: #020617;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #1f2937;
+        }
+        .os-btn {
+            flex: 1;
+            padding: 12px;
+            background: #1f2937;
+            color: #9ca3af;
+            border: 1px solid #374151;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        .os-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+        /* Volume Matrix Grid */
+        .mount-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .volume {
+            background: var(--panel);
+            border: 1px solid #374151;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        .volume h3 { font-size: 1.2rem; color: #fff; margin-bottom: 4px; }
+        .btn-action {
+            width: 100%;
+            background: #374151;
+            color: #fff;
+            padding: 10px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-action:hover { background: #4b5563; }
+
+        /* Output Terminal Console */
+        .terminal {
+            background: #000;
+            border: 1px solid #27272a;
+            padding: 18px;
+            border-radius: 8px;
+            font-family: monospace;
+            min-height: 90px;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Cross-Platform <span>Mount Matrix Simulator</span></h1>
+        <p>Analyze filesystem interoperability constraints and identify data migration solutions.</p>
+    </header>
+
+    <div class="assignment-selectors">
+        <button class="assignment-btn active" id="assign-0" onclick="switchAssignment(0)">
+            <span>Scenario #1</span>🐧 Recover Linux Backup
+        </button>
+        <button class="assignment-btn" id="assign-1" onclick="switchAssignment(1)">
+            <span>Scenario #2</span>🍏 Mount Apple Assets on Windows
+        </button>
+        <button class="assignment-btn" id="assign-2" onclick="switchAssignment(2)">
+            <span>Scenario #3</span>🚀 Deploy The Universal Bridge
+        </button>
+    </div>
+
+    <div class="briefing-box" id="briefing-content">
+        </div>
+
+    <div class="os-selector">
+        <button class="os-btn active" id="os-win" onclick="selectOs('windows')">💻 Windows Server Workstation</button>
+        <button class="os-btn" id="os-lin" onclick="selectOs('linux')">🐧 RedHat Linux Appliance</button>
+        <button class="os-btn" id="os-mac" onclick="selectOs('mac')">🍏 macOS Production Node</button>
+    </div>
+
+    <div class="mount-grid">
+        <div class="volume"><h3>ext4 Volume</h3><p style="color: var(--text-muted); font-size: 0.85rem;">Linux Native File Standard</p><button class="btn-action" onclick="tryWrite('ext4')">Commit Write Path</button></div>
+        <div class="volume"><h3>APFS Volume</h3><p style="color: var(--text-muted); font-size: 0.85rem;">Apple Storage Container</p><button class="btn-action" onclick="tryWrite('apfs')">Commit Write Path</button></div>
+        <div class="volume"><h3>exFAT Volume</h3><p style="color: var(--text-muted); font-size: 0.85rem;">Cross-Platform Data Bridge</p><button class="btn-action" onclick="tryWrite('exfat')">Commit Write Path</button></div>
+    </div>
+
+    <div class="terminal" id="term-out">[CONSOLE] Workspace loaded. Click a scenario button to pull up assignment parameters...</div>
+</div>
+
+<script>
+    var currentOs = "windows";
+    var activeScenario = 0;
+
+    var tasks = [
+        { title: "Scenario 1: Linux Archive Retrieval", text: "<strong>Objective:</strong> A system image backup has been delivered from a <strong>RedHat Linux Appliance</strong> formatted as <strong>ext4</strong>. Determine which host node instance can natively mount and read/write code structures to this disk partition array successfully." },
+        { title: "Scenario 2: Apple Assets Cross-Mount", text: "<strong>Objective:</strong> Video editors are trying to write media assets directly onto a modern high-speed <strong>APFS Volume</strong>. Test all workstation platforms to discover why the write operation rejects natively outside Apple environments." },
+        { title: "Scenario 3: The Universal Business Exchange", text: "<strong>Objective:</strong> You need to format an external data flight drive that can cross boundaries seamlessly between Windows, Linux, and macOS environments without throwing driver validation faults. Find the correct universal filesystem container match." }
+    ];
+
+    function switchAssignment(index) {
+        activeScenario = index;
+        for (var i = 0; i < 3; i++) {
+            var btn = document.getElementById('assign-' + i);
+            if (btn) btn.className = (i === index) ? 'assignment-btn active' : 'assignment-btn';
+        }
+        document.getElementById('briefing-content').innerHTML = '<h3>' + tasks[index].title + '</h3><p>' + tasks[index].text + '</p>';
+        document.getElementById('term-out').innerHTML = '[SYSTEM] Context primed for scenario objective ' + (index + 1) + '. Select an OS environment and test write outputs below.';
+    }
+
+    function selectOs(os) {
+        currentOs = os;
+        document.getElementById('os-win').className = (os === 'windows') ? 'os-btn active' : 'os-btn';
+        document.getElementById('os-lin').className = (os === 'linux') ? 'os-btn active' : 'os-btn';
+        document.getElementById('os-mac').className = (os === 'mac') ? 'os-btn active' : 'os-btn';
+        document.getElementById('term-out').innerHTML = '[CONSOLE_LOGS] Switched processing engine execution path to: ' + os.toUpperCase();
+    }
+
+    function tryWrite(fs) {
+        var out = document.getElementById('term-out');
+        if (!out) return;
+
+        if (fs === 'exfat') {
+            if (activeScenario === 2) {
+                out.innerHTML = '<span style="color: var(--success);">🎉 SUCCESS! exFAT is natively supported for raw read/write mapping actions across Windows, Linux, and macOS. You solved the cross-platform sharing conundrum!</span>';
+            } else {
+                out.innerHTML = '<span style="color: var(--success);">[SUCCESS] exFAT mount verified on ' + currentOs.toUpperCase() + '. Data structures successfully allocated.</span>';
+            }
+            return;
+        }
+
+        if (currentOs === 'windows') {
+            if (
