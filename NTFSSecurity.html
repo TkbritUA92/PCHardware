@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NTFS Permission Auditor</title>
+    <style>
+        :root { --bg: #0f172a; --panel: #1e293b; --accent: #38bdf8; --text: #f1f5f9; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 30px; display: flex; justify-content: center; }
+        .wrapper { max-width: 1000px; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .card { background: var(--panel); padding: 20px; border-radius: 8px; border: 1px solid #334155; }
+        .folder { padding: 10px; margin-bottom: 10px; background: #0f172a; border-radius: 4px; cursor: pointer; border: 1px solid transparent; }
+        .folder:hover { border-color: var(--accent); }
+        .folder.active { border-color: var(--accent); background: #1e293b; box-shadow: inset 3px 0 0 var(--accent); }
+        h3 { color: var(--accent); margin-bottom: 12px; }
+        .perm-line { background: #020617; padding: 10px; border-radius: 4px; margin-bottom: 8px; font-family: monospace; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="card">
+        <h3>NTFS Directory Tree Directory</h3>
+        <p style="color: #94a3b8; margin-bottom: 15px;">Select a directory block to read permissions inside the file system entry records:</p>
+        <div class="folder" id="f-public" onclick="auditFolder('public')">📁 D:\Corporate_Public</div>
+        <div class="folder" id="f-payroll" onclick="auditFolder('payroll')">📁 D:\HR_Payroll_Confidential</div>
+    </div>
+    <div class="card">
+        <h3>MFT Security Matrix Inspector</h3>
+        <div id="inspector-placeholder" style="color: #64748b; font-style: italic; padding: 20px 0;">Select a target folder link node to execute the access control verification module...</div>
+        <div id="inspector-content" style="display: none;">
+            <h4 id="active-folder-title" style="margin-bottom: 15px;">Directory Details</h4>
+            <div class="perm-line"><strong>Inheritance State:</strong> <span id="p-inherit">--</span></div>
+            <div class="perm-line"><strong>Domain Admins Access:</strong> <span style="color: #10b981;">Full Control (Allow)</span></div>
+            <div class="perm-line"><strong>Domain Guest Access:</strong> <span id="p-guest">--</span></div>
+            <p id="audit-feedback" style="margin-top: 15px; font-weight: bold; font-family: monospace;"></p>
+        </div>
+    </div>
+</div>
+<script>
+    var folderDb = {
+        public: { title: "D:\\Corporate_Public", inherit: "ENABLED (Inherited from Volume Root)", guest: "Read & Execute (Allow)", fix: "Correct Configuration: Public shares inherit standard global security container models safely." },
+        payroll: { title: "D:\\HR_Payroll_Confidential", inherit: "ENABLED (Inherited from Volume Root) 🚨 SECURITY FLAW", guest: "Read & Execute (Allow) 🚨 EXPOSED", fix: "CRITICAL BREACH DETECTED: This sensitive NTFS directory inherited global root settings! For modern business use, inheritance must be DISABLED on confidential folders, and explicit Explicit Access Control Lists (ACLs) applied." }
+    };
+    function auditFolder(id) {
+        document.querySelectorAll('.folder').forEach(function(el) { el.classList.remove('active'); });
+        document.getElementById('f-' + id).classList.add('active');
+        document.getElementById('inspector-placeholder').style.display = 'none';
+        document.getElementById('inspector-content').style.display = 'block';
+        
+        var data = folderDb[id];
+        document.getElementById('active-folder-title').innerText = data.title;
+        document.getElementById('p-inherit').innerText = data.inherit;
+        document.getElementById('p-guest').innerText = data.guest;
+        
+        var feedback = document.getElementById('audit-feedback');
+        feedback.innerText = data.fix;
+        feedback.style.color = (id === 'payroll') ? '#ef4444' : '#10b981';
+    }
+</script>
+</body>
+</html>
