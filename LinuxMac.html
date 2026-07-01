@@ -3,32 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cross-Platform Storage Mount Matrix Sandbox</title>
+    <title>Cross-Platform Storage Architecture Sandbox</title>
     <style>
         :root {
-            --bg: #090d16;
-            --panel: #111827;
+            --bg-dark: #090d16;
+            --panel-bg: #111827;
             --accent: #a855f7;
-            --text: #e5e7eb;
-            --text-muted: #6b7280;
             --success: #10b981;
             --error: #ef4444;
             --warning: #f59e0b;
+            --text-light: #e5e7eb;
+            --text-muted: #6b7280;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            background-color: var(--bg-dark);
+            color: var(--text-light);
             padding: 30px 20px;
             display: flex;
             justify-content: center;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             width: 100%;
         }
 
@@ -43,222 +43,250 @@
         header h1 span { color: var(--accent); }
         header p { color: var(--text-muted); margin-top: 5px; }
 
-        /* Lab Assignments Selectors */
-        .assignment-selectors {
-            display: flex;
-            gap: 12px;
+        /* Instructions Briefing Panel */
+        .briefing-card {
+            background-color: var(--panel-bg);
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+            padding: 25px;
             margin-bottom: 25px;
         }
+        .briefing-card h2 { font-size: 1.3rem; margin-bottom: 12px; color: #fff; }
+        .briefing-card ol { padding-left: 20px; margin-bottom: 15px; }
+        .briefing-card li { margin-bottom: 8px; font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; }
+        .briefing-card strong { color: var(--accent); }
 
-        .assignment-btn {
-            flex: 1;
-            background: #1f2937;
-            border: 1px solid #374151;
-            color: var(--text-muted);
-            padding: 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            text-align: left;
-            transition: all 0.2s;
-        }
-
-        .assignment-btn.active {
-            background: var(--panel);
-            color: #fff;
-            border-color: var(--accent);
-            box-shadow: inset 4px 0 0 var(--accent);
-        }
-
-        .assignment-btn span {
-            display: block;
-            font-size: 0.75rem;
-            color: var(--accent);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
-        }
-
-        /* Briefing Section */
-        .briefing-box {
-            background: #020617;
-            border: 1px solid #1f2937;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 25px;
-            border-left: 4px solid var(--accent);
-        }
-        .briefing-box h3 { font-size: 1.1rem; color: #fff; margin-bottom: 6px; }
-        .briefing-box p { font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; }
-
-        /* OS Switcher Toolbar */
-        .os-selector {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            background: #020617;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #1f2937;
-        }
-        .os-btn {
-            flex: 1;
-            padding: 12px;
-            background: #1f2937;
-            color: #9ca3af;
-            border: 1px solid #374151;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-        .os-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
-
-        /* Volume Matrix Grid */
-        .mount-grid {
+        /* The Drive Rack */
+        .rack-title { font-size: 1.1rem; color: #fff; margin-bottom: 15px; font-weight: 600; }
+        .drive-rack {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: repeat(4, 1fr);
             gap: 15px;
             margin-bottom: 25px;
         }
-        .volume {
-            background: var(--panel);
-            border: 1px solid #374151;
+
+        .drive-node {
+            background: #1f2937;
+            border: 2px solid #374151;
             border-radius: 8px;
             padding: 20px;
             text-align: center;
-        }
-        .volume h3 { font-size: 1.2rem; color: #fff; margin-bottom: 4px; }
-        .btn-action {
-            width: 100%;
-            background: #374151;
-            color: #fff;
-            padding: 10px;
-            margin-top: 15px;
-            border: none;
-            border-radius: 4px;
             cursor: pointer;
-            font-weight: bold;
+            transition: all 0.2s;
         }
-        .btn-action:hover { background: #4b5563; }
+        .drive-node:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .drive-node.active { border-color: var(--accent); background: var(--panel-bg); box-shadow: 0 0 15px rgba(168, 85, 247, 0.2); }
+        .drive-node .icon { font-size: 2rem; margin-bottom: 8px; }
+        .drive-node .label { font-weight: bold; font-size: 0.95rem; }
+        .drive-node .meta { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; font-family: monospace; }
 
-        /* Output Terminal Console */
-        .terminal {
-            background: #000;
-            border: 1px solid #27272a;
-            padding: 18px;
-            border-radius: 8px;
-            font-family: monospace;
-            min-height: 90px;
-            font-size: 1rem;
-            line-height: 1.4;
+        /* Main Lab Workbench Layout */
+        .workbench-layout {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
         }
+
+        .card {
+            background: var(--panel-bg);
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+        }
+        .card h3 { font-size: 1.2rem; margin-bottom: 15px; color: #fff; border-bottom: 1px solid #374151; padding-bottom: 8px; }
+
+        /* Forensic Inspector Panel */
+        .placeholder-text { color: var(--text-muted); font-style: italic; text-align: center; padding: 60px 0; }
+        .data-row { background: #020617; border: 1px solid #1f2937; padding: 12px; border-radius: 6px; margin-bottom: 12px; }
+        .data-row label { display: block; font-size: 0.75rem; color: var(--text-muted); font-weight: bold; text-transform: uppercase; margin-bottom: 4px; }
+        .data-field { font-family: monospace; font-size: 1rem; font-weight: bold; color: #fff; }
+
+        /* Interactive Triage Form Questions */
+        .question-group { margin-bottom: 18px; }
+        .question-group label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: #cbd5e1; }
+        .select-input { width: 100%; background: #020617; border: 1px solid #374151; color: #fff; padding: 10px; border-radius: 6px; outline: none; font-weight: bold; }
+        .select-input:focus { border-color: var(--accent); }
+
+        .btn-submit { background: var(--accent); color: #000; border: none; padding: 14px; font-weight: bold; font-size: 1rem; border-radius: 6px; cursor: pointer; margin-top: auto; transition: opacity 0.2s; }
+        .btn-submit:hover { opacity: 0.9; }
+
+        /* Console Output Display */
+        .console { background: #000; border: 1px solid #27272a; padding: 20px; border-radius: 8px; font-family: monospace; font-size: 1rem; min-height: 70px; line-height: 1.4; }
     </style>
 </head>
 <body>
+
 <div class="container">
     <header>
-        <h1>Cross-Platform <span>Mount Matrix Simulator</span></h1>
-        <p>Analyze filesystem interoperability constraints and identify data migration solutions.</p>
+        <h1>Cross-Platform <span>Storage Forensic Challenge</span></h1>
+        <p>Audit unknown block storage raw fields, isolate driver conflicts, and implement cross-platform deployment matrices.</p>
     </header>
 
-    <div class="assignment-selectors">
-        <button class="assignment-btn active" id="assign-0" onclick="switchAssignment(0)">
-            <span>Scenario #1</span>🐧 Recover Linux Backup
-        </button>
-        <button class="assignment-btn" id="assign-1" onclick="switchAssignment(1)">
-            <span>Scenario #2</span>🍏 Mount Apple Assets on Windows
-        </button>
-        <button class="assignment-btn" id="assign-2" onclick="switchAssignment(2)">
-            <span>Scenario #3</span>🚀 Deploy The Universal Bridge
-        </button>
+    <div class="briefing-card">
+        <h2>📁 Incident Response Scenario</h2>
+        <ol>
+            <li><strong>Step 1: Inspect the Evidence</strong> — Select individual physical hardware volumes from the **Evidence Storage Rack** below to mount them into the forensics terminal array.</li>
+            <li><strong>Step 2: Run Forensic Diagnostics</strong> — Analyze the file allocation table markers, volume journaling indexes, and single file payloads trapped on each physical storage unit.</li>
+            <li><strong>Step 3: Resolve the Architectural Matrix</strong> — Fill out the cross-platform structural interrogation ledger on the right side of the workbench panel and commit your analysis report.</li>
+        </ol>
     </div>
 
-    <div class="briefing-box" id="briefing-content">
+    <div class="rack-container">
+        <div class="rack-title">Evidence Storage Rack (Click on a node to mount disk metadata)</div>
+        <div class="drive-rack">
+            <div class="drive-node" id="drive-0" onclick="mountDrive(0)">
+                <div class="icon">💾</div>
+                <div class="label">Volume Target Alpha</div>
+                <div class="meta">DevID: 0x4A81</div>
+            </div>
+            <div class="drive-node" id="drive-1" onclick="mountDrive(1)">
+                <div class="icon">💾</div>
+                <div class="label">Volume Target Beta</div>
+                <div class="meta">DevID: 0x9B22</div>
+            </div>
+            <div class="drive-node" id="drive-2" onclick="mountDrive(2)">
+                <div class="icon">💾</div>
+                <div class="label">Volume Target Gamma</div>
+                <div class="meta">DevID: 0xC113</div>
+            </div>
+            <div class="drive-node" id="drive-3" onclick="mountDrive(3)">
+                <div class="icon">💾</div>
+                <div class="label">Volume Target Delta</div>
+                <div class="meta">DevID: 0xE504</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="workbench-layout">
+        <div class="card">
+            <h3>Forensic Hardware Block Analyzer</h3>
+            <div class="placeholder-text" id="inspector-placeholder">
+                Mount a device node from the storage rack above to query partition records...
+            </div>
+            <div id="inspector-ui" style="display: none;">
+                <div class="data-row">
+                    <label>Detected Signature Marker String</label>
+                    <div class="data-field" id="field-sig">--</div>
+                </div>
+                <div class="data-row">
+                    <label>Volume Metadata Structure Layout</label>
+                    <div class="data-field" id="field-layout">--</div>
+                </div>
+                <div class="data-row">
+                    <label>Journaling & Resiliency Log Allocation</label>
+                    <div class="data-field" id="field-journal">--</div>
+                </div>
+                <div class="data-row">
+                    <label>Largest Single Target Payload File Block Size</label>
+                    <div class="data-field" id="field-payload">--</div>
+                </div>
+            </div>
         </div>
 
-    <div class="os-selector">
-        <button class="os-btn active" id="os-win" onclick="selectOs('windows')">💻 Windows Server Workstation</button>
-        <button class="os-btn" id="os-lin" onclick="selectOs('linux')">🐧 RedHat Linux Appliance</button>
-        <button class="os-btn" id="os-mac" onclick="selectOs('mac')">🍏 macOS Production Node</button>
+        <div class="card">
+            <h3>Structural Diagnostics Ledger</h3>
+            <form id="triage-form" onsubmit="evaluateTriageReport(event)">
+                <div class="question-group">
+                    <label>Which Device ID represents the raw Linux native EXT4 backup partition volume?</label>
+                    <select class="select-input" id="q-linux">
+                        <option value="">-- Select Target Option --</option>
+                        <option value="0x4A81">Device 0x4A81 (Target Alpha)</option>
+                        <option value="0x9B22">Device 0x9B22 (Target Beta)</option>
+                        <option value="0xC113">Device 0xC113 (Target Gamma)</option>
+                        <option value="0xE504">Device 0xE504 (Target Delta)</option>
+                    </select>
+                </div>
+
+                <div class="question-group">
+                    <label>Which Device ID contains a legacy format that will throw write drops over 4GB objects?</label>
+                    <select class="select-input" id="q-legacy">
+                        <option value="">-- Select Target Option --</option>
+                        <option value="0x4A81">Device 0x4A81 (Target Alpha)</option>
+                        <option value="0x9B22">Device 0x9B22 (Target Beta)</option>
+                        <option value="0xC113">Device 0xC113 (Target Gamma)</option>
+                        <option value="0xE504">Device 0xE504 (Target Delta)</option>
+                    </select>
+                </div>
+
+                <div class="question-group">
+                    <label>Which volume represents the ideal structural standard for seamless cross-platform file transfers?</label>
+                    <select class="select-input" id="q-bridge">
+                        <option value="">-- Select Target Option --</option>
+                        <option value="0x4A81">Device 0x4A81 (Target Alpha)</option>
+                        <option value="0x9B22">Device 0x9B22 (Target Beta)</option>
+                        <option value="0xC113">Device 0xC113 (Target Gamma)</option>
+                        <option value="0xE504">Device 0xE504 (Target Delta)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-submit">Submit Diagnostic Assessment Report</button>
+            </form>
+        </div>
     </div>
 
-    <div class="mount-grid">
-        <div class="volume"><h3>ext4 Volume</h3><p style="color: var(--text-muted); font-size: 0.85rem;">Linux Native File Standard</p><button class="btn-action" onclick="tryWrite('ext4')">Commit Write Path</button></div>
-        <div class="volume"><h3>APFS Volume</h3><p style="color: var(--text-muted); font-size: 0.85rem;">Apple Storage Container</p><button class="btn-action" onclick="tryWrite('apfs')">Commit Write Path</button></div>
-        <div class="volume"><h3>exFAT Volume</h3><p style="color: var(--text-muted); font-size: 0.85rem;">Cross-Platform Data Bridge</p><button class="btn-action" onclick="tryWrite('exfat')">Commit Write Path</button></div>
+    <div class="console" id="console-out">
+        <span style="color: var(--text-muted);">[SYSTEM] Forensics engine standby. Mount hardware to dump raw hex descriptors...</span>
     </div>
-
-    <div class="terminal" id="term-out">[CONSOLE] Workspace loaded. Click a scenario button to pull up assignment parameters...</div>
 </div>
 
 <script>
-    var currentOs = "windows";
-    var activeScenario = 0;
-
-    var tasks = [
-        { title: "Scenario 1: Linux Archive Retrieval", text: "<strong>Objective:</strong> A system image backup has been delivered from a <strong>RedHat Linux Appliance</strong> formatted as <strong>ext4</strong>. Determine which host node instance can natively mount and read/write code structures to this disk partition array successfully." },
-        { title: "Scenario 2: Apple Assets Cross-Mount", text: "<strong>Objective:</strong> Video editors are trying to write media assets directly onto a modern high-speed <strong>APFS Volume</strong>. Test all workstation platforms to discover why the write operation rejects natively outside Apple environments." },
-        { title: "Scenario 3: The Universal Business Exchange", text: "<strong>Objective:</strong> You need to format an external data flight drive that can cross boundaries seamlessly between Windows, Linux, and macOS environments without throwing driver validation faults. Find the correct universal filesystem container match." }
+    // Explicit, raw data object matrix matching forensic evidence states
+    var diskDatabase = [
+        { sig: "FAT32 / MSDOS5.0", layout: "File Allocation Table Cluster Linked List (Legacy)", journal: "DISABLED (No crash-safety recovery logging)", payload: "3.85 GB File Object Space Allocation (Approaching hard wall limit)", devId: "0x4A81" },
+        { sig: "NTFS / Windows NT", layout: "MFT (Master File Table) B-Tree Attribute Indexes", journal: "ENABLED (Circular Transaction Security Logging Active)", payload: "42.8 GB Enterprise Database System Dump file", devId: "0x9B22" },
+        { sig: "EXT4 / Linux Native Data Block", layout: "Inode Index Map System & Extent Block Addressing Trees", journal: "ENABLED (JBD2 Kernel Level Journal Subsystem)", payload: "125.0 GB Compressed Linux Backup Image Archive (.tar.gz)", devId: "0xC113" },
+        { sig: "exFAT / Extended FAT Array", layout: "Extended Allocation Bitmap Matrix Lookup Tables", journal: "DISABLED (Lightweight cross-platform design matrix footprint)", payload: "85.4 GB 8K Apple ProRes Raw Video Clip Payload", devId: "0xE504" }
     ];
 
-    function switchAssignment(index) {
-        activeScenario = index;
-        for (var i = 0; i < 3; i++) {
-            var btn = document.getElementById('assign-' + i);
-            if (btn) btn.className = (i === index) ? 'assignment-btn active' : 'assignment-btn';
+    function mountDrive(index) {
+        // Toggle selected drive grid element highlights procedurally
+        for (var i = 0; i < 4; i++) {
+            var node = document.getElementById('drive-' + i);
+            if (node) node.className = (i === index) ? 'drive-node active' : 'drive-node';
         }
-        document.getElementById('briefing-content').innerHTML = '<h3>' + tasks[index].title + '</h3><p>' + tasks[index].text + '</p>';
-        document.getElementById('term-out').innerHTML = '[SYSTEM] Context primed for scenario objective ' + (index + 1) + '. Select an OS environment and test write outputs below.';
+
+        // Hide placeholders and expose dynamic table text fields
+        document.getElementById('inspector-placeholder').style.display = 'none';
+        document.getElementById('inspector-ui').style.display = 'block';
+
+        var drive = diskDatabase[index];
+        document.getElementById('field-sig').innerText = drive.sig;
+        document.getElementById('field-layout').innerText = drive.layout;
+        document.getElementById('field-journal').innerText = drive.journal;
+        document.getElementById('field-payload').innerText = drive.payload;
+
+        var consoleEl = document.getElementById('console-out');
+        if (consoleEl) {
+            consoleEl.innerHTML = '<span style="color: var(--accent);">[MOUNT_SUCCESS] DevID ' + drive.devId + ' partition descriptors dumped cleanly into workspace. Check raw fields.</span>';
+        }
     }
 
-    function selectOs(os) {
-        currentOs = os;
-        document.getElementById('os-win').className = (os === 'windows') ? 'os-btn active' : 'os-btn';
-        document.getElementById('os-lin').className = (os === 'linux') ? 'os-btn active' : 'os-btn';
-        document.getElementById('os-mac').className = (os === 'mac') ? 'os-btn active' : 'os-btn';
-        document.getElementById('term-out').innerHTML = '[CONSOLE_LOGS] Switched processing engine execution path to: ' + os.toUpperCase();
-    }
+    function evaluateTriageReport(event) {
+        event.preventDefault(); // Stop standard form page reloading behavior
 
-    function tryWrite(fs) {
-        var out = document.getElementById('term-out');
-        if (!out) return;
+        var ansLinux = document.getElementById('q-linux').value;
+        var ansLegacy = document.getElementById('q-legacy').value;
+        var ansBridge = document.getElementById('q-bridge').value;
+        var consoleEl = document.getElementById('console-out');
 
-        if (fs === 'exfat') {
-            if (activeScenario === 2) {
-                out.innerHTML = '<span style="color: var(--success);">🎉 SUCCESS! exFAT is natively supported for raw read/write mapping actions across Windows, Linux, and macOS. You solved the cross-platform sharing conundrum!</span>';
-            } else {
-                out.innerHTML = '<span style="color: var(--success);">[SUCCESS] exFAT mount verified on ' + currentOs.toUpperCase() + '. Data structures successfully allocated.</span>';
-            }
+        if (!consoleEl) return;
+
+        if (!ansLinux || !ansLegacy || !ansBridge) {
+            consoleEl.innerHTML = '<span style="color: var(--warning);">[WARN] Structural interrogation metrics incomplete. Evaluate all fields before submitting.</span>';
             return;
         }
 
-        if (currentOs === 'windows') {
-            if (fs === 'ext4') out.innerHTML = '<span style="color: var(--error);">[IO_ERROR] Kernel mount failure. Windows cannot interpret Linux ext4 metadata blocks natively. Partition array displays as RAW / Unformatted.</span>';
-            if (fs === 'apfs') out.innerHTML = '<span style="color: var(--error);">[DRIVER_FAULT] Access denied. Windows lacks native core drivers to parse Apple File System (APFS) hierarchical container wrappers.</span>';
-        } else if (currentOs === 'linux') {
-            if (fs === 'ext4') {
-                if (activeScenario === 0) {
-                    out.innerHTML = '<span style="color: var(--success);">🎉 MISSION COMPLETE! Linux natively parses ext4 journal data structures and access privileges perfectly. The backups are retrieved.</span>';
-                } else {
-                    out.innerHTML = '<span style="color: var(--success);">[SUCCESS] ext4 root space validation check passed cleanly on native Linux kernel.</span>';
-                }
-            }
-            if (fs === 'apfs') out.innerHTML = '<span style="color: var(--error);">[MOUNT_FAILED] Operation dropped. Open-source Linux kernels do not support a production-grade secure write pipeline into encrypted Apple APFS blocks.</span>';
-        } else if (currentOs === 'mac') {
-            if (fs === 'ext4') out.innerHTML = '<span style="color: var(--error);">[SANDBOX_VIOLATION] macOS lacks native operational modules to write data down onto Linux ext4 maps. Read-only fallback triggered.</span>';
-            if (fs === 'apfs') {
-                if (activeScenario === 1) {
-                    out.innerHTML = '<span style="color: var(--success);">🎉 MISSION COMPLETE! APFS is the modern native standard for Apple solid-state drives. Only Apple architecture can handle this read/write stream naturally!</span>';
-                } else {
-                    out.innerHTML = '<span style="color: var(--success);">[SUCCESS] APFS block allocation maps structural update completed on macOS node.</span>';
-                }
-            }
+        // Evaluate answers against explicit targets matching database configuration keys
+        // Correct keys: Linux=0xC113 (EXT4), Legacy=0x4A81 (FAT32), Bridge=0xE504 (exFAT)
+        if (ansLinux === '0xC113' && ansLegacy === '0x4A81' && ansBridge === '0xE504') {
+            consoleEl.innerHTML = '<span style="color: var(--success);">🎉 AUDIT VERIFIED! Excellent diagnostic work, Engineer. You isolated the EXT4 partition array, flagged the critical 4GB file cap vulnerability on FAT32, and identified exFAT as the ideal cross-platform delivery bridge. Your remediation map is authorized.</span>';
+        } else {
+            consoleEl.innerHTML = '<span style="color: var(--error);">🚨 ASSESSMENT DISMISSED: Critical logic contradiction encountered! Your report contains analysis errors. Inspect partition signatures and payload capabilities more closely before re-committing code keys.</span>';
         }
     }
-
-    // Direct baseline initialization call path execution parameters
-    switchAssignment(0);
 </script>
 </body>
 </html>
