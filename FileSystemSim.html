@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enterprise Storage Allocation & File System Simulator</title>
+    <title>Cross-Platform Storage Allocation & Cluster Workbench</title>
     <style>
         :root {
             --bg: #0f172a;
@@ -27,7 +27,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             width: 100%;
         }
 
@@ -91,8 +91,8 @@
         /* Targets Volumes Layout */
         .volumes-layout {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
             margin-bottom: 25px;
         }
 
@@ -100,8 +100,8 @@
             background: var(--panel);
             border: 2px dashed #475569;
             border-radius: 12px;
-            padding: 25px;
-            min-height: 320px;
+            padding: 20px;
+            min-height: 350px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -120,7 +120,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        .drive-header h3 { font-size: 1.2rem; color: #fff; }
+        .drive-header h3 { font-size: 1.1rem; color: #fff; }
         .fs-badge {
             background: #475569;
             color: #fff;
@@ -128,11 +128,12 @@
             border-radius: 4px;
             font-family: monospace;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
         .fs-badge.fat32 { background: #f59e0b; color: #000; }
         .fs-badge.ntfs { background: #38bdf8; color: #000; }
-        .fs-badge.exfat) { background: #a855f7; }
+        .fs-badge.hfs { background: #a855f7; color: #fff; }
+        .fs-badge.exfat { background: #10b981; color: #000; }
 
         .allocated-list {
             list-style: none;
@@ -152,13 +153,14 @@
         /* Workbench Formatting Tools */
         .format-controls {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             margin-top: 15px;
             border-top: 1px solid #475569;
             padding-top: 15px;
+            flex-direction: column;
         }
         .format-select {
-            flex-grow: 1;
+            width: 100%;
             background: #0f172a;
             color: #fff;
             border: 1px solid #475569;
@@ -168,10 +170,11 @@
             outline: none;
         }
         .btn-format {
+            width: 100%;
             background: #e11d48;
             color: #fff;
             border: none;
-            padding: 8px 16px;
+            padding: 8px;
             font-weight: bold;
             border-radius: 4px;
             cursor: pointer;
@@ -216,16 +219,16 @@
 
 <div class="container">
     <header>
-        <h1>Storage Allocation & <span>Cluster Workbench</span></h1>
-        <p>Deploy file payloads across multi-platform allocation tables to test mechanical cluster file system boundary limits.</p>
+        <h1>Cross-Platform <span>Storage Master Workbench</span></h1>
+        <p>Deploy file payloads across multi-platform filesystems to analyze formatting boundaries, file size caps, and write permissions.</p>
     </header>
 
     <div class="briefing-card">
-        <h2>📋 Active Triage Objectives</h2>
+        <h2>📋 Cross-Platform Workstation Challenges</h2>
         <ol>
-            <li><strong>Task 1 (The FAT32 Barrier):</strong> Attempt to drag the <strong>4.6 GB 4K Video</strong> or the <strong>15.0 GB Virtual Machine</strong> onto the default FAT32 volume. Read the output.</li>
-            <li><strong>Task 2 (Cross-Platform Strategy):</strong> Use the **Drive Formatting Workbench** at the bottom of each volume to wipe and convert Volume A into different layouts to observe changing limits.</li>
-            <li><strong>Task 3 (Enterprise Readiness):</strong> Determine which file system file table standard securely allows single objects larger than 4 GB while optimizing cluster security permissions.</li>
+            <li><strong>Task 1 (The 4GB Limit):</strong> Try dropping the <strong>4.6 GB 4K Video</strong> or <strong>15.0 GB Virtual Machine</strong> onto the **FAT32** volume. Note the native rejection warning.</li>
+            <li><strong>Task 2 (Mac/Windows Friction):</strong> Test what happens when you drop files onto the **NTFS** or **macOS Extended (HFS+)** arrays. Notice that while one system can read the data, cross-platform writing fails natively.</li>
+            <li><strong>Task 3 (The Universal Solver):</strong> Reformat any of the storage nodes to **exFAT** and test all payloads. Notice how it cleanly accepts large files and mounts seamlessly across Windows and Mac nodes.</li>
         </ol>
     </div>
 
@@ -242,70 +245,91 @@
     </div>
 
     <div class="volumes-layout">
-        <div class="drive-card" id="drive-A" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 0)">
+        <div class="drive-card" id="drive-0" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 0)">
             <div>
                 <div class="drive-header">
-                    <h3>Storage Device A</h3>
+                    <h3>Volume Node A</h3>
                     <span class="fs-badge fat32" id="badge-0">FAT32</span>
                 </div>
-                <p style="color: var(--text-muted); font-size: 0.85rem; text-align: center;" id="empty-hint-0">Volume empty. Drag files here.</p>
+                <p style="color: var(--text-muted); font-size: 0.85rem; text-align: center;" id="empty-hint-0">Volume empty.</p>
                 <ul class="allocated-list" id="list-0"></ul>
             </div>
-            
             <div class="format-controls">
                 <select class="format-select" id="select-0">
-                    <option value="fat32">FAT32 (Legacy Default)</option>
-                    <option value="ntfs">NTFS (Windows Enterprise)</option>
-                    <option value="exfat">exFAT (Cross-Platform Exchange)</option>
+                    <option value="fat32">FAT32 (Legacy Universal)</option>
+                    <option value="ntfs">NTFS (Windows Corporate)</option>
+                    <option value="hfs">macOS Extended (HFS+)</option>
+                    <option value="exfat">exFAT (Cross-Platform Bridge)</option>
                 </select>
-                <button class="btn-format" onclick="executeFormatVolume(0)">Format</button>
+                <button class="btn-format" onclick="executeFormatVolume(0)">Format Drive</button>
             </div>
         </div>
 
-        <div class="drive-card" id="drive-B" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 1)">
+        <div class="drive-card" id="drive-1" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 1)">
             <div>
                 <div class="drive-header">
-                    <h3>Storage Device B</h3>
+                    <h3>Volume Node B</h3>
                     <span class="fs-badge ntfs" id="badge-1">NTFS</span>
                 </div>
-                <p style="color: var(--text-muted); font-size: 0.85rem; text-align: center;" id="empty-hint-1">Volume empty. Drag files here.</p>
+                <p style="color: var(--text-muted); font-size: 0.85rem; text-align: center;" id="empty-hint-1">Volume empty.</p>
                 <ul class="allocated-list" id="list-1"></ul>
             </div>
-            
             <div class="format-controls">
                 <select class="format-select" id="select-1">
-                    <option value="ntfs">NTFS (Windows Enterprise)</option>
-                    <option value="fat32">FAT32 (Legacy Default)</option>
-                    <option value="exfat">exFAT (Cross-Platform Exchange)</option>
+                    <option value="ntfs">NTFS (Windows Corporate)</option>
+                    <option value="fat32">FAT32 (Legacy Universal)</option>
+                    <option value="hfs">macOS Extended (HFS+)</option>
+                    <option value="exfat">exFAT (Cross-Platform Bridge)</option>
                 </select>
-                <button class="btn-format" onclick="executeFormatVolume(1)">Format</button>
+                <button class="btn-format" onclick="executeFormatVolume(1)">Format Drive</button>
+            </div>
+        </div>
+
+        <div class="drive-card" id="drive-2" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 2)">
+            <div>
+                <div class="drive-header">
+                    <h3>Volume Node C</h3>
+                    <span class="fs-badge hfs" id="badge-2">HFS+</span>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.85rem; text-align: center;" id="empty-hint-2">Volume empty.</p>
+                <ul class="allocated-list" id="list-2"></ul>
+            </div>
+            <div class="format-controls">
+                <select class="format-select" id="select-2">
+                    <option value="hfs">macOS Extended (HFS+)</option>
+                    <option value="fat32">FAT32 (Legacy Universal)</option>
+                    <option value="ntfs">NTFS (Windows Corporate)</option>
+                    <option value="exfat">exFAT (Cross-Platform Bridge)</option>
+                </select>
+                <button class="btn-format" onclick="executeFormatVolume(2)">Format Drive</button>
             </div>
         </div>
     </div>
 
     <div class="dashboard-footer">
         <div class="console" id="console-logs">
-            <span style="color: var(--text-muted);">[SYSTEM] Storage matrix running. Drag any payload package to analyze cluster writing parameters...</span>
+            <span style="color: var(--text-muted);">[SYSTEM] Storage matrix running. Drag a payload package onto a partition target to test compliance profiles...</span>
         </div>
-        <button class="btn-reset" onclick="resetEntireLab()">Reset Workshop Space</button>
+        <button class="btn-reset" onclick="resetEntireLab()">Reset All Workspaces</button>
     </div>
 </div>
 
 <script>
-    // Volume architectural file structures state system records
     var volumesState = [
         { fileSystem: "fat32", allocatedFiles: [] }, // Drive A
-        { fileSystem: "ntfs", allocatedFiles: [] }   // Drive B
+        { fileSystem: "ntfs", allocatedFiles: [] },  // Drive B
+        { fileSystem: "hfs", allocatedFiles: [] }    // Drive C
     ];
 
     var draggedElementId = null;
 
-    // Track the elements safely across browsers using global pointers
-    var files = document.querySelectorAll('.file');
-    for (var i = 0; i < files.length; i++) {
-        files[i].addEventListener('dragstart', function(e) {
-            draggedElementId = e.target.id;
-        });
+    function hookDragEvents() {
+        var files = document.querySelectorAll('.file');
+        for (var i = 0; i < files.length; i++) {
+            files[i].addEventListener('dragstart', function(e) {
+                draggedElementId = e.target.id;
+            });
+        }
     }
 
     function allowDrop(e) {
@@ -333,37 +357,44 @@
         var currentFs = volumesState[volumeIndex].fileSystem;
         var consoleEl = document.getElementById('console-logs');
 
-        // Check file limits based on active file system
-        if (currentFs === 'fat32' && fileSize > 4.0) {
-            if (consoleEl) {
-                consoleEl.innerHTML = '<span style="color: var(--error);">🚨 FATAL IO ERROR: Write operation rejected for ' + fileLabel + '. FAT32 allocation maps cannot record objects greater than 4 GB! Convert the filesystem standard to bypass.</span>';
-            }
-        } else {
-            // Write to block index successfully
-            volumesState[volumeIndex].allocatedFiles.push(fileLabel);
-            if (consoleEl) {
-                consoleEl.innerHTML = '<span style="color: var(--success);">✔ WRITE SUCCESS: ' + fileLabel + ' committed to allocation sectors using native ' + currentFs.toUpperCase() + ' structural lookup matrices.</span>';
-            }
-            
-            payload.style.opacity = "0.3";
-            payload.setAttribute('draggable', 'false');
-            payload.style.cursor = "not-allowed";
+        if (!consoleEl) return;
 
-            renderVolumeLists();
+        // 1. FAT32 Absolute Size Restriction Check
+        if (currentFs === 'fat32' && fileSize > 4.0) {
+            consoleEl.innerHTML = '<span style="color: var(--error);">🚨 FATAL WRITE ERROR: ' + fileLabel + ' rejected. FAT32 cannot allocate singular objects larger than 4GB! System call cancelled.</span>';
+            return;
         }
+
+        // 2. Cross-Platform OS Proprietary Write Intercepts Simulation
+        if (currentFs === 'ntfs' && fileLabel.indexOf('vmdk') !== -1 && volumeIndex === 2) {
+            // Simulating a Mac workstation trying to write to an NTFS block directly
+            consoleEl.innerHTML = '<span style="color: var(--error);">🚨 PERMISSION DENIED: macOS nodes can READ NTFS partition paths out-of-the-box, but cannot write files natively! Use exFAT or a dedicated driver.</span>';
+            return;
+        }
+        
+        if (currentFs === 'hfs' && volumeIndex === 1) {
+            // Simulating a Windows computer encountering a native Mac partition 
+            consoleEl.innerHTML = '<span style="color: var(--error);">🚨 STORAGE INCOMPATIBLE: Windows hosts cannot read or write to macOS Extended (HFS+) structures naturally. Volume displays as Unformatted/RAW.</span>';
+            return;
+        }
+
+        // 3. Normal Valid Execution Path Commit
+        volumesState[volumeIndex].allocatedFiles.push(fileLabel);
+        consoleEl.innerHTML = '<span style="color: var(--success);">✔ WRITE SUCCESS: ' + fileLabel + ' successfully block-cached into Node ' + String.fromCharCode(65 + volumeIndex) + ' using the native ' + currentFs.toUpperCase() + ' allocation standard.</span>';
+        
+        payload.style.opacity = "0.3";
+        payload.setAttribute('draggable', 'false');
+        payload.style.cursor = "not-allowed";
+
+        renderVolumeLists();
     }
 
     function executeFormatVolume(volumeIndex) {
         var dropdown = document.getElementById('select-' + volumeIndex);
         var consoleEl = document.getElementById('console-logs');
-        if (!dropdown) return;
+        if (!dropdown || !consoleEl) return;
 
         var chosenFs = dropdown.value;
-        
-        // Wipe volume allocation table arrays completely
-        volumesState[volumeIndex].fileSystem = chosenFs;
-        
-        // Restore opacity to previously wiped files belonging to this set
         var currentFilesOnDrive = volumesState[volumeIndex].allocatedFiles;
         var allSourceFiles = document.querySelectorAll('.file');
         
@@ -377,30 +408,27 @@
             }
         }
 
+        volumesState[volumeIndex].fileSystem = chosenFs;
         volumesState[volumeIndex].allocatedFiles = [];
 
-        // Redraw badges dynamically
         var badge = document.getElementById('badge-' + volumeIndex);
         if (badge) {
             badge.innerText = chosenFs.toUpperCase();
             badge.className = 'fs-badge ' + chosenFs;
         }
 
-        if (consoleEl) {
-            consoleEl.innerHTML = '<span style="color: var(--accent);">🧹 VOLUME REFORMATTED: Device ' + (volumeIndex === 0 ? "A" : "B") + ' cleared. Cluster maps updated to: ' + chosenFs.toUpperCase() + '. All sector allocations initialized to zero.</span>';
-        }
+        consoleEl.innerHTML = '<span style="color: var(--accent);">🧹 BLOCK ARRAY CLEANSE: Volume ' + String.fromCharCode(65 + volumeIndex) + ' re-indexed completely to ' + chosenFs.toUpperCase() + '. Old indexes unlinked.</span>';
 
         renderVolumeLists();
     }
 
     function renderVolumeLists() {
-        for (var v = 0; v < 2; v++) {
+        for (var v = 0; v < 3; v++) {
             var listEl = document.getElementById('list-' + v);
             var hintEl = document.getElementById('empty-hint-' + v);
-            var filesList = volumesState[v].allocatedFiles;
-
             if (!listEl || !hintEl) continue;
 
+            var filesList = volumesState[v].allocatedFiles;
             listEl.innerHTML = '';
             
             if (filesList.length === 0) {
@@ -419,10 +447,10 @@
     function resetEntireLab() {
         volumesState = [
             { fileSystem: "fat32", allocatedFiles: [] },
-            { fileSystem: "ntfs", allocatedFiles: [] }
+            { fileSystem: "ntfs", allocatedFiles: [] },
+            { fileSystem: "hfs", allocatedFiles: [] }
         ];
 
-        // Restore active tags natively across pool items
         var sourceFiles = document.querySelectorAll('.file');
         for (var i = 0; i < sourceFiles.length; i++) {
             sourceFiles[i].style.opacity = "1";
@@ -430,27 +458,26 @@
             sourceFiles[i].style.cursor = "grab";
         }
 
-        // Reset badges
-        var b0 = document.getElementById('badge-0');
-        if (b0) { b0.innerText = "FAT32"; b0.className = "fs-badge fat32"; }
-        var b1 = document.getElementById('badge-1');
-        if (b1) { b1.innerText = "NTFS"; b1.className = "fs-badge ntfs"; }
-
-        var select0 = document.getElementById('select-0');
-        if (select0) select0.value = "fat32";
-        var select1 = document.getElementById('select-1');
-        if (select1) select1.value = "ntfs";
+        for (var v = 0; v < 3; v++) {
+            var badge = document.getElementById('badge-' + v);
+            var select = document.getElementById('select-' + v);
+            var defaultFs = ["fat32", "ntfs", "hfs"][v];
+            
+            if (badge) { badge.innerText = defaultFs.toUpperCase(); badge.className = "fs-badge " + defaultFs; }
+            if (select) select.value = defaultFs;
+        }
 
         var consoleEl = document.getElementById('console-logs');
-        if (consoleEl) {
-            consoleEl.innerHTML = '<span style="color: var(--text-muted);">[SYSTEM] Workstation environment flushed clean. Ready for testing.</span>';
-        }
+        if (consoleEl) consoleEl.innerHTML = '<span style="color: var(--text-muted);">[SYSTEM] Cross-platform training matrix restored to default values.</span>';
 
         renderVolumeLists();
     }
 
-    // Run baseline initial generation pass cleanly
-    renderVolumeLists();
+    // Window loading execution initialization path
+    window.onload = function() {
+        hookDragEvents();
+        renderVolumeLists();
+    };
 </script>
 
 </body>
