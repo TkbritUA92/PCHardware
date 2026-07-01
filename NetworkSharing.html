@@ -8,7 +8,7 @@
         :root {
             --bg: #0b0f17;
             --panel: #1e293b;
-            --accent: #06b6d4; /* Cyan accent for networking theme */
+            --accent: #06b6d4;
             --text: #f1f5f9;
             --text-muted: #64748b;
             --success: #10b981;
@@ -28,7 +28,7 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             width: 100%;
         }
 
@@ -42,6 +42,42 @@
         header h1 { font-size: 2.2rem; }
         header h1 span { color: var(--accent); }
         header p { color: var(--text-muted); margin-top: 5px; }
+
+        /* Scenario Assignment Target selectors */
+        .assignment-selectors {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .assignment-btn {
+            flex: 1;
+            background: #111827;
+            border: 1px solid #334155;
+            color: var(--text-muted);
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .assignment-btn.active {
+            background: var(--panel);
+            color: #fff;
+            border-color: var(--accent);
+            box-shadow: inset 4px 0 0 var(--accent);
+        }
+
+        .assignment-btn span {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
 
         /* Instructions Briefing */
         .brief-card {
@@ -93,15 +129,15 @@
             border: 1px solid #334155;
             margin-bottom: 15px;
         }
-        .control-group label { display: block; font-size: 0.8rem; color: var(--text-muted); font-weight: bold; text-transform: uppercase; margin-bottom: 8px; }
+        .control-group label { display: block; font-size: 0.8rem; color: var(--text-muted); font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
         
         .radio-option {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-family: monospace;
-            font-size: 1rem;
+            font-size: 0.95rem;
             cursor: pointer;
         }
         .radio-option input { cursor: pointer; }
@@ -137,47 +173,88 @@
 <div class="container">
     <header>
         <h1>Network File Sharing <span>Protocol Workbench</span></h1>
-        <p>Bypass physical local file standard limits by configuring cross-platform network mount endpoints over the wire.</p>
+        <p>Bypass local filesystem layout bounds by deploying cross-platform network and cloud share protocols.</p>
     </header>
 
-    <div class="brief-card">
-        <h3>📋 Advanced Training Objective</h3>
-        <p>Instead of manually plugging physical drives into slots, corporate environments host centralized data arrays. Your task is to select an active client machine from the explorer pool, pick the matching native industry network protocol configuration, and initiate a network mount socket connection.</p>
+    <div class="assignment-selectors">
+        <button class="assignment-btn active" id="assign-0" onclick="switchAssignment(0)">
+            <span>Mission #1</span>💻 Local Windows Domain Share
+        </button>
+        <button class="assignment-btn" id="assign-1" onclick="switchAssignment(1)">
+            <span>Mission #2</span>🐧 High-Speed Linux Mount
+        </button>
+        <button class="assignment-btn" id="assign-2" onclick="switchAssignment(2)">
+            <span>Mission #3</span>🌍 Remote Public Web Drop
+        </button>
     </div>
+
+    <div class="brief-card" id="briefing-box">
+        </div>
 
     <div class="grid-matrix">
         <div class="card">
-            <h3>Active Connecting Clients</h3>
-            <div class="client-node" id="node-win" onclick="selectClient('win')">💻 Windows Enterprise Desk Workstation</div>
-            <div class="client-node" id="node-lin" onclick="selectClient('lin')">🐧 Linux Production Cluster Node</div>
+            <h3>Target Client Machine</h3>
+            <div class="client-node" id="node-win" onclick="selectClient('win')">💻 Windows Active Directory Workstation</div>
+            <div class="client-node" id="node-lin" onclick="selectClient('lin')">🐧 Enterprise RedHat Linux Node</div>
         </div>
 
         <div class="card">
-            <h3>Network Protocol Mount Panel</h3>
+            <h3>Protocol Configuration Engine</h3>
             <div id="workbench-content">
                 <div class="control-group">
-                    <label>Select Target Network Protocol</label>
-                    <label class="radio-option">
-                        <input type="radio" name="protocol" value="smb" checked> SMB (Server Message Block / CIFS)
-                    </label>
-                    <label class="radio-option">
-                        <input type="radio" name="protocol" value="nfs"> NFS (Network File System)
-                    </label>
+                    <label>Select Transport Sharing Protocol</label>
+                    <label class="radio-option"><input type="radio" name="protocol" value="smb" checked> SMB (Server Message Block)</label>
+                    <label class="radio-option"><input type="radio" name="protocol" value="nfs"> NFS (Network File System)</label>
+                    <label class="radio-option"><input type="radio" name="protocol" value="https"> HTTPS Object Storage API (S3 / Blob)</label>
+                    <label class="radio-option"><input type="radio" name="protocol" value="sftp"> SFTP (SSH Secure File Transfer)</label>
                 </div>
-                <button class="btn-connect" onclick="attemptNetworkMount()">Mount Network Volume Path</button>
+                <button class="btn-connect" onclick="attemptNetworkMount()">Commit Socket Mount Path</button>
             </div>
         </div>
     </div>
 
-    <div class="terminal" id="term-out">[SYSTEM] Network adapter bound. Select a client device pool entry node to trace packet negotiations...</div>
+    <div class="terminal" id="term-out">[SYSTEM] Network infrastructure initialized. Select an objective challenge path above...</div>
 </div>
 
 <script>
     var selectedClient = null;
+    var currentMissionIdx = 0;
+
+    var missions = [
+        {
+            brief: "<strong>Objective Challenge 1 (LAN File Share):</strong> An office worker using a <strong>Windows Active Directory Workstation</strong> needs to connect to the corporate document storage over the local area network. Choose the matching protocol that seamlessly parses Windows user identity tokens natively.",
+            targetClient: "win", requiredProto: "smb"
+        },
+        {
+            brief: "<strong>Objective Challenge 2 (High-Performance Compute):</strong> A <strong>Linux Cluster Node</strong> needs to mount a shared directory to run continuous high-throughput data parsing. Pick the protocol that natively respects Linux UID/GID permission flags without transaction encapsulation performance overhead.",
+            targetClient: "lin", requiredProto: "nfs"
+        },
+        {
+            brief: "<strong>Objective Challenge 3 (Cloud Data Pipeline):</strong> Your engineering pool needs to programmatically deliver large data assets into an offsite web storage repository over the open public internet. Traditional local network mounts fail here. Select the modern API cloud protocol standard.",
+            targetClient: "lin", requiredProto: "https" // Can be either client, but target code matches protocol
+        }
+    ];
+
+    function switchAssignment(index) {
+        currentMissionIdx = index;
+        for (var i = 0; i < 3; i++) {
+            var btn = document.getElementById('assign-' + i);
+            if (btn) btn.className = (i === index) ? 'assignment-btn active' : 'assignment-btn';
+        }
+
+        document.getElementById('briefing-box').innerHTML = '<h3>Active Operational Scenario</h3><p>' + missions[index].brief + '</p>';
+        document.getElementById('term-out').innerHTML = '[SYSTEM] Context shifted to Mission ' + (index + 1) + '. Triage client environment data streams...';
+        
+        // Reset client choices
+        var winNode = document.getElementById('node-win');
+        var linNode = document.getElementById('node-lin');
+        if (winNode) winNode.className = 'client-node';
+        if (linNode) linNode.className = 'client-node';
+        selectedClient = null;
+    }
 
     function selectClient(clientKey) {
         selectedClient = clientKey;
-        
         var winNode = document.getElementById('node-win');
         var linNode = document.getElementById('node-lin');
         
@@ -188,8 +265,7 @@
             if (winNode) winNode.className = 'client-node';
             if (linNode) linNode.className = 'client-node active';
         }
-
-        document.getElementById('term-out').innerHTML = '[CONSOLE] Target set. Connection parameters primed for client host architectural class: ' + (clientKey === 'win' ? 'WINDOWS' : 'LINUX');
+        document.getElementById('term-out').innerHTML = '[CONSOLE] Connection stream set to host: ' + clientKey.toUpperCase();
     }
 
     function attemptNetworkMount() {
@@ -197,34 +273,49 @@
         if (!out) return;
 
         if (!selectedClient) {
-            out.innerHTML = '<span style="color: var(--warning);">[ALERT] Network connection rejected: You must select a connecting client machine node before mounting paths.</span>';
+            out.innerHTML = '<span style="color: var(--warning);">[ALERT] Access Denied: Match the requested scenario client node selection parameters first.</span>';
             return;
         }
 
-        // Figure out which radio protocol option is checked
         var chosenProtocol = "smb";
         var radios = document.getElementsByName('protocol');
         for (var i = 0; i < radios.length; i++) {
-            if (radios[i].checked) {
-                chosenProtocol = radios[i].value;
-                break;
-            }
+            if (radios[i].checked) { chosenProtocol = radios[i].value; break; }
         }
 
-        if (selectedClient === 'win') {
+        var activeMission = missions[currentMissionIdx];
+
+        // Process Validation Logic Rules
+        if (currentMissionIdx === 2 && chosenProtocol === 'https') {
+            out.innerHTML = '<span style="color: var(--success);">🎉 MISSION ACCOMPLISHED! HTTPS Object Storage APIs (like AWS S3 or Azure Blob) are the modern standard for global, offsite cloud storage exchange. They easily cross firewall barriers over web ports without requiring underlying local file system configurations.</span>';
+            return;
+        }
+
+        if (selectedClient !== activeMission.targetClient && currentMissionIdx !== 2) {
+            out.innerHTML = '<span style="color: var(--error);">🚨 ERROR INTERCEPT: You are executing adjustments on the wrong endpoint machine type required by this specific deployment ticket! Check the client operating platform.</span>';
+            return;
+        }
+
+        if (chosenProtocol === activeMission.requiredProto) {
             if (chosenProtocol === 'smb') {
-                out.innerHTML = '<span style="color: var(--success);">🎉 CONNECTION VERIFIED: Windows natively mounted path using SMB via UNC pathing (\\\\server\\share). File properties and domain user identities automatically map into Active Directory ACL attributes seamlessly! Perfect design implementation.</span>';
-            } else {
-                out.innerHTML = '<span style="color: var(--error);">🚨 Protocol Fault: Windows cannot process raw NFS share protocols easily out-of-the-box. Client connection dropped into loop timeout error states. Universal file level access rejected.</span>';
+                out.innerHTML = '<span style="color: var(--success);">🎉 MISSION ACCOMPLISHED! SMB connects cleanly over the LAN to Windows endpoints. It reads configuration parameters instantly and securely passes domain credential tokens across file share nodes.</span>';
+            } else if (chosenProtocol === 'nfs') {
+                out.innerHTML = '<span style="color: var(--success);">🎉 MISSION ACCOMPLISHED! NFS is standard utility infrastructure within pure Unix pipelines. By executing a direct mount over ports without wrapper transformations, processing metrics stay optimal.</span>';
             }
-        } else if (selectedClient === 'lin') {
-            if (chosenProtocol === 'nfs') {
-                out.innerHTML = '<span style="color: var(--success);">🎉 CONNECTION VERIFIED: Linux mounted the remote path effortlessly using NFS protocol metrics down into the /mnt workspace path. Native POSIX permission groups (UID/GID) translate natively across network streams without latency overhead. Perfect design implementation.</span>';
+        } else {
+            // Error trace diagnostics logic output paths
+            if (chosenProtocol === 'sftp') {
+                out.innerHTML = '<span style="color: var(--warning);">⚠️ MISMATCH: SFTP works well for safe on-demand individual file uploads via SSH tunnels, but it cannot map continuous high-throughput file system volumes or local network share pathways efficiently. Try a native sharing wrapper!</span>';
+            } else if (chosenProtocol === 'smb' && selectedClient === 'lin') {
+                out.innerHTML = '<span style="color: var(--warning);">🚨 ATTENTION Required: While Linux can talk to SMB via Samba frameworks, it creates conversion translation overhead and drops native POSIX user mapping arrays. There is an easier, cleaner standard for raw Linux pipelines!</span>';
             } else {
-                out.innerHTML = '<span style="color: var(--warning);">⚠️ PARTIAL COMPLIANCE: Linux *can* connect to an SMB share using standard extensions (Samba / cifs-utils utilities), but it introduces protocol layer encapsulation performance bottlenecks and scrambles native system permission masks. For pure Linux pipelines, NFS is the architectural winner!</span>';
+                out.innerHTML = '<span style="color: var(--error);">🚨 CONNECTION TERMINATED: Protocol mismatch error encountered! The target node cannot map files system indexes using this configuration framework. Connection rejected.</span>';
             }
         }
     }
+
+    // Run safe lifecycle default execution parameter sets
+    switchAssignment(0);
 </script>
 </body>
 </html>
