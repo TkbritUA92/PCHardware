@@ -1,1 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File System Allocation Simulator</title>
+    <style>
+        :root { --bg: #0f172a; --panel: #1e293b; --accent: #38bdf8; --text: #f1f5f9; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 30px; display: flex; justify-content: center; }
+        .container { max-width: 900px; width: 100%; }
+        header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid #334155; padding-bottom: 15px; }
+        .drive-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
+        .drive { background: var(--panel); border: 2px dashed #475569; border-radius: 8px; padding: 20px; min-height: 200px; text-align: center; }
+        .drive.hovered { border-color: var(--accent); background: rgba(56, 189, 248, 0.05); }
+        .file-bin { display: flex; gap: 15px; justify-content: center; margin-bottom: 25px; }
+        .file { background: #3b82f6; padding: 15px; border-radius: 6px; cursor: grab; font-weight: bold; font-family: monospace; }
+        .console { background: #020617; padding: 15px; border-radius: 6px; min-height: 80px; font-family: monospace; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Storage Allocation <span>Triage</span></h1>
+        <p>Drag files from the payload pool onto the target volumes to test structural partition capacities.</p>
+    </header>
+    <div class="file-bin">
+        <div class="file" draggable="true" id="f1" data-size="2.1">📄 PDF_Manual.pdf (2.1 GB)</div>
+        <div class="file" draggable="true" id="f2" data-size="4.5">🎬 4K_Video.mp4 (4.5 GB)</div>
+        <div class="file" draggable="true" id="f3" data-size="12.0">🖳 Win11_VM.vmdk (12.0 GB)</div>
+    </div>
+    <div class="drive-container">
+        <div class="drive" id="fat32" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'fat32')">
+            <h3>Legacy Drive (FAT32)</h3>
+            <p style="color: #64748b; margin-top: 10px;">Drop files here</p>
+            <ul style="text-align: left; margin-top: 15px; padding-left: 20px;" id="list-fat32"></ul>
+        </div>
+        <div class="drive" id="ntfs" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'ntfs')">
+            <h3>Modern Volume (NTFS)</h3>
+            <p style="color: #64748b; margin-top: 10px;">Drop files here</p>
+            <ul style="text-align: left; margin-top: 15px; padding-left: 20px;" id="list-ntfs"></ul>
+        </div>
+    </div>
+    <div class="console" id="log-out">[SYSTEM] Storage array idle. Drag a payload to begin analysis...</div>
+</div>
+<script>
+    function allowDrop(e) { e.preventDefault(); }
+    function dragEnter(e) { e.currentTarget.classList.add('hovered'); }
+    function dragLeave(e) { e.currentTarget.classList.remove('hovered'); }
+    
+    // Explicit tracking of drag payload across browsers
+    var draggedId = null;
+    document.querySelectorAll('.file').forEach(function(f) {
+        f.addEventListener('dragstart', function(e) { draggedId = e.target.id; });
+    });
 
+    function handleDrop(e, driveType) {
+        e.preventDefault();
+        var targetDrive = e.currentTarget;
+        targetDrive.classList.remove('hovered');
+        
+        var fileEl = document.getElementById(draggedId);
+        if (!fileEl) return;
+        
+        var fileSize = parseFloat(fileEl.getAttribute('data-size'));
+        var fileName = fileEl.innerText;
+        var log = document.getElementById('log-out');
+
+        if (driveType === 'fat32' && fileSize > 4.0) {
+            log.innerHTML = '<span style="color: #ef4444;">🚨 WRITE ERROR: Cannot copy ' + fileName + '. FAT32 has an absolute architectural hard file limit constraint of 4GB! Volume allocation failed.</span>';
+        } else {
+            log.innerHTML = '<span style="color: #10b981;">✔ SUCCESS: ' + fileName + ' successfully allocated block space on ' + driveType.toUpperCase() + ' cluster table map entries.</span>';
+            var li = document.createElement('li');
+            li.innerText = fileName;
+            document.getElementById('list-' + driveType).appendChild(li);
+            fileEl.style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>
