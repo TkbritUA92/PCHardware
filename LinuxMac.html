@@ -8,7 +8,7 @@
         :root {
             --bg: #090d16;
             --panel: #111827;
-            --accent: #a855f7; /* Purple accents for cross-platform theme */
+            --accent: #a855f7;
             --text: #e5e7eb;
             --text-muted: #6b7280;
             --success: #10b981;
@@ -234,4 +234,31 @@
         }
 
         if (currentOs === 'windows') {
-            if (
+            if (fs === 'ext4') out.innerHTML = '<span style="color: var(--error);">[IO_ERROR] Kernel mount failure. Windows cannot interpret Linux ext4 metadata blocks natively. Partition array displays as RAW / Unformatted.</span>';
+            if (fs === 'apfs') out.innerHTML = '<span style="color: var(--error);">[DRIVER_FAULT] Access denied. Windows lacks native core drivers to parse Apple File System (APFS) hierarchical container wrappers.</span>';
+        } else if (currentOs === 'linux') {
+            if (fs === 'ext4') {
+                if (activeScenario === 0) {
+                    out.innerHTML = '<span style="color: var(--success);">🎉 MISSION COMPLETE! Linux natively parses ext4 journal data structures and access privileges perfectly. The backups are retrieved.</span>';
+                } else {
+                    out.innerHTML = '<span style="color: var(--success);">[SUCCESS] ext4 root space validation check passed cleanly on native Linux kernel.</span>';
+                }
+            }
+            if (fs === 'apfs') out.innerHTML = '<span style="color: var(--error);">[MOUNT_FAILED] Operation dropped. Open-source Linux kernels do not support a production-grade secure write pipeline into encrypted Apple APFS blocks.</span>';
+        } else if (currentOs === 'mac') {
+            if (fs === 'ext4') out.innerHTML = '<span style="color: var(--error);">[SANDBOX_VIOLATION] macOS lacks native operational modules to write data down onto Linux ext4 maps. Read-only fallback triggered.</span>';
+            if (fs === 'apfs') {
+                if (activeScenario === 1) {
+                    out.innerHTML = '<span style="color: var(--success);">🎉 MISSION COMPLETE! APFS is the modern native standard for Apple solid-state drives. Only Apple architecture can handle this read/write stream naturally!</span>';
+                } else {
+                    out.innerHTML = '<span style="color: var(--success);">[SUCCESS] APFS block allocation maps structural update completed on macOS node.</span>';
+                }
+            }
+        }
+    }
+
+    // Direct baseline initialization call path execution parameters
+    switchAssignment(0);
+</script>
+</body>
+</html>
