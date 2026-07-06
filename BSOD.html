@@ -11,6 +11,7 @@
             --accent: #38bdf8;
             --text-light: #f1f5f9;
             --text-muted: #94a3b8;
+            --warning: #f59e0b;
             --success: #10b981;
             --error: #ef4444;
             --bsod-blue: #0078d7; /* Authentic Windows BSOD Blue */
@@ -259,4 +260,11 @@
         if (userComponent === activeScenario.correctComponent && userRemediation === activeScenario.correctRemediation) {
             consoleEl.innerHTML = '<span style="color: var(--success);">🎉 FORENSIC VERIFICATION SUCCESSFUL! Your search engine query matched the drivers and system errors parameters accurately! You successfully isolated the root cause element and executed the proper least-privilege repair strategy to recover the asset. Excellent triage.</span>';
         } else {
-            consoleEl.innerHTML = '<span style="color: var(--error);">🚨 REMEDIATION DEPLOYMENT ERROR: Operating state remains
+            consoleEl.innerHTML = '<span style="color: var(--error);">🚨 REMEDIATION DEPLOYMENT ERROR: Operating state remains unstable. Re-check the stop code research and map the subsystem to the correct remediation plan.</span>';
+        }
+    }
+
+    generateRandomCrash();
+</script>
+</body>
+</html>
