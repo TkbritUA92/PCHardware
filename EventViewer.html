@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows Event Viewer Diagnostics Sandbox</title>
+    <style>
+        :root { --bg: #0f172a; --panel: #1e293b; --accent: #38bdf8; --text: #f1f5f9; --text-muted: #94a3b8; --success: #10b981; --error: #ef4444; --warning: #f59e0b; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); padding: 30px 20px; display: flex; justify-content: center; }
+        .container { max-width: 1200px; width: 100%; }
+        header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid #334155; padding-bottom: 20px; }
+        header h1 { font-size: 2.2rem; }
+        header h1 span { color: var(--accent); }
+        header p { color: var(--text-muted); margin-top: 5px; }
+
+        .briefing-box { background: #020617; border: 1px solid #334155; border-radius: 8px; padding: 20px; margin-bottom: 25px; border-left: 4px solid var(--accent); }
+        .briefing-box h3 { font-size: 1.1rem; color: #fff; margin-bottom: 6px; }
+        .briefing-box p { font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; }
+
+        /* Event Viewer Application Layout */
+        .ev-window { background: #f3f4f6; color: #111827; border-radius: 6px; border: 1px solid #9ca3af; display: grid; grid-template-columns: 240px 1fr; min-height: 500px; box-shadow: 0 15px 30px rgba(0,0,0,0.5); margin-bottom: 25px; }
+        
+        /* Left Navigation Pane */
+        .ev-nav { background: #e5e7eb; border-right: 1px solid #cbd5e1; padding: 15px 10px; }
+        .ev-nav-title { font-weight: bold; font-size: 0.85rem; color: #4b5563; text-transform: uppercase; margin-bottom: 10px; padding-left: 5px; }
+        .nav-node { padding: 8px 10px; border-radius: 4px; font-size: 0.9rem; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .nav-node:hover { background: #d1d5db; }
+        .nav-node.active { background: #3b82f6; color: #fff; }
+
+        /* Right Summary/Grid Pane */
+        .ev-main { display: grid; grid-template-rows: 1.2fr 1fr; background: #ffffff; }
+        .grid-pane { overflow-y: auto; padding: 10px; border-bottom: 2px solid #cbd5e1; }
+        .detail-pane { overflow-y: auto; padding: 15px; background: #f9fafb; font-family: monospace; font-size: 0.85rem; line-height: 1.5; color: #374151; }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; }
+        th { padding: 6px; border-bottom: 1px solid #cbd5e1; background: #f3f4f6; color: #4b5563; font-weight: bold; position: sticky; top: 0; }
+        td { padding: 6px; border-bottom: 1px solid #f3f4f6; }
+        
+        .evt-row { cursor: pointer; }
+        .evt-row:hover { background: #f3f4f6; }
+        .evt-row.active { background: #dbeafe; }
+
+        .badge { padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; text-transform: uppercase; }
+        .badge-error { background: #fee2e2; color: #991b1b; }
+        .badge-warn { background: #fef3c7; color: #92400e; }
+        .badge-info { background: #e0f2fe; color: #0369a1; }
+
+        /* Controls Panel */
+        .workbench-controls { background: var(--panel); border: 1px solid #334155; padding: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+        .btn-audit { background: var(--success); color: #020617; border: none; padding: 10px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+        .btn-audit:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Event Viewer <span>Forensic Registry</span></h1>
+        <p>Analyze operational logging structures, parse structural event scopes, and isolate critical infrastructure crash logs.</p>
+    </header>
+
+    <div class="briefing-box">
+        <h3>🚨 Ticket #9912: Automated Service Collapse</h3>
+        <p><strong>Incident Matrix:</strong> At exactly 10:14 AM, the core background SQL transactional database unexpectedly closed down, halting web orders. Step 1 & 2 are complete. You are executing **Step 3 (Test the Theory)**.</p>
+        <p><strong>Instructions:</strong> Switch between the Windows Logs sub-containers in the left console navigation pane. Locate the specific log entry generated at the time of failure, inspect its raw hex data details block, and select your analysis below.</p>
+    </div>
+
+    <div class="ev-window">
+        <div class="ev-nav">
+            <div class="ev-nav-title">Windows Logs</div>
+            <div class="nav-node active" id="node-Application" onclick="switchContainer('Application')">📄 Application</div>
+            <div class="nav-node" id="node-Security" onclick="switchContainer('Security')">🔒 Security</div>
+            <div class="nav-node" id="node-System" onclick="switchContainer('System')">⚙ System</div>
+        </div>
+        
+        <div class="ev-main">
+            <div class="grid-pane">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 15%;">Level</th>
+                            <th style="width: 20%;">Date and Time</th>
+                            <th style="width: 25%;">Source</th>
+                            <th style="width: 15%;">Event ID</th>
+                            <th style="width: 25%;">Task Category</th>
+                        </tr>
+                    </thead>
+                    <tbody id="log-grid-body">
+                        </tbody>
+                </table>
+            </div>
+            
+            <div class="detail-pane" id="detail-box">
+                Select an entry item from the upper logs grid display to parse raw metadata block details...
+            </div>
+        </div>
+    </div>
+
+    <div class="workbench-controls">
+        <div style="flex-grow: 1;">
+            <select id="report-select" style="width: 100%; background: #020617; color: #fff; border: 1px solid #475569; padding: 10px; border-radius: 4px; font-weight: bold; outline: none; font-family: monospace;">
+                <option value="none">Select your forensic root cause diagnosis...</option>
+                <option value="sec_fail">Security Error (Event 4625): Audit Failure caused by an intrusive brute-force login attack.</option>
+                <option value="app_crash">Application Error (Event 1000): database_engine.exe crashed due to missing runtime memory allocation limits.</option>
+                <option value="sys_warn">System Warning (Event 27): Local system disk storage cluster entered sector wear degradation.</option>
+            </select>
+        </div>
+        <button class="btn-audit" onclick="validateForensicReport()">Submit Root Cause Diagnosis</button>
+    </div>
+</div>
+
+<script>
+    var logDatabase = {
+        Application: [
+            { id: 1, level: "Error", time: "10:14:02 AM", source: "Application Error", evId: 1000, category: "Crash Event", desc: "Faulting application name: database_engine.exe, version: 4.2.1\nFaulting module name: KERNELBASE.dll, version: 10.0\nException code: 0xc0000005\nFault offset: 0x000000000002b8a\nFaulting process id: 0x1f4c\nDescription: Access violation encounted. The database engine engine attempted to execute system memory instructions outside assigned allocation parameters." },
+            { id: 2, level: "Information", time: "10:12:15 AM", source: "MSExchangeIS", evId: 8194, category: "General", desc: "Information log trace: Microsoft Exchange Storage health validation loops completed successfully. Array optimization clean." }
+        ],
+        Security: [
+            { id: 3, level: "Audit Success", time: "10:13:55 AM", source: "Microsoft-Windows-Security", evId: 4624, category: "Logon", desc: "An account was successfully logged on.\nSubject:\n  Security ID: SYSTEM\n  Account Name: SYSTEM\nLogon Information:\n  Logon Type: 5 (Service Initialization)" },
+            { id: 4, level: "Audit Failure", time: "10:10:22 AM", source: "Microsoft-Windows-Security", evId: 4625, category: "Logon", desc: "An account failed to log on.\nAccount For Which Logon Failed:\n  Account Name: Administrator\nFailure Information:\n  Failure Reason: Unknown user name or bad password.\nProcess Information:\n  Caller Process Name: C:\\Windows\\System32\\svchost.exe" }
+        ],
+        System: [
+            { id: 5, level: "Warning", time: "10:13:40 AM", source: "e1dexpress", evId: 27, category: "None", desc: "Intel(R) Ethernet Connection link has been disconnected.\nSystem interface attempting automated network link speed negotiation path loops..." },
+            { id: 6, level: "Information", time: "10:10:00 AM", source: "Service Control Mgr", evId: 7036, category: "None", desc: "The Windows Time service entered the running state automatically based on corporate NTP server alignment properties." }
+        ]
+    };
+
+    var selectedContainer = "Application";
+    var selectedRowId = null;
+
+    function renderGrid() {
+        var body = document.getElementById('log-grid-body');
+        var items = logDatabase[selectedContainer];
+        var html = "";
+
+        for (var i = 0; i < items.length; i++) {
+            var row = items[i];
+            var isRowActive = (selectedRowId === row.id) ? "evt-row active" : "evt-row";
+            var badgeClass = "badge " + (row.level.indexOf("Error") !== -1 || row.level.indexOf("Failure") !== -1 ? "badge-error" : (row.level.indexOf("Warning") !== -1 ? "badge-warn" : "badge-info"));
+
+            html += '<tr class="' + isRowActive + '" onclick="selectEvent(' + row.id + ')">';
+            html += '<td><span class="' + badgeClass + '">' + row.level + '</span></td>';
+            html += '<td>' + row.time + '</td>';
+            html += '<td>' + row.source + '</td>';
+            html += '<td>' + row.evId + '</td>';
+            html += '<td>' + row.category + '</td>';
+            html += '</tr>';
+        }
+        body.innerHTML = html;
+    }
+
+    function switchContainer(name) {
+        selectedContainer = name;
+        var nodes = document.querySelectorAll('.nav-node');
+        for (var i = 0; i < nodes.length; i++) {
+            nodes[i].className = (nodes[i].id === 'node-' + name) ? 'nav-node active' : 'nav-node';
+        }
+        selectedRowId = null;
+        document.getElementById('detail-box').innerText = "Select an entry item from the upper logs grid display to parse raw metadata block details...";
+        renderGrid();
+    }
+
+    function selectEvent(id) {
+        selectedRowId = id;
+        renderGrid();
+        
+        var items = logDatabase[selectedContainer];
+        var match = null;
+        for (var i = 0; i < items.length; i++) {
+            if (items[i].id === id) { match = items[i]; break; }
+        }
+
+        if (match) {
+            document.getElementById('detail-box').innerHTML = "<strong>Log Data Output Details:</strong>\n--------------------------------------------\n" + match.desc.replace(/\n/g, '<br>');
+        }
+    }
+
+    function validateForensicReport() {
+        var selection = document.getElementById('report-select').value;
+        var targetBox = document.getElementById('detail-box');
+
+        if (selection === 'none') {
+            alert("Please pick a diagnosis selection option first.");
+            return;
+        }
+
+        if (selection === 'app_crash') {
+            targetBox.innerHTML = '<span style="color: var(--success); font-weight: bold;">🎉 FORENSIC CASE SOLVED! You successfully isolated the root cause profile inside the Application log. Event ID 1000 with Exception Code 0xc0000005 maps to a generic Memory Access Violation (Null Pointer Dereference). The software process attempted to run thread steps in prohibited kernel memory registers. This confirms your hypothesis! Move onto Step 4 (Action Plan).</span>';
+        } else {
+            targetBox.innerHTML = '<span style="color: var(--error); font-weight: bold;">🚨 DIAGNOSTIC ERROR: Mismatched timeline or classification indicator metrics. While that log exists inside the subsystem interface, it was not the event that directly caused the database processing engine to go offline at 10:14 AM. Re-examine details blocks.</span>';
+        }
+    }
+
+    renderGrid();
+</script>
+</body>
+</html>
