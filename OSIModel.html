@@ -127,7 +127,6 @@
             align-items: flex-start;
         }
 
-        /* Twin Bucket Columns */
         .bucket-grid {
             flex: 2;
             display: flex;
@@ -142,3 +141,247 @@
             border-radius: 6px;
             padding: 15px;
             display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 400px;
+            transition: all 0.3s ease;
+        }
+
+        .bucket-title {
+            font-weight: bold;
+            font-size: 1.05rem;
+            border-bottom: 1px solid var(--node-bg);
+            padding-bottom: 8px;
+            text-align: center;
+        }
+
+        .encap-title { color: var(--accent-orange); }
+        .decap-title { color: var(--accent-blue); }
+
+        .dropzone-area {
+            flex: 1;
+            border: 2px dashed rgba(100, 116, 139, 0.2);
+            border-radius: 4px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background-color: rgba(11, 15, 25, 0.4);
+            min-height: 350px;
+        }
+
+        .dropzone-area.drag-over {
+            border-color: var(--accent-purple);
+            background-color: rgba(168, 85, 247, 0.03);
+        }
+
+        .draggable-pool {
+            flex: 1;
+            background-color: var(--panel-bg);
+            border: 1px solid var(--node-bg);
+            padding: 20px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: sticky;
+            top: 20px;
+        }
+
+        .draggable-pool h3 {
+            margin: 0;
+            border-bottom: 1px solid var(--node-bg);
+            padding-bottom: 10px;
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .drag-item {
+            background-color: var(--node-bg);
+            border: 1px solid transparent;
+            color: var(--text-light);
+            padding: 12px 15px;
+            border-radius: 4px;
+            cursor: grab;
+            user-select: none;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            transition: all 0.2s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .drag-item:active { cursor: grabbing; }
+        .drag-item:hover { border-color: var(--accent-purple); }
+
+        .bucket-column.correct-group { border-color: var(--accent-green); }
+        .bucket-column.error-group { border-color: var(--accent-red); }
+
+        @media (max-width: 900px) {
+            .container { flex-direction: column; }
+            .bucket-grid { flex-direction: column; width: 100%; }
+            .draggable-pool { position: static; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>OSI Data Traversal Challenge</h1>
+        <p class="instructions">Analyze the data behavior and drag the card into the correct traversal pipeline zone.</p>
+    </header>
+
+    <div class="controls">
+        <button class="btn-verify" onclick="verifyTraversal()">Verify Traversal</button>
+        <button class="btn-reset" onclick="resetMatrix()">Reset Exercise</button>
+    </div>
+
+    <div class="status-banner" id="statusBanner"></div>
+
+    <div class="container">
+        <div class="bucket-grid">
+            <div class="bucket-column" id="col-encap" data-pipeline="encap">
+                <div class="bucket-title encap-title">Encapsulation (Down the Stack)</div>
+                <div class="dropzone-area" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+
+            <div class="bucket-column" id="col-decap" data-pipeline="decap">
+                <div class="bucket-title decap-title">Decapsulation (Up the Stack)</div>
+                <div class="dropzone-area" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="drop(event)"></div>
+            </div>
+        </div>
+
+        <div class="draggable-pool">
+            <h3>Traversal Scenarios</h3>
+            <div id="itemPool"></div>
+        </div>
+    </div>
+
+    <script>
+        window.draggedItem = null;
+
+        const initialProfiles = [
+            { id: "t1", target: "encap", text: "An application creates an HTTP request payload and wraps it with a TCP segment header." },
+            { id: "t2", target: "decap", text: "A Layer 3 switch strips away the Ethernet Frame header to read the logical destination IP address." },
+            { id: "t3", target: "encap", text: "The network layer takes an IP packet and adds a MAC address header and a trailer (FCS) before transmission." },
+            { id: "t4", target: "decap", text: "A host receiving bits from an Ethernet cable parses them into a frame, checking the destination MAC before dropping the frame header." },
+            { id: "t5", target: "encap", text: "A router receives data, determines the path, and adds a brand-new Layer 2 frame wrap to match the outward-bound interface link." },
+            { id: "t6", target: "decap", text: "The Transport Layer verifies sequence numbers, trims the TCP header markers away, and hands the clean payload data stream up to the Session Layer." }
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initTask();
+        });
+
+        function initTask() {
+            const pool = document.getElementById('itemPool');
+            pool.innerHTML = '';
+            
+            const shuffled = [...initialProfiles].sort(() => Math.random() - 0.5);
+            
+            shuffled.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'drag-item';
+                div.draggable = true;
+                div.id = item.id;
+                div.setAttribute('data-target', item.target);
+                div.innerText = item.text;
+                
+                div.addEventListener('dragstart', (e) => {
+                    window.draggedItem = e.target;
+                    clearVisualFeedback();
+                });
+                
+                pool.appendChild(div);
+            });
+        }
+
+        function allowDrop(e) {
+            e.preventDefault();
+            const zone = e.target.closest('.dropzone-area');
+            if (zone) zone.classList.add('drag-over');
+        }
+
+        function dragLeave(e) {
+            const zone = e.target.closest('.dropzone-area');
+            if (zone) zone.classList.remove('drag-over');
+        }
+
+        function drop(e) {
+            e.preventDefault();
+            const zone = e.target.closest('.dropzone-area');
+            if (!zone) return;
+            
+            zone.classList.remove('drag-over');
+
+            if (window.draggedItem) {
+                zone.appendChild(window.draggedItem);
+                clearVisualFeedback();
+            }
+        }
+
+        function verifyTraversal() {
+            const columns = document.querySelectorAll('.bucket-column');
+            let totalCorrect = 0;
+            let totalPlaced = 0;
+            const banner = document.getElementById('statusBanner');
+
+            columns.forEach(col => {
+                const pipelineType = col.getAttribute('data-pipeline');
+                const items = col.querySelectorAll('.drag-item');
+                let groupHasError = false;
+
+                col.classList.remove('correct-group', 'error-group');
+
+                items.forEach(item => {
+                    totalPlaced++;
+                    if (item.getAttribute('data-target') === pipelineType) {
+                        totalCorrect++;
+                    } else {
+                        groupHasError = true;
+                    }
+                });
+
+                if (items.length > 0) {
+                    if (groupHasError) {
+                        col.classList.add('error-group');
+                    } else {
+                        col.classList.add('correct-group');
+                    }
+                }
+            });
+
+            banner.style.display = 'block';
+
+            if (totalCorrect === initialProfiles.length) {
+                banner.className = "status-banner success";
+                banner.innerText = "✓ Verification Complete: All packet traversal behaviors are classified flawlessly.";
+                document.querySelectorAll('.drag-item').forEach(item => item.draggable = false);
+            } else {
+                banner.className = "status-banner fail";
+                if (totalPlaced < initialProfiles.length) {
+                    banner.innerText = "❌ Verification Failed: Some network scenarios have not been assigned to a pipeline bucket yet.";
+                } else {
+                    banner.innerText = "❌ Verification Failed: Data alignment errors detected. Review your header processing flow.";
+                }
+            }
+        }
+
+        function resetMatrix() {
+            clearVisualFeedback();
+            initTask();
+        }
+
+        function clearVisualFeedback() {
+            const banner = document.getElementById('statusBanner');
+            banner.style.display = 'none';
+            banner.className = "status-banner";
+            
+            const columns = document.querySelectorAll('.bucket-column');
+            columns.forEach(col => {
+                col.classList.remove('correct-group', 'error-group');
+            });
+        }
+    </script>
+</body>
+</html>
