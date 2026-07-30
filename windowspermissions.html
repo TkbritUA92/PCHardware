@@ -3,16 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interactive Lab: Windows Permissions Simulator</title>
+  <title>Windows Security Lab: NTFS Permissions Workshop</title>
   <style>
     :root {
-      --bg-color: #f3f3f3;
+      --bg-color: #f3f4f6;
       --card-bg: #ffffff;
-      --border-color: #cccccc;
-      --text-color: #333333;
-      --primary-color: #0078d4;
-      --danger-color: #d13438;
-      --success-color: #107c41;
+      --border-color: #d1d5db;
+      --text-color: #1f2937;
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      --danger-color: #dc2626;
+      --success-color: #16a34a;
+      --warning-bg: #fef3c7;
+      --warning-border: #f59e0b;
     }
 
     body {
@@ -24,27 +27,73 @@
     }
 
     .container {
-      max-width: 900px;
+      max-width: 1000px;
       margin: 0 auto;
     }
 
     header {
       background-color: var(--primary-color);
       color: white;
-      padding: 15px 20px;
-      border-radius: 6px 6px 0 0;
+      padding: 20px;
+      border-radius: 8px 8px 0 0;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 
     header h1 {
+      margin: 0 0 6px 0;
+      font-size: 1.5rem;
+    }
+
+    header p {
       margin: 0;
-      font-size: 1.4rem;
+      opacity: 0.9;
+      font-size: 0.95rem;
+    }
+
+    /* Tab Navigation */
+    .tab-nav {
+      display: flex;
+      background: #e5e7eb;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      background: none;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #4b5563;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      background: #d1d5db;
+    }
+
+    .tab-btn.active {
+      background: var(--card-bg);
+      color: var(--primary-color);
+      border-bottom: 3px solid var(--primary-color);
+    }
+
+    .scenario-banner {
+      background-color: var(--warning-bg);
+      border-left: 5px solid var(--warning-border);
+      padding: 14px 18px;
+      margin: 20px 0;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.95rem;
+      line-height: 1.5;
     }
 
     .workspace {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
-      margin-top: 20px;
     }
 
     @media (max-width: 768px) {
@@ -56,39 +105,41 @@
     .panel {
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 15px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
 
     .panel h2 {
       margin-top: 0;
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       border-bottom: 1px solid var(--border-color);
-      padding-bottom: 8px;
+      padding-bottom: 10px;
     }
 
-    .user-switcher {
+    .user-control {
+      background-color: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 10px 14px;
+      border-radius: 6px;
+      margin-bottom: 15px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 15px;
-      background-color: #eef;
-      padding: 10px;
-      border-radius: 4px;
+      justify-content: space-between;
     }
 
     .file-explorer {
       border: 1px solid var(--border-color);
-      border-radius: 4px;
+      border-radius: 6px;
       overflow: hidden;
+      background: #fafafa;
     }
 
     .file-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 12px;
+      padding: 12px 14px;
       border-bottom: 1px solid #eee;
       background-color: #fff;
     }
@@ -101,42 +152,47 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      font-weight: 500;
+      font-weight: 600;
     }
 
     .btn {
       background-color: var(--primary-color);
       color: white;
       border: none;
-      padding: 6px 12px;
+      padding: 7px 14px;
       border-radius: 4px;
       cursor: pointer;
       font-size: 0.85rem;
+      font-weight: 500;
     }
 
     .btn:hover {
-      opacity: 0.9;
+      background-color: var(--primary-hover);
     }
 
     .btn-secondary {
-      background-color: #666;
+      background-color: #4b5563;
+    }
+
+    .btn-secondary:hover {
+      background-color: #374151;
     }
 
     .permission-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
+      margin-top: 12px;
     }
 
     .permission-table th, .permission-table td {
       border: 1px solid var(--border-color);
-      padding: 8px;
+      padding: 8px 10px;
       text-align: left;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
     }
 
     .permission-table th {
-      background-color: #f8f8f8;
+      background-color: #f3f4f6;
     }
 
     .modal {
@@ -146,41 +202,49 @@
       background-color: rgba(0,0,0,0.5);
       justify-content: center;
       align-items: center;
+      z-index: 1000;
     }
 
     .modal-content {
       background: white;
-      padding: 20px;
-      border-radius: 6px;
-      width: 400px;
+      padding: 24px;
+      border-radius: 8px;
+      width: 460px;
       max-width: 90%;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     }
 
     .alert {
       padding: 12px;
-      border-radius: 4px;
+      border-radius: 6px;
       margin-top: 15px;
       display: none;
+      font-size: 0.9rem;
+      font-weight: 500;
     }
 
     .alert-danger {
-      background-color: #fde8e8;
+      background-color: #fef2f2;
       color: var(--danger-color);
-      border: 1px solid #f8b4b4;
+      border: 1px solid #fecaca;
     }
 
     .alert-success {
-      background-color: #edf7ed;
+      background-color: #f0fdf4;
       color: var(--success-color);
-      border: 1px solid #b7dfb7;
+      border: 1px solid #bbf7d0;
     }
 
-    .instruction-box {
-      background-color: #fff8e1;
-      border-left: 4px solid #ffc107;
-      padding: 10px 15px;
-      margin-bottom: 15px;
-      font-size: 0.9rem;
+    .log-box {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.82rem;
+      height: 240px;
+      overflow-y: auto;
+      background: #111827;
+      color: #4ade80;
+      padding: 12px;
+      border-radius: 6px;
+      line-height: 1.5;
     }
   </style>
 </head>
@@ -188,70 +252,124 @@
 
 <div class="container">
   <header>
-    <h1>Windows Security Lab: Securing HR Data</h1>
+    <h1>Windows Security Lab: NTFS Permissions Workshop</h1>
+    <p>Interactive simulations for Access Control Lists (ACLs) and Deny Precedence</p>
   </header>
 
-  <div class="instruction-box">
-    <strong>Mission Objective:</strong> Configure the properties of <code>HR_Confidential</code> to explicitly <strong>DENY</strong> access to the <strong>Guest</strong> account. Switch users to verify access to <code>Salaries.txt</code> is blocked.
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTask(1)">Task 1: Securing HR Confidential Data</button>
+    <button class="tab-btn" onclick="switchTask(2)">Task 2: The "Deny Wins" Paradox</button>
   </div>
 
-  <div class="user-switcher">
-    <label for="currentUserSelect"><strong>Active User Session:</strong></label>
-    <select id="currentUserSelect" onchange="switchUser()">
-      <option value="Admin">Administrator (HR Director)</option>
-      <option value="Guest">Guest Account</option>
-    </select>
-  </div>
-
-  <div class="workspace">
-    <!-- File System View -->
-    <div class="panel">
-      <h2>Desktop File Explorer</h2>
-      <div class="file-explorer">
-        <div class="file-item">
-          <span class="file-name">📁 HR_Confidential</span>
-          <div>
-            <button class="btn btn-secondary" onclick="openProperties()">Properties</button>
-            <button class="btn" onclick="openFolder()">Open</button>
-          </div>
-        </div>
-      </div>
-
-      <div id="folderContent" style="margin-top: 15px; display: none;">
-        <h3>Contents of HR_Confidential/</h3>
-        <div class="file-explorer">
-          <div class="file-item">
-            <span class="file-name">📄 Salaries.txt</span>
-            <button class="btn" onclick="openFile()">Read File</button>
-          </div>
-        </div>
-      </div>
-
-      <div id="outputAlert" class="alert"></div>
+  <!-- TASK 1 CONTENT -->
+  <div id="task1-view">
+    <div class="scenario-banner">
+      <strong>Task 1 Scenario:</strong> The HR Director needs sensitive payroll files protected from guest accounts. 
+      <br><strong>Mission:</strong> As <code>Administrator</code>, configure properties for <code>HR_Confidential</code> to <strong>DENY</strong> access to the <code>Guest</code> user. Switch session to <code>Guest</code> and verify access to <code>Salaries.txt</code> is blocked.
     </div>
 
-    <!-- Security Log / Output -->
-    <div class="panel">
-      <h2>Activity & Verification Log</h2>
-      <div id="systemLog" style="font-family: monospace; font-size: 0.85rem; height: 200px; overflow-y: auto; background: #222; color: #0f0; padding: 10px; border-radius: 4px;">
-        [SYSTEM] Session initialized as Admin.<br>
+    <div class="workspace">
+      <div class="panel">
+        <h2>Desktop Environment</h2>
+        <div class="user-control">
+          <span><strong>Active User:</strong></span>
+          <select id="t1-userSelect" onchange="t1_switchUser()">
+            <option value="Admin">Administrator (HR Director)</option>
+            <option value="Guest">Guest Account</option>
+          </select>
+        </div>
+
+        <div class="file-explorer">
+          <div class="file-item">
+            <span class="file-name">📁 HR_Confidential</span>
+            <div>
+              <button class="btn btn-secondary" onclick="t1_openProperties()">Properties</button>
+              <button class="btn" onclick="t1_openFolder()">Open</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="t1-folderContent" style="margin-top: 18px; display: none;">
+          <h3>Contents of HR_Confidential/</h3>
+          <div class="file-explorer">
+            <div class="file-item">
+              <span class="file-name">📄 Salaries.txt</span>
+              <button class="btn" onclick="t1_openFile()">Read File</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="t1-alert" class="alert"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Activity & Audit Log</h2>
+        <div id="t1-log" class="log-box">
+          [SYSTEM] Task 1 Initialized. Active Session: Administrator.<br>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TASK 2 CONTENT -->
+  <div id="task2-view" style="display: none;">
+    <div class="scenario-banner">
+      <strong>Task 2 Scenario:</strong> Prove to your manager that NTFS security enforcement is absolute by locking <strong>your own account</strong> out of sensitive data.
+      <br><strong>Mission:</strong> Configure <code>Top_Secret</code> so that your active account (<code>Admin_User</code>) is explicitly <strong>DENIED</strong> Read access. Verify that access to <code>Codes.txt</code> is completely blocked.
+    </div>
+
+    <div class="workspace">
+      <div class="panel">
+        <h2>Desktop Environment</h2>
+        <div class="user-control">
+          <span><strong>Active User:</strong> <code>Admin_User</code> (Your Account)</span>
+        </div>
+
+        <div class="file-explorer">
+          <div class="file-item">
+            <span class="file-name">📁 Top_Secret</span>
+            <div>
+              <button class="btn btn-secondary" onclick="t2_openProperties()">Properties</button>
+              <button class="btn" onclick="t2_openFolder()">Open Folder</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="t2-folderContent" style="margin-top: 18px; display: none;">
+          <h3>Contents of Top_Secret/</h3>
+          <div class="file-explorer">
+            <div class="file-item">
+              <span class="file-name">📄 Codes.txt</span>
+              <button class="btn" onclick="t2_openFile()">Read File</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="t2-alert" class="alert"></div>
+      </div>
+
+      <div class="panel">
+        <h2>ACL Evaluation Log</h2>
+        <div id="t2-log" class="log-box">
+          [SYSTEM] Task 2 Initialized. User: Admin_User.<br>
+          [ACL] Admin_User = Allow Full Control (Inherited).<br>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Properties Modal -->
-<div id="propertiesModal" class="modal">
+<!-- Task 1 Properties Modal -->
+<div id="t1-modal" class="modal">
   <div class="modal-content">
-    <h2>HR_Confidential Properties</h2>
-    <p><strong>Security Tab - Access Control List (ACL)</strong></p>
-    
+    <h3 style="margin-top:0;">HR_Confidential Properties</h3>
+    <p style="font-size: 0.9rem; color: #666;"><strong>Security Tab &mdash; Access Control List (ACL)</strong></p>
     <table class="permission-table">
       <thead>
         <tr>
-          <th>User / Group</th>
-          <th>Allow Access</th>
-          <th>Explicit Deny</th>
+          <th>Group / User Name</th>
+          <th>Allow</th>
+          <th>Explicit DENY</th>
         </tr>
       </thead>
       <tbody>
@@ -261,112 +379,194 @@
           <td><input type="checkbox" disabled></td>
         </tr>
         <tr>
-          <td>Guest</td>
-          <td><input type="checkbox" id="guestAllow" checked onchange="togglePermission('allow')"></td>
-          <td><input type="checkbox" id="guestDeny" onchange="togglePermission('deny')"></td>
+          <td><strong>Guest</strong></td>
+          <td><input type="checkbox" id="t1-guestAllow" checked onchange="t1_togglePerm('allow')"></td>
+          <td><input type="checkbox" id="t1-guestDeny" onchange="t1_togglePerm('deny')"></td>
         </tr>
       </tbody>
     </table>
-
     <div style="margin-top: 20px; text-align: right;">
-      <button class="btn" onclick="closeProperties()">Apply & Close</button>
+      <button class="btn" onclick="t1_closeProperties()">Apply & Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Task 2 Properties Modal -->
+<div id="t2-modal" class="modal">
+  <div class="modal-content">
+    <h3 style="margin-top:0;">Top_Secret Properties</h3>
+    <p style="font-size: 0.9rem; color: #666;"><strong>Security Tab &mdash; Access Control List (ACL)</strong></p>
+    <table class="permission-table">
+      <thead>
+        <tr>
+          <th>Group / User Name</th>
+          <th>Allow Read</th>
+          <th>Explicit DENY Read</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Admin_User</strong> (You)</td>
+          <td><input type="checkbox" checked disabled></td>
+          <td><input type="checkbox" id="t2-adminDeny" onchange="t2_handleDenyToggle()"></td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size: 0.8rem; color: #777; margin-top: 10px;">
+      * Explicit DENY entries override all ALLOW permissions regardless of group or admin status.
+    </p>
+    <div style="margin-top: 20px; text-align: right;">
+      <button class="btn" onclick="t2_closeProperties()">Apply & Close</button>
     </div>
   </div>
 </div>
 
 <script>
-  let state = {
-    currentUser: 'Admin',
-    guestAllowed: true,
-    guestExplicitDeny: false,
-    folderOpened: false
-  };
+  // Tab Switching
+  function switchTask(taskNum) {
+    document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+      btn.classList.toggle('active', idx === taskNum - 1);
+    });
+    document.getElementById('task1-view').style.display = taskNum === 1 ? 'block' : 'none';
+    document.getElementById('task2-view').style.display = taskNum === 2 ? 'block' : 'none';
+  }
 
-  function logAction(message) {
-    const log = document.getElementById('systemLog');
-    log.innerHTML += `[${new Date().toLocaleTimeString()}] ${message}<br>`;
+  // Common Logger
+  function appendLog(logId, msg) {
+    const log = document.getElementById(logId);
+    log.innerHTML += `[${new Date().toLocaleTimeString()}] ${msg}<br>`;
     log.scrollTop = log.scrollHeight;
   }
 
-  function switchUser() {
-    state.currentUser = document.getElementById('currentUserSelect').value;
-    logAction(`Switched active session to: <strong>${state.currentUser}</strong>`);
-    
-    // Hide folder contents when switching user context
-    document.getElementById('folderContent').style.display = 'none';
-    document.getElementById('outputAlert').style.display = 'none';
+  /* ------------------- TASK 1 LOGIC ------------------- */
+  let t1_state = { user: 'Admin', guestExplicitDeny: false, guestAllowed: true };
+
+  function t1_switchUser() {
+    t1_state.user = document.getElementById('t1-userSelect').value;
+    appendLog('t1-log', `Switched active session to: <strong>${t1_state.user}</strong>`);
+    document.getElementById('t1-folderContent').style.display = 'none';
+    document.getElementById('t1-alert').style.display = 'none';
   }
 
-  function openProperties() {
-    if (state.currentUser !== 'Admin') {
-      showAlert('Access Denied: Only Administrators can modify folder Security ACLs.', 'danger');
-      logAction('ERROR: Non-admin attempted to open Security Properties.');
+  function t1_openProperties() {
+    if (t1_state.user !== 'Admin') {
+      t1_showAlert('⛔ Access Denied: Only Administrators can modify ACL Security rules.', 'danger');
+      appendLog('t1-log', 'ERROR: Non-admin attempted to edit folder Security Properties.');
       return;
     }
-    document.getElementById('propertiesModal').style.display = 'flex';
+    document.getElementById('t1-modal').style.display = 'flex';
   }
 
-  function closeProperties() {
-    document.getElementById('propertiesModal').style.display = 'none';
-    logAction(`Updated ACL Rules - Guest Deny Flag: ${state.guestExplicitDeny}`);
+  function t1_closeProperties() {
+    document.getElementById('t1-modal').style.display = 'none';
+    appendLog('t1-log', `Updated ACL Rules — Guest Deny Flag: ${t1_state.guestExplicitDeny}`);
   }
 
-  function togglePermission(type) {
+  function t1_togglePerm(type) {
     if (type === 'deny') {
-      const denyChecked = document.getElementById('guestDeny').checked;
-      state.guestExplicitDeny = denyChecked;
+      const denyChecked = document.getElementById('t1-guestDeny').checked;
+      t1_state.guestExplicitDeny = denyChecked;
       if (denyChecked) {
-        document.getElementById('guestAllow').checked = false;
-        state.guestAllowed = false;
+        document.getElementById('t1-guestAllow').checked = false;
+        t1_state.guestAllowed = false;
       }
-    } else if (type === 'allow') {
-      const allowChecked = document.getElementById('guestAllow').checked;
-      state.guestAllowed = allowChecked;
+    } else {
+      const allowChecked = document.getElementById('t1-guestAllow').checked;
+      t1_state.guestAllowed = allowChecked;
       if (allowChecked) {
-        document.getElementById('guestDeny').checked = false;
-        state.guestExplicitDeny = false;
+        document.getElementById('t1-guestDeny').checked = false;
+        t1_state.guestExplicitDeny = false;
       }
     }
   }
 
-  function openFolder() {
-    const alertBox = document.getElementById('outputAlert');
-    
-    if (state.currentUser === 'Guest' && state.guestExplicitDeny) {
-      showAlert('ACCESS DENIED: You do not have permission to access HR_Confidential.', 'danger');
-      logAction('SECURITY AUDIT PASSED: Guest access blocked by Explicit Deny.');
-      document.getElementById('folderContent').style.display = 'none';
+  function t1_openFolder() {
+    if (t1_state.user === 'Guest' && t1_state.guestExplicitDeny) {
+      t1_showAlert('⛔ ACCESS DENIED: Access to HR_Confidential is restricted by Explicit Deny.', 'danger');
+      appendLog('t1-log', 'AUDIT PASSED: Guest access blocked by Explicit Deny.');
+      document.getElementById('t1-folderContent').style.display = 'none';
       return;
     }
 
-    if (state.currentUser === 'Guest' && !state.guestAllowed) {
-      showAlert('ACCESS DENIED: No implicit allow permissions found.', 'danger');
-      logAction('SECURITY ALERT: Guest blocked (No Allow rule).');
-      document.getElementById('folderContent').style.display = 'none';
+    if (t1_state.user === 'Guest' && !t1_state.guestAllowed) {
+      t1_showAlert('⛔ ACCESS DENIED: No implicit allow permissions found.', 'danger');
+      appendLog('t1-log', 'SECURITY ALERT: Guest blocked (No Allow rule).');
+      document.getElementById('t1-folderContent').style.display = 'none';
       return;
     }
 
-    // Access granted
-    document.getElementById('folderContent').style.display = 'block';
-    showAlert('Folder opened successfully.', 'success');
-    logAction(`User '${state.currentUser}' successfully opened HR_Confidential.`);
+    document.getElementById('t1-folderContent').style.display = 'block';
+    t1_showAlert('Folder opened successfully.', 'success');
+    appendLog('t1-log', `User '${t1_state.user}' successfully opened HR_Confidential.`);
   }
 
-  function openFile() {
-    if (state.currentUser === 'Guest' && state.guestExplicitDeny) {
-      showAlert('ACCESS DENIED: File access restricted.', 'danger');
-      logAction('READ FAILED: Guest attempted file read on Salaries.txt.');
+  function t1_openFile() {
+    if (t1_state.user === 'Guest' && t1_state.guestExplicitDeny) {
+      t1_showAlert('⛔ ACCESS DENIED: File access restricted.', 'danger');
+      appendLog('t1-log', 'READ FAILED: Guest attempted file read on Salaries.txt.');
     } else {
       alert("CONFIDENTIAL PAYROLL DATA:\n\nCEO: $250,000\nHR Director: $120,000\nIT SysAdmin: $95,000");
-      logAction(`User '${state.currentUser}' read Salaries.txt.`);
+      appendLog('t1-log', `User '${t1_state.user}' read Salaries.txt.`);
     }
   }
 
-  function showAlert(msg, type) {
-    const alertBox = document.getElementById('outputAlert');
-    alertBox.className = `alert alert-${type}`;
-    alertBox.innerHTML = msg;
-    alertBox.style.display = 'block';
+  function t1_showAlert(msg, type) {
+    const el = document.getElementById('t1-alert');
+    el.className = `alert alert-${type}`;
+    el.innerHTML = msg;
+    el.style.display = 'block';
+  }
+
+  /* ------------------- TASK 2 LOGIC ------------------- */
+  let t2_state = { explicitDenyRead: false };
+
+  function t2_openProperties() {
+    document.getElementById('t2-modal').style.display = 'flex';
+    appendLog('t2-log', 'Opened Security Properties for folder: Top_Secret.');
+  }
+
+  function t2_handleDenyToggle() {
+    t2_state.explicitDenyRead = document.getElementById('t2-adminDeny').checked;
+  }
+
+  function t2_closeProperties() {
+    document.getElementById('t2-modal').style.display = 'none';
+    if (t2_state.explicitDenyRead) {
+      appendLog('t2-log', 'ACL UPDATED: Explicit DENY Read applied to Admin_User.');
+      document.getElementById('t2-folderContent').style.display = 'none';
+    } else {
+      appendLog('t2-log', 'ACL UPDATED: Explicit DENY Read removed.');
+    }
+  }
+
+  function t2_openFolder() {
+    if (t2_state.explicitDenyRead) {
+      t2_showAlert('⛔ ACCESS DENIED: Explicit Deny takes precedence over Allow rules.', 'danger');
+      appendLog('t2-log', 'CRITICAL AUDIT PASSED: Admin_User blocked by Explicit Deny rule!');
+      document.getElementById('t2-folderContent').style.display = 'none';
+      return;
+    }
+
+    document.getElementById('t2-folderContent').style.display = 'block';
+    t2_showAlert('Folder opened successfully.', 'success');
+    appendLog('t2-log', 'Access Granted: Top_Secret opened by Admin_User.');
+  }
+
+  function t2_openFile() {
+    if (t2_state.explicitDenyRead) {
+      t2_showAlert('⛔ ACCESS DENIED: Unable to read Codes.txt.', 'danger');
+      appendLog('t2-log', 'FILE READ FAILED: Blocked by Explicit Deny.');
+    } else {
+      alert("CONFIDENTIAL CONTENT:\n\nSecret Code: ALPHA-9942-DELTA\nLaunch Key: 883019");
+      appendLog('t2-log', 'FILE READ SUCCESS: Codes.txt opened by Admin_User.');
+    }
+  }
+
+  function t2_showAlert(msg, type) {
+    const el = document.getElementById('t2-alert');
+    el.className = `alert alert-${type}`;
+    el.innerHTML = msg;
+    el.style.display = 'block';
   }
 </script>
 
