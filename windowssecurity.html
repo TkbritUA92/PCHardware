@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Windows Security Lab: The Self-Lockout Paradox</title>
+  <style>
+    :root {
+      --bg-color: #f3f4f6;
+      --card-bg: #ffffff;
+      --border-color: #d1d5db;
+      --text-color: #1f2937;
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      --danger-color: #dc2626;
+      --success-color: #16a34a;
+      --warning-bg: #fef3c7;
+      --warning-border: #f59e0b;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    header {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 20px;
+      border-radius: 8px 8px 0 0;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    header h1 {
+      margin: 0 0 6px 0;
+      font-size: 1.5rem;
+    }
+
+    header p {
+      margin: 0;
+      opacity: 0.9;
+      font-size: 0.95rem;
+    }
+
+    /* Tab Navigation */
+    .tab-nav {
+      display: flex;
+      background: #e5e7eb;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      background: none;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #4b5563;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      background: #d1d5db;
+    }
+
+    .tab-btn.active {
+      background: var(--card-bg);
+      color: var(--primary-color);
+      border-bottom: 3px solid var(--primary-color);
+    }
+
+    .scenario-banner {
+      background-color: var(--warning-bg);
+      border-left: 5px solid var(--warning-border);
+      padding: 14px 18px;
+      margin: 20px 0;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .panel h2 {
+      margin-top: 0;
+      font-size: 1.15rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
+    }
+
+    .user-control {
+      background-color: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 10px 14px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .file-explorer {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      overflow: hidden;
+      background: #fafafa;
+    }
+
+    .file-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      border-bottom: 1px solid #eee;
+      background-color: #fff;
+    }
+
+    .file-item:last-child {
+      border-bottom: none;
+    }
+
+    .file-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+
+    .btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 7px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: #4b5563;
+    }
+
+    .btn-secondary:hover {
+      background-color: #374151;
+    }
+
+    .permission-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    .permission-table th, .permission-table td {
+      border: 1px solid var(--border-color);
+      padding: 8px 10px;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+
+    .permission-table th {
+      background-color: #f3f4f6;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 24px;
+      border-radius: 8px;
+      width: 460px;
+      max-width: 90%;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .alert {
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 15px;
+      display: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .alert-danger {
+      background-color: #fef2f2;
+      color: var(--danger-color);
+      border: 1px solid #fecaca;
+    }
+
+    .alert-success {
+      background-color: #f0fdf4;
+      color: var(--success-color);
+      border: 1px solid #bbf7d0;
+    }
+
+    .log-box {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.82rem;
+      height: 240px;
+      overflow-y: auto;
+      background: #111827;
+      color: #4ade80;
+      padding: 12px;
+      border-radius: 6px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Windows Security Lab: The Self-Lockout Paradox</h1>
+    <p>Demonstrating Absolute NTFS Security & Explicit Deny Precedence</p>
+  </header>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTask(1)">Part 1: Setup & Standard Access Verification</button>
+    <button class="tab-btn" onclick="switchTask(2)">Part 2: The Self-Lockout Lockdown</button>
+  </div>
+
+  <!-- PART 1 CONTENT -->
+  <div id="part1-view">
+    <div class="scenario-banner">
+      <strong>Part 1 Scenario: Setup & Baseline Audit</strong><br>
+      Create the target folder <code>Top_Secret</code> on your Desktop, add <code>Codes.txt</code> with confidential data inside, and verify that your account has standard full operational access under default inherited permissions.
+    </div>
+
+    <div class="workspace">
+      <div class="panel">
+        <h2>Desktop File Explorer</h2>
+        <div class="user-control">
+          <span><strong>Active Session:</strong> <code>Admin_User</code> (Your Account)</span>
+        </div>
+
+        <div class="file-explorer">
+          <div class="file-item">
+            <span class="file-name">📁 Top_Secret</span>
+            <div>
+              <button class="btn btn-secondary" onclick="p1_openProperties()">Properties</button>
+              <button class="btn" onclick="p1_openFolder()">Open Folder</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="p1-folderContent" style="margin-top: 18px; display: none;">
+          <h3>Contents of Top_Secret/</h3>
+          <div class="file-explorer">
+            <div class="file-item">
+              <span class="file-name">📄 Codes.txt</span>
+              <button class="btn" onclick="p1_openFile()">Read File</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="p1-alert" class="alert"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Baseline Audit Log</h2>
+        <div id="p1-log" class="log-box">
+          [SYSTEM] Part 1 Initialized.<br>
+          [SYSTEM] Environment loaded with folder Top_Secret.<br>
+          [ACL] Admin_User = Allow Full Control (Inherited).<br>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PART 2 CONTENT -->
+  <div id="part2-view" style="display: none;">
+    <div class="scenario-banner">
+      <strong>Part 2 Scenario: The Self-Lockout Lockdown</strong><br>
+      Prove to your manager that Windows security enforcement is absolute. Configure properties for <code>Top_Secret</code> so that your active account (<code>Admin_User</code>) is explicitly <strong>DENIED</strong> Read access. Verify that access to <code>Codes.txt</code> is completely blocked even though you own the system account.
+    </div>
+
+    <div class="workspace">
+      <div class="panel">
+        <h2>Desktop File Explorer</h2>
+        <div class="user-control">
+          <span><strong>Active Session:</strong> <code>Admin_User</code> (Your Account)</span>
+        </div>
+
+        <div class="file-explorer">
+          <div class="file-item">
+            <span class="file-name">📁 Top_Secret</span>
+            <div>
+              <button class="btn btn-secondary" onclick="p2_openProperties()">Properties</button>
+              <button class="btn" onclick="p2_openFolder()">Open Folder</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="p2-folderContent" style="margin-top: 18px; display: none;">
+          <h3>Contents of Top_Secret/</h3>
+          <div class="file-explorer">
+            <div class="file-item">
+              <span class="file-name">📄 Codes.txt</span>
+              <button class="btn" onclick="p2_openFile()">Read File</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="p2-alert" class="alert"></div>
+      </div>
+
+      <div class="panel">
+        <h2>ACL Enforcement Log</h2>
+        <div id="p2-log" class="log-box">
+          [SYSTEM] Part 2 Initialized. User: Admin_User.<br>
+          [ACL] Active ACL check pending configuration change...<br>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Part 1 Properties Modal -->
+<div id="p1-modal" class="modal">
+  <div class="modal-content">
+    <h3 style="margin-top:0;">Top_Secret Properties</h3>
+    <p style="font-size: 0.9rem; color: #666;"><strong>Security Tab &mdash; Access Control List (ACL)</strong></p>
+    <table class="permission-table">
+      <thead>
+        <tr>
+          <th>Group / User Name</th>
+          <th>Allow Read</th>
+          <th>Explicit DENY Read</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Admin_User</strong> (You)</td>
+          <td><input type="checkbox" checked disabled></td>
+          <td><input type="checkbox" disabled></td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size: 0.8rem; color: #777; margin-top: 10px;">
+      * Default state: Inherited Allow permissions active.
+    </p>
+    <div style="margin-top: 20px; text-align: right;">
+      <button class="btn" onclick="p1_closeProperties()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Part 2 Properties Modal -->
+<div id="p2-modal" class="modal">
+  <div class="modal-content">
+    <h3 style="margin-top:0;">Top_Secret Properties</h3>
+    <p style="font-size: 0.9rem; color: #666;"><strong>Security Tab &mdash; Access Control List (ACL)</strong></p>
+    <table class="permission-table">
+      <thead>
+        <tr>
+          <th>Group / User Name</th>
+          <th>Allow Read</th>
+          <th>Explicit DENY Read</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Admin_User</strong> (You)</td>
+          <td><input type="checkbox" checked disabled></td>
+          <td><input type="checkbox" id="p2-adminDeny" onchange="p2_handleDenyToggle()"></td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size: 0.8rem; color: #777; margin-top: 10px;">
+      * Check the Explicit DENY box next to Read to test self-lockout enforcement.
+    </p>
+    <div style="margin-top: 20px; text-align: right;">
+      <button class="btn" onclick="p2_closeProperties()">Apply & Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function switchTask(partNum) {
+    document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+      btn.classList.toggle('active', idx === partNum - 1);
+    });
+    document.getElementById('part1-view').style.display = partNum === 1 ? 'block' : 'none';
+    document.getElementById('part2-view').style.display = partNum === 2 ? 'block' : 'none';
+  }
+
+  function appendLog(logId, msg) {
+    const log = document.getElementById(logId);
+    log.innerHTML += `[${new Date().toLocaleTimeString()}] ${msg}<br>`;
+    log.scrollTop = log.scrollHeight;
+  }
+
+  /* ------------------- PART 1 LOGIC ------------------- */
+  function p1_openProperties() {
+    document.getElementById('p1-modal').style.display = 'flex';
+    appendLog('p1-log', 'Viewed Security Properties for Top_Secret.');
+  }
+
+  function p1_closeProperties() {
+    document.getElementById('p1-modal').style.display = 'none';
+  }
+
+  function p1_openFolder() {
+    document.getElementById('p1-folderContent').style.display = 'block';
+    p1_showAlert('Folder opened successfully.', 'success');
+    appendLog('p1-log', 'ACCESS GRANTED: Admin_User opened Top_Secret.');
+  }
+
+  function p1_openFile() {
+    alert("CONFIDENTIAL CONTENT:\n\nSecret Code: ALPHA-9942-DELTA\nLaunch Key: 883019");
+    appendLog('p1-log', 'READ SUCCESS: Codes.txt read by Admin_User.');
+  }
+
+  function p1_showAlert(msg, type) {
+    const el = document.getElementById('p1-alert');
+    el.className = `alert alert-${type}`;
+    el.innerHTML = msg;
+    el.style.display = 'block';
+  }
+
+  /* ------------------- PART 2 LOGIC ------------------- */
+  let p2_state = { explicitDenyRead: false };
+
+  function p2_openProperties() {
+    document.getElementById('p2-modal').style.display = 'flex';
+    appendLog('p2-log', 'Opened Security Properties for Top_Secret.');
+  }
+
+  function p2_handleDenyToggle() {
+    p2_state.explicitDenyRead = document.getElementById('p2-adminDeny').checked;
+  }
+
+  function p2_closeProperties() {
+    document.getElementById('p2-modal').style.display = 'none';
+    if (p2_state.explicitDenyRead) {
+      appendLog('p2-log', 'ACL UPDATED: Explicit DENY Read applied to Admin_User.');
+      document.getElementById('p2-folderContent').style.display = 'none';
+    } else {
+      appendLog('p2-log', 'ACL UPDATED: Explicit DENY Read removed.');
+    }
+  }
+
+  function p2_openFolder() {
+    if (p2_state.explicitDenyRead) {
+      p2_showAlert('⛔ ACCESS DENIED: Explicit Deny takes precedence over Allow rules.', 'danger');
+      appendLog('p2-log', 'CRITICAL AUDIT PASSED: Admin_User blocked by Explicit Deny rule!');
+      document.getElementById('p2-folderContent').style.display = 'none';
+      return;
+    }
+
+    document.getElementById('p2-folderContent').style.display = 'block';
+    p2_showAlert('Folder opened successfully.', 'success');
+    appendLog('p2-log', 'Access Granted: Top_Secret opened by Admin_User.');
+  }
+
+  function p2_openFile() {
+    if (p2_state.explicitDenyRead) {
+      p2_showAlert('⛔ ACCESS DENIED: Unable to read Codes.txt.', 'danger');
+      appendLog('p2-log', 'FILE READ FAILED: Blocked by Explicit Deny.');
+    } else {
+      alert("CONFIDENTIAL CONTENT:\n\nSecret Code: ALPHA-9942-DELTA\nLaunch Key: 883019");
+      appendLog('p2-log', 'FILE READ SUCCESS: Codes.txt opened by Admin_User.');
+    }
+  }
+
+  function p2_showAlert(msg, type) {
+    const el = document.getElementById('p2-alert');
+    el.className = `alert alert-${type}`;
+    el.innerHTML = msg;
+    el.style.display = 'block';
+  }
+</script>
+
+</body>
+</html>
