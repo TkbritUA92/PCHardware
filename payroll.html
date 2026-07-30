@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab: The "Deny Wins" Paradox</title>
+  <style>
+    :root {
+      --bg-color: #e4e9ed;
+      --card-bg: #ffffff;
+      --border-color: #cccccc;
+      --text-color: #222222;
+      --primary-color: #0078d4;
+      --danger-color: #d13438;
+      --success-color: #107c41;
+      --warning-bg: #fff8e1;
+      --warning-border: #ffc107;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 950px;
+      margin: 0 auto;
+    }
+
+    header {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 16px 20px;
+      border-radius: 6px 6px 0 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+
+    .scenario-banner {
+      background-color: var(--warning-bg);
+      border-left: 5px solid var(--warning-border);
+      padding: 12px 16px;
+      margin: 15px 0;
+      border-radius: 0 4px 4px 0;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 16px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .panel h2 {
+      margin-top: 0;
+      font-size: 1.1rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+
+    .file-explorer {
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+      background: #fafafa;
+    }
+
+    .file-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      border-bottom: 1px solid #eee;
+      background-color: #fff;
+    }
+
+    .file-item:last-child {
+      border-bottom: none;
+    }
+
+    .file-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+
+    .btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+    }
+
+    .btn-secondary {
+      background-color: #555555;
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+
+    .permission-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    .permission-table th, .permission-table td {
+      border: 1px solid var(--border-color);
+      padding: 8px;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+
+    .permission-table th {
+      background-color: #f1f1f1;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 22px;
+      border-radius: 6px;
+      width: 440px;
+      max-width: 90%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .alert {
+      padding: 12px;
+      border-radius: 4px;
+      margin-top: 15px;
+      display: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .alert-danger {
+      background-color: #fde8e8;
+      color: var(--danger-color);
+      border: 1px solid #f8b4b4;
+    }
+
+    .alert-success {
+      background-color: #edf7ed;
+      color: var(--success-color);
+      border: 1px solid #b7dfb7;
+    }
+
+    .log-box {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.83rem;
+      height: 220px;
+      overflow-y: auto;
+      background: #1e1e1e;
+      color: #00ff66;
+      padding: 12px;
+      border-radius: 4px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Windows Security Lab: The Self-Lockout Paradox</h1>
+  </header>
+
+  <div class="scenario-banner">
+    <strong>Challenge Scenario:</strong> You are proving to your manager that Windows NTFS security is absolute. You must configure the <code>Top_Secret</code> folder so that <strong>even your own account</strong> (<code>Admin_User</code>) is explicitly <strong>DENIED</strong> Read access.
+  </div>
+
+  <div class="workspace">
+    <!-- Desktop Simulator -->
+    <div class="panel">
+      <h2>Desktop File Explorer</h2>
+      <div class="file-explorer">
+        <div class="file-item">
+          <span class="file-name">📁 Top_Secret</span>
+          <div>
+            <button class="btn btn-secondary" onclick="openProperties()">Properties</button>
+            <button class="btn" onclick="openFolder()">Open Folder</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Folder Contents -->
+      <div id="folderContent" style="margin-top: 18px; display: none;">
+        <h3>Contents of Top_Secret/</h3>
+        <div class="file-explorer">
+          <div class="file-item">
+            <span class="file-name">📄 Codes.txt</span>
+            <button class="btn" onclick="openFile()">Read File</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="outputAlert" class="alert"></div>
+    </div>
+
+    <!-- Security Audit Log -->
+    <div class="panel">
+      <h2>Security & ACL Evaluation Log</h2>
+      <div id="systemLog" class="log-box">
+        [SYSTEM] Session initialized for user: Admin_User.<br>
+        [SYSTEM] Current ACL: Admin_User = Allow Full Control (Inherited).<br>
+      </div>
+      <div style="margin-top: 12px;">
+        <button class="btn btn-secondary" onclick="resetLab()">Reset Lab Environment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Folder Properties Modal -->
+<div id="propertiesModal" class="modal">
+  <div class="modal-content">
+    <h3 style="margin-top:0;">Top_Secret Properties</h3>
+    <p style="font-size: 0.9rem; color: #555;"><strong>Security Tab &mdash; Access Control List (ACL)</strong></p>
+    
+    <table class="permission-table">
+      <thead>
+        <tr>
+          <th>Group or User Name</th>
+          <th>Allow Read</th>
+          <th>Explicit DENY Read</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Admin_User</strong> (You)</td>
+          <td><input type="checkbox" id="adminAllow" checked disabled></td>
+          <td><input type="checkbox" id="adminDeny" onchange="handleDenyToggle()"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="font-size: 0.8rem; color: #777; margin-top: 10px;">
+      * Explicit DENY entries override all ALLOW permissions, regardless of group membership or administrator status.
+    </p>
+
+    <div style="margin-top: 20px; text-align: right;">
+      <button class="btn" onclick="applyAndCloseProperties()">Apply & Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let state = {
+    user: 'Admin_User',
+    explicitDenyRead: false,
+    folderOpened: false
+  };
+
+  function logAction(msg) {
+    const log = document.getElementById('systemLog');
+    log.innerHTML += `[${new Date().toLocaleTimeString()}] ${msg}<br>`;
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function openProperties() {
+    document.getElementById('propertiesModal').style.display = 'flex';
+    logAction('Opened Security Properties for folder: Top_Secret.');
+  }
+
+  function handleDenyToggle() {
+    const isChecked = document.getElementById('adminDeny').checked;
+    state.explicitDenyRead = isChecked;
+  }
+
+  function applyAndCloseProperties() {
+    document.getElementById('propertiesModal').style.display = 'none';
+    if (state.explicitDenyRead) {
+      logAction('ACL UPDATED: Explicit DENY Read applied to Admin_User.');
+      // If folder was previously opened, close it on lockout
+      document.getElementById('folderContent').style.display = 'none';
+    } else {
+      logAction('ACL UPDATED: Explicit DENY Read removed.');
+    }
+  }
+
+  function openFolder() {
+    const alertBox = document.getElementById('outputAlert');
+
+    if (state.explicitDenyRead) {
+      showAlert('⛔ ACCESS DENIED: You do not have permission to access Top_Secret (Explicit Deny takes precedence).', 'danger');
+      logAction('CRITICAL AUDIT PASSED: Admin_User blocked by Explicit Deny rule!');
+      document.getElementById('folderContent').style.display = 'none';
+      return;
+    }
+
+    // Access Allowed
+    document.getElementById('folderContent').style.display = 'block';
+    showAlert('Folder opened successfully.', 'success');
+    logAction('Access Granted: Top_Secret opened by Admin_User.');
+  }
+
+  function openFile() {
+    if (state.explicitDenyRead) {
+      showAlert('⛔ ACCESS DENIED: Unable to read Codes.txt.', 'danger');
+      logAction('FILE READ FAILED: Blocked by Explicit Deny.');
+    } else {
+      alert("CONFIDENTIAL CONTENT:\n\nSecret Code: ALPHA-9942-DELTA\nLaunch Key: 883019");
+      logAction('FILE READ SUCCESS: Codes.txt opened by Admin_User.');
+    }
+  }
+
+  function showAlert(msg, type) {
+    const alertBox = document.getElementById('outputAlert');
+    alertBox.className = `alert alert-${type}`;
+    alertBox.innerHTML = msg;
+    alertBox.style.display = 'block';
+  }
+
+  function resetLab() {
+    state.explicitDenyRead = false;
+    document.getElementById('adminDeny').checked = false;
+    document.getElementById('folderContent').style.display = 'none';
+    document.getElementById('outputAlert').style.display = 'none';
+    document.getElementById('systemLog').innerHTML = `
+      [SYSTEM] Environment reset.<br>
+      [SYSTEM] Current ACL: Admin_User = Allow Full Control (Inherited).<br>
+    `;
+  }
+</script>
+
+</body>
+</html>
